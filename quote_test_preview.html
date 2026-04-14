@@ -948,9 +948,14 @@
 
 <!-- ── ACCEPT & SIGN ─────────────────────────────── -->
 <div class="cta-section" id="accept-section">
-  <div id="sign-form" class="sign-form-wrap">
-    <h3>Accept this Quote</h3>
-    <p style="font-size:15px;color:var(--grey-400);margin:0 0 32px;">Sign below to confirm your booking and accept the terms above.</p>
+  <div id="cta-initial">
+    <h3>Let's get started</h3>
+    <p style="font-size:15px;color:var(--grey-400);margin:0 0 32px;">Ready to confirm your booking? Click below to review and sign.</p>
+    <button type="button" id="show-sig-btn" class="accept-btn">Accept Quote</button>
+  </div>
+  <div id="sign-form" class="sign-form-wrap" style="display:none;">
+    <h3>Sign to Confirm</h3>
+    <p style="font-size:15px;color:var(--grey-400);margin:0 0 32px;">Please provide your name and signature to accept the terms above.</p>
     <label class="sign-label" for="signer-name">Full Name</label>
     <input type="text" id="signer-name" class="sign-name-input" value="Haley Alexander" autocomplete="name">
     <div class="sign-canvas-wrap">
@@ -958,7 +963,7 @@
       <button type="button" id="sig-clear" class="sig-clear-btn">Clear</button>
     </div>
     <p class="sign-hint">Draw your signature above</p>
-    <button type="button" id="accept-btn" class="accept-btn">Accept &amp; Sign</button>
+    <button type="button" id="accept-btn" class="accept-btn">Confirm &amp; Sign</button>
     <p class="sign-note">By signing, you confirm you have read and agree to the Terms &amp; Conditions above.</p>
   </div>
   <div id="accepted-state" style="display:none;text-align:center;">
@@ -1015,6 +1020,14 @@
     } catch(e) {}
   }
 
+  // ── Show signature form on "Accept Quote" click ───
+  document.getElementById('show-sig-btn').addEventListener('click', () => {
+    document.getElementById('cta-initial').style.display = 'none';
+    document.getElementById('sign-form').style.display = 'block';
+    // Init pad now that canvas is visible and has dimensions
+    if (!_sigPad) _initPad();
+  });
+
   // ── Signature pad ─────────────────────────────────
   const _canvas = document.getElementById('sig-canvas');
   let _sigPad = null;
@@ -1033,7 +1046,7 @@
     });
   }
 
-  window.addEventListener('load', _initPad);
+  // Pad is initialised when the form is revealed (canvas has no dimensions while hidden)
 
   window.addEventListener('resize', () => {
     if (!_sigPad) return;
@@ -1114,10 +1127,14 @@
     let y = M;
     const blue = [26,86,255], dark = [10,15,30], grey = [130,130,130], light = [220,220,220];
 
-    // Logo
+    // Logo — preserve aspect ratio
     const logoEl = document.getElementById('vf-logo-blue');
     if (logoEl && logoEl.src.startsWith('data:')) {
-      try { doc.addImage(logoEl.src, 'PNG', M, y, 38, 15); } catch(e) {}
+      try {
+        const logoW = 40;
+        const logoH = logoEl.naturalHeight > 0 ? logoW * (logoEl.naturalHeight / logoEl.naturalWidth) : 14;
+        doc.addImage(logoEl.src, 'PNG', M, y, logoW, logoH);
+      } catch(e) {}
     }
     // Quote ref
     doc.setFontSize(8); doc.setTextColor(...grey);
