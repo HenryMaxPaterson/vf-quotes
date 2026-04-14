@@ -56,7 +56,7 @@ exports.handler = async (event) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'Valley Films <quotes@valley.film>',
+          from: 'Valley Films <onboarding@resend.dev>',
           to:   ['max@valley.film'],
           subject: `Quote Accepted: ${quoteRef} — ${signerName}`,
           html: `
