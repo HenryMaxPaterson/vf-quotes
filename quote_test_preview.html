@@ -953,7 +953,7 @@
     <h3>Let's get started</h3>
     <p style="font-size:15px;color:var(--grey-400);margin:0 0 32px;">Ready to confirm your booking? Click below to review and sign.</p>
     <button type="button" id="show-sig-btn" class="accept-btn">Accept Quote</button>
-    <p style="font-size:12px;color:var(--grey-400);margin-top:16px;">This quotation is valid until 21 April 2026</p>
+    <p style="font-size:12px;color:var(--grey-400);margin-top:16px;">This quotation is valid until 25 April 2026</p>
   </div>
   <div id="sign-form" class="sign-form-wrap" style="display:none;">
     <h3>Sign to Confirm</h3>
@@ -989,7 +989,7 @@
     </div>
     <div class="footer-meta">
       max@valley.film<br>
-      Created @ 14 April 2026
+      Created @ 18 April 2026
     </div>
   </div>
 </div>
@@ -1011,7 +1011,7 @@
   });
 
   // ── Quote data ────────────────────────────────────
-  const VF = {"pageId": "test-page-id-0000-0000-0000-000000000001", "quoteRef": "VF-00000001", "clientName": "Max Paterson", "clientCompany": "Valley Films", "projectTitle": "Test Project", "productionDate": "1 May 2026", "total": "\u00a32,500", "validUntil": "21 April 2026", "generatedDate": "14 April 2026"};
+  const VF = {"pageId": "test-page-id-0000-0000-0000-000000000001", "quoteRef": "VF-00000001", "clientName": "Max Paterson", "clientCompany": "Valley Films", "projectTitle": "Test Project", "productionDate": "1 May 2026", "total": "\u00a32,500", "validUntil": "25 April 2026", "generatedDate": "18 April 2026"};
 
   // ── Restore accepted state from localStorage ──────
   const _storeKey = 'vf_accepted_' + VF.quoteRef;
@@ -1090,7 +1090,7 @@
     _generatePDF(name, sigDataUrl, dateStr);
 
     // Notify backend (non-blocking)
-    fetch('/.netlify/functions/accept-quote', {
+    fetch('https://accept-quote.max-708.workers.dev', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
