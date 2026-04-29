@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>July Brandbox — Valley Films</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #1A56FF;
+    --blue-dark: #1238cc;
+    --dark: #0a0f1e;
+    --white: #ffffff;
+    --body-bg: #f4f4f4;
+    --card-bg: #ffffff;
+    --grey-100: #e4e4e4;
+    --grey-200: #cccccc;
+    --grey-400: #9a9a9a;
+    --grey-600: #555555;
+    --grey-900: #111111;
+  }
+
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: var(--body-bg);
+    color: var(--grey-900);
+    line-height: 1.5;
+  }
+
+  /* ── HERO ─────────────────────────────── */
+  .hero {
+    position: relative;
+    min-height: 460px;
+    background: var(--dark);
+    
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 56px 64px;
+    color: white;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.4) 60%, rgba(10,15,30,0.2) 100%),
+      radial-gradient(ellipse 70% 80% at 15% 50%, rgba(26,86,255,0.4) 0%, transparent 65%);
+    z-index: 0;
+  }
+
+  /* Wave cutout at bottom of hero */
+  .hero-wave {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    z-index: 2;
+    line-height: 0;
+  }
+
+  .hero-content { position: relative; z-index: 1; padding-bottom: 40px; }
+
+  .hero-top {
+    position: absolute;
+    top: 44px;
+    left: 64px;
+    right: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1;
+  }
+
+  .hero-quote-ref {
+    text-align: right;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.45);
+    line-height: 2;
+  }
+
+  .hero-quote-ref strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 2.5px;
+  }
+
+  .hero-title {
+    font-size: clamp(52px, 9vw, 80px);
+    font-weight: 900;
+    letter-spacing: -3px;
+    line-height: 1;
+    margin-bottom: 18px;
+    color: white;
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    font-weight: 400;
+    letter-spacing: 0.2px;
+  }
+
+  .hero-sub strong { color: white; font-weight: 600; }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 16px;
+  }
+
+  .hero-desc {
+    font-size: 14px;
+    color: rgba(255,255,255,0.42);
+    font-weight: 400;
+    line-height: 1.7;
+    margin-top: 14px;
+    max-width: 560px;
+    letter-spacing: 0.1px;
+  }
+
+  /* ── SHARED LIGHT SECTIONS ────────────── */
+  .light-section {
+    background: var(--body-bg);
+    padding: 72px 64px;
+  }
+
+  .white-section {
+    background: var(--card-bg);
+    padding: 72px 64px;
+  }
+
+  .section-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    color: var(--grey-400);
+    margin-bottom: 12px;
+  }
+
+  .section-heading {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    color: var(--blue);
+    margin-bottom: 40px;
+    line-height: 1.1;
+  }
+
+  /* ── BRIEF ────────────────────────────── */
+  .brief-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .brief-item {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 20px 22px;
+    border: 1.5px solid var(--grey-200);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .brief-item-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--grey-400);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+
+  .brief-item-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--grey-900);
+    line-height: 1.3;
+  }
+
+  .sub-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--grey-400);
+    margin-bottom: 14px;
+  }
+
+  .tag {
+    display: inline-block;
+    background: rgba(26,86,255,0.07);
+    color: var(--blue);
+    border: 1.5px solid rgba(26,86,255,0.15);
+    padding: 7px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    margin: 4px 6px 4px 0;
+    letter-spacing: 0.2px;
+  }
+
+  .tag.muted {
+    background: var(--grey-100);
+    color: var(--grey-400);
+    border-color: var(--grey-200);
+  }
+
+  .tag-standard {
+    background: rgba(26,86,255,0.04);
+    color: var(--grey-600);
+    border: 1.5px solid var(--grey-200);
+  }
+
+  .tag-deadline {
+    background: rgba(26,86,255,0.07);
+    color: var(--blue);
+    border: 1.5px solid rgba(26,86,255,0.2);
+  }
+
+  /* ── WAVE DIVIDER ─────────────────────── */
+  .wave-divider {
+    line-height: 0;
+    background: var(--body-bg);
+  }
+
+  .wave-divider.to-white { background: var(--body-bg); }
+  .wave-divider.to-light { background: var(--card-bg); }
+  .wave-divider.to-dark  { background: var(--body-bg); }
+
+  /* ── PACKAGES ─────────────────────────── */
+  .pkg-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .pkg-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--grey-200);
+    border-radius: 16px;
+    padding: 28px 24px;
+    position: relative;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+
+  .pkg-card.selected {
+    border-color: var(--blue);
+    background: rgba(26,86,255,0.03);
+    box-shadow: 0 4px 20px rgba(26,86,255,0.12);
+  }
+
+  .pkg-card:not(.selected):hover {
+    border-color: var(--grey-400);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+
+  .pkg-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--blue);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 4px 14px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .pkg-name {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--grey-400);
+    margin-bottom: 14px;
+  }
+
+  .pkg-price {
+    font-size: 34px;
+    font-weight: 900;
+    color: var(--grey-900);
+    letter-spacing: -1.5px;
+    margin-bottom: 8px;
+  }
+
+  .pkg-card.selected .pkg-price { color: var(--blue); }
+
+  .pkg-desc {
+    font-size: 12px;
+    color: var(--grey-400);
+    margin-bottom: 16px;
+    font-weight: 400;
+  }
+
+  .pkg-rate-note {
+    font-size: 11px;
+    color: var(--grey-400);
+    margin-top: -4px;
+    margin-bottom: 10px;
+    letter-spacing: 0.2px;
+  }
+
+  .pkg-was {
+    font-size: 12px;
+    color: var(--grey-400);
+    margin-bottom: 10px;
+  }
+
+  .pkg-was s { color: var(--grey-400); }
+
+  .pkg-saving {
+    display: inline-block;
+    background: rgba(26,86,255,0.08);
+    color: var(--blue);
+    border: 1.5px solid rgba(26,86,255,0.18);
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .pkg-includes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 8px;
+  }
+
+  .pkg-includes li {
+    font-size: 12px;
+    color: var(--grey-600);
+    padding: 5px 0 5px 18px;
+    position: relative;
+    border-top: 1px solid var(--grey-100);
+    line-height: 1.4;
+  }
+
+  .pkg-includes li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .pkg-select {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--grey-400);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .pkg-card.selected .pkg-select { color: var(--blue); }
+
+  .extras-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--grey-200);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: var(--grey-600);
+    font-weight: 500;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+
+  .subtotal-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--grey-400);
+    margin-right: 10px;
+  }
+
+  .pkg-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 4px 0;
+    border-top: 2px solid var(--grey-100);
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--grey-400);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .pkg-total-row strong {
+    font-size: 22px;
+    color: var(--grey-900);
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    text-transform: none;
+  }
+
+  /* ── TOTALS ───────────────────────────── */
+  .totals-list {
+    max-width: 520px;
+    margin: 0 auto;
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--grey-100);
+    overflow: hidden;
+  }
+
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 18px 28px;
+    font-size: 14px;
+    color: var(--grey-600);
+    border-bottom: 1px solid var(--grey-100);
+    font-weight: 500;
+  }
+
+  .totals-row.grand {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--grey-900);
+    letter-spacing: -0.5px;
+    border-bottom: none;
+    padding: 24px 28px;
+  }
+
+  .totals-row.grand span:last-child { color: var(--blue); }
+
+  /* ── CLOSING ──────────────────────────── */
+  .closing-section {
+    background: var(--dark);
+    color: white;
+    text-align: center;
+    padding: 88px 64px 72px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .closing-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(26,86,255,0.25) 0%, transparent 70%);
+    z-index: 0;
+  }
+
+  .closing-section > * { position: relative; z-index: 1; }
+
+  .closing-section h2 {
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    color: white;
+  }
+
+  .closing-section p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+    max-width: 500px;
+    margin: 0 auto 52px;
+    line-height: 1.75;
+    font-weight: 400;
+  }
+
+  .signature-wrap {
+    margin: 0 auto 10px;
+    width: 220px;
+    height: 88px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .signature-img {
+    max-width: 220px;
+    max-height: 88px;
+    opacity: 0.85;
+  }
+
+  .signature-placeholder {
+    font-size: 13px;
+    color: rgba(255,255,255,0.2);
+    font-style: italic;
+    border: 1px dashed rgba(255,255,255,0.12);
+    padding: 14px 28px;
+    border-radius: 8px;
+  }
+
+  .sig-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 0;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  /* ── CTA ──────────────────────────────── */
+  .cta-section {
+    background: var(--body-bg);
+    text-align: center;
+    padding: 80px 64px;
+  }
+
+  .cta-section h3 {
+    font-size: clamp(36px, 6vw, 56px);
+    font-weight: 900;
+    color: var(--grey-900);
+    letter-spacing: -2px;
+    margin-bottom: 36px;
+    line-height: 1;
+  }
+
+  .accept-btn {
+    display: inline-block;
+    background: var(--blue);
+    color: white;
+    padding: 18px 60px;
+    border-radius: 100px;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 24px rgba(26,86,255,0.3);
+  }
+
+  .accept-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(26,86,255,0.45);
+  }
+
+  /* ── T&C ACCORDION ───────────────────── */
+  .tnc-section {
+    background: var(--body-bg);
+    padding: 0 0 8px;
+  }
+
+  details.tnc-accordion {
+    border-top: 1px solid var(--grey-200);
+    border-bottom: 1px solid var(--grey-200);
+    margin: 0 0 8px;
+  }
+
+  details.tnc-accordion summary {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 64px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--grey-400);
+    transition: color 0.15s;
+  }
+
+  details.tnc-accordion summary::-webkit-details-marker { display: none; }
+  details.tnc-accordion summary:hover { color: var(--grey-900); }
+
+  details.tnc-accordion summary .tnc-chevron {
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--grey-400);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  details.tnc-accordion[open] summary .tnc-chevron { transform: rotate(45deg); }
+  details.tnc-accordion[open] summary { color: var(--blue); }
+
+  .tnc-body {
+    padding: 0 64px 48px;
+    animation: tnc-open 0.2s ease;
+  }
+
+  @keyframes tnc-open {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .tnc-body h3 {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--grey-900);
+    margin: 28px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+
+  .tnc-body h3:first-child { margin-top: 0; }
+
+  .tnc-body p {
+    font-size: 13px;
+    color: var(--grey-600);
+    line-height: 1.8;
+    margin-bottom: 8px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .tnc-body ul {
+    margin: 8px 0 12px;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .tnc-body ul li {
+    font-size: 13px;
+    color: var(--grey-600);
+    line-height: 1.75;
+    padding: 8px 14px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-family: 'Inter', sans-serif;
+    border: 1px solid var(--grey-100);
+  }
+
+  .tnc-body ul li strong { color: var(--grey-900); }
+  .tnc-divider { border: none; border-top: 1px solid var(--grey-100); margin: 28px 0 0; }
+
+  /* ── MOBILE (<= 600px) ───────────────── */
+  @media (max-width: 600px) {
+    .hero { padding: 36px 20px 44px; min-height: 340px; }
+    .hero-top { left: 20px; right: 20px; top: 24px; }
+    .hero-title { font-size: 44px; letter-spacing: -2px; }
+    .hero-sub { font-size: 13px; }
+
+    .light-section, .white-section { padding: 44px 20px; }
+    .section-heading { font-size: 26px; letter-spacing: -0.8px; margin-bottom: 24px; }
+
+    .brief-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .pkg-grid { grid-template-columns: 1fr; gap: 20px; }
+    .pkg-card { padding: 24px 20px; }
+
+    .closing-section { padding: 60px 20px 52px; }
+    .closing-section h2 { font-size: 30px; letter-spacing: -1px; }
+
+    .cta-section { padding: 52px 20px; }
+    .cta-section h3 { font-size: 34px; letter-spacing: -1.2px; }
+    .accept-btn { padding: 16px 36px; }
+
+    details.tnc-accordion summary { padding: 18px 20px; }
+    .tnc-body { padding: 0 20px 32px; }
+
+    .footer-wrap { padding: 0 16px 32px; }
+    .footer-card {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 32px 28px;
+      text-align: center;
+    }
+    .footer-links { justify-content: center; gap: 20px; }
+    .footer-meta { text-align: center; white-space: normal; }
+  }
+
+  /* ── FOOTER CARD (matches valley.film) ── */
+  .footer-wrap {
+    background: var(--body-bg);
+    padding: 0 32px 48px;
+  }
+
+  .footer-card {
+    background: var(--blue);
+    border-radius: 24px;
+    padding: 44px 56px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 40px;
+  }
+
+  .footer-logo img {
+    height: 40px;
+    display: block;
+    opacity: 0.9;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+
+  .footer-links a {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    transition: color 0.15s;
+  }
+
+  .footer-links a:hover { color: white; }
+
+  .footer-meta {
+    text-align: right;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.9;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ── SIGNATURE PAD ───────────────────── */
+  .sign-form-wrap { max-width: 520px; margin: 0 auto; text-align: left; }
+
+  .sign-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--grey-400);
+    margin-bottom: 8px;
+  }
+
+  .sign-name-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1.5px solid var(--grey-200);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--grey-900);
+    margin-bottom: 20px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s;
+    background: var(--card-bg);
+    box-sizing: border-box;
+  }
+
+  .sign-name-input:focus { border-color: var(--blue); }
+
+  .sign-canvas-wrap {
+    position: relative;
+    border: 1.5px solid var(--grey-200);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    background: var(--card-bg);
+  }
+
+  #sig-canvas {
+    width: 100%;
+    height: 160px;
+    display: block;
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .sig-clear-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: 1px solid var(--grey-200);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--grey-400);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .sig-clear-btn:hover { border-color: var(--grey-400); color: var(--grey-900); }
+
+  .sig-baseline {
+    position: absolute;
+    bottom: 44px;
+    left: 20px;
+    right: 20px;
+    height: 1px;
+    background: var(--grey-100);
+    pointer-events: none;
+  }
+
+  .sig-baseline-label {
+    position: absolute;
+    bottom: 28px;
+    left: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--grey-200);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    pointer-events: none;
+  }
+
+  .sign-hint { font-size: 11px; color: var(--grey-400); margin-bottom: 12px; }
+
+  .sign-note {
+    font-size: 12px;
+    color: var(--grey-400);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .accepted-badge {
+    display: inline-block;
+    background: rgba(26,86,255,0.07);
+    color: var(--blue);
+    border: 1.5px solid rgba(26,86,255,0.18);
+    padding: 8px 22px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+  }
+
+  .accepted-msg { font-size: 15px; color: var(--grey-400); margin-bottom: 32px; }
+  .accepted-msg strong { color: var(--grey-900); }
+
+  /* ── INTERACTIVE PRICING ──────────────────────── */
+  .price-base-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: rgba(26,86,255,0.04);
+    border: 1.5px solid rgba(26,86,255,0.15);
+    border-radius: 14px;
+    margin-bottom: 28px;
+  }
+
+  .price-row-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--grey-900);
+    margin-bottom: 4px;
+  }
+
+  .price-row-desc { font-size: 12px; color: var(--grey-400); }
+
+  .price-row-amount {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--blue);
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+  }
+
+  .price-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--grey-400);
+    margin-bottom: 12px;
+  }
+
+  /* ── PILL BUTTONS (delivery) ──────────────────── */
+  .pill-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1.5px solid var(--grey-200);
+    border-radius: 100px;
+    background: var(--card-bg);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--grey-600);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .pill-btn:hover { border-color: var(--grey-400); color: var(--grey-900); }
+
+  .pill-btn.selected {
+    border-color: var(--blue);
+    background: rgba(26,86,255,0.06);
+    color: var(--blue);
+  }
+
+  .pill-price { font-size: 12px; font-weight: 500; opacity: 0.65; }
+  .pill-btn.selected .pill-price { opacity: 1; }
+
+  .delivery-hint {
+    font-size: 12px;
+    color: var(--grey-400);
+    margin-top: 10px;
+    min-height: 18px;
+    line-height: 1.5;
+    transition: opacity 0.2s;
+  }
+
+  /* ── TOGGLE CARDS (post-prod, add-ons) ─────────── */
+  .toggle-cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .toggle-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .toggle-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--grey-200);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    user-select: none;
+  }
+
+  .toggle-card:hover {
+    border-color: var(--grey-400);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .toggle-card.selected {
+    border-color: var(--blue);
+    background: rgba(26,86,255,0.03);
+  }
+
+  .toggle-card-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--grey-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    background: var(--card-bg);
+    margin-top: 1px;
+  }
+
+  .toggle-card.selected .toggle-card-check {
+    background: var(--blue);
+    border-color: var(--blue);
+  }
+
+  .toggle-card-check svg { opacity: 0; transition: opacity 0.1s; }
+  .toggle-card.selected .toggle-card-check svg { opacity: 1; }
+
+  .toggle-card-body { flex: 1; min-width: 0; }
+
+  .toggle-card-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--grey-900);
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+
+  .toggle-card.selected .toggle-card-name { color: var(--blue); }
+
+  .toggle-card-desc { font-size: 12px; color: var(--grey-400); line-height: 1.4; }
+
+  .toggle-card-price {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--grey-400);
+    white-space: nowrap;
+    letter-spacing: -0.3px;
+    flex-shrink: 0;
+  }
+
+  .toggle-card.selected .toggle-card-price { color: var(--blue); }
+
+  /* ── QUOTE NOTES ─────────────────────────────── */
+  .quote-notes-block {
+    margin-top: 32px;
+    padding: 18px 22px;
+    background: rgba(26,86,255,0.04);
+    border: 1.5px solid rgba(26,86,255,0.12);
+    border-radius: 12px;
+  }
+
+  .quote-notes-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--blue);
+    margin-bottom: 8px;
+  }
+
+  .quote-notes-text {
+    font-size: 13px;
+    color: var(--grey-600);
+    line-height: 1.65;
+    white-space: pre-wrap;
+  }
+
+  /* ── PRICE BREAKDOWN ─────────────────────────── */
+  .price-breakdown {
+    margin-top: 32px;
+    border-radius: 16px;
+    border: 1.5px solid var(--grey-100);
+    overflow: hidden;
+    background: var(--card-bg);
+  }
+
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    font-size: 14px;
+    color: var(--grey-600);
+    font-weight: 500;
+    border-bottom: 1px solid var(--grey-100);
+  }
+
+  .breakdown-row.base-row {
+    font-weight: 600;
+    color: var(--grey-900);
+  }
+
+  .breakdown-row.fixed-row {
+    color: var(--grey-400);
+    font-size: 13px;
+  }
+
+  .breakdown-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--grey-400);
+  }
+
+  #quote-total {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--grey-900);
+    letter-spacing: -1px;
+    text-transform: none;
+    transition: color 0.2s;
+  }
+
+  @media (max-width: 600px) {
+    .pill-group { gap: 6px; }
+    .pill-btn { font-size: 12px; padding: 9px 14px; }
+    .toggle-cards-grid { grid-template-columns: 1fr; }
+    .price-base-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HERO ───────────────────────────────────────── -->
+<div class="hero">
+  <div class="hero-top">
+    <a href="https://www.valley.film" target="_blank" rel="noopener" style="display:block;line-height:0;"><span style="font-weight:800;font-size:18px">Valley Films</span></a>
+    <div class="hero-quote-ref">
+      Quote Reference<br>
+      <strong>VF-0075</strong>
+    </div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">July Brandbox</div>
+    <div class="hero-title">Quotation</div>
+    <div class="hero-sub">
+      <strong>Prepared for Regina Quartey, Exequitive</strong>
+    </div>
+  </div>
+  <!-- wave into light body -->
+  <div class="hero-wave">
+    <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="width:100%;height:72px;display:block;">
+      <path d="M0,40 C360,80 1080,0 1440,40 L1440,72 L0,72 Z" fill="#f4f4f4"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ── BRIEF ──────────────────────────────────────── -->
+<div class="light-section">
+  <div class="section-eyebrow">The Brief</div>
+  <div class="section-heading">Project Details</div>
+  
+  <div class="brief-grid">
+    
+        <div class="brief-item">
+          <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M2 8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2Z"/><path d="m10 8-3 4h6l-3 4"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>Project</div>
+          <div class="brief-item-value">July Brandbox</div>
+        </div>
+        <div class="brief-item">
+          <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Location</div>
+          <div class="brief-item-value">London, England, United Kingdom</div>
+        </div>
+        <div class="brief-item">
+          <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Production Date</div>
+          <div class="brief-item-value">16:00–16:30 · 10th July 2026</div>
+        </div>
+  </div>
+  
+</div>
+
+<!-- wave: light → white -->
+<div class="wave-divider to-white">
+  <svg viewBox="0 0 1440 56" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="width:100%;height:56px;display:block;">
+    <path d="M0,28 C480,60 960,0 1440,28 L1440,56 L0,56 Z" fill="#ffffff"/>
+  </svg>
+</div>
+
+<!-- ── PRODUCTION SERVICES ────────────────────── -->
+<div class="white-section">
+  <div class="section-eyebrow">Production Services</div>
+  <div class="section-heading">Quotation</div>
+  <div class="pkg-grid"><div class="pkg-card " data-pkg-id="34f47fd0-3620-813b-ab04-cff5f8bd1655" data-pkg-price="750"><div class="pkg-name">Core</div><div class="pkg-price">£750</div><div class="pkg-rate-note">£750/day</div><div class="pkg-desc">1x social cut (up to 60s), colour grade</div><ul class="pkg-includes"><li>Crew: Solo DP</li><li>1x social cut (up to 60s)</li><li>colour grade</li></ul></div><div class="pkg-card selected" data-pkg-id="34f47fd0-3620-81cf-ac50-edb008f094b6" data-pkg-price="1050"><div class="pkg-badge">Recommended</div><div class="pkg-name">Primary</div><div class="pkg-price">£1,050</div><div class="pkg-rate-note">£1,050/day</div><div class="pkg-desc">2x social cuts + 1x hero edit (2–5 min), colour grade</div><ul class="pkg-includes"><li>Crew: DP + 1stAC</li><li>2x social cuts + 1x hero edit (2–5 min)</li><li>colour grade</li></ul></div><div class="pkg-card " data-pkg-id="34f47fd0-3620-81a6-9d86-eeba47824bd5" data-pkg-price="1400"><div class="pkg-name">Premium</div><div class="pkg-price">£1,400</div><div class="pkg-rate-note">£1,400/day</div><div class="pkg-desc">Full delivery suite: social cuts + hero edit + long-form, grade, stills</div><ul class="pkg-includes"><li>Crew: DP + 1stAC & Spark</li><li>Full delivery suite: social cuts + hero edit + long-form</li><li>grade</li><li>stills</li></ul></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-819d-a712-e9fa795f5876" data-price="250"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Rush Turnaround</div><div class="toggle-card-desc">Delivery within 24–48 hours of shoot. Applied per project.</div></div><div class="toggle-card-price">+£250</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Stills Package</div><div class="toggle-card-desc">Cull and edit of photography from shoot day.</div></div><div class="toggle-card-price">+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Rough Cut / Light Edit</div><div class="toggle-card-desc">Selects edit with basic pacing and cuts — no colour grade or motion graphics. Ideal for internal review or simple social use.</div></div><div class="toggle-card-price">+£350</div></div></div>
+
+  <div class="quote-notes-block"><div class="quote-notes-label">Notes</div><div class="quote-notes-text">This is a very comprehensive draft. To make it "bulletproof" for an AI quotation generator, you want to shift from a descriptive style to a </div></div>
+
+  <div class="price-breakdown">
+    <div id="breakdown-rows"></div>
+    <div class="breakdown-total">
+      <span>Total</span>
+      <strong id="quote-total">£1,208</strong>
+    </div>
+  </div>
+</div>
+<!-- wave: white → light -->
+<div class="wave-divider to-light">
+  <svg viewBox="0 0 1440 56" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="width:100%;height:56px;display:block;">
+    <path d="M0,28 C480,0 960,56 1440,28 L1440,56 L0,56 Z" fill="#f4f4f4"/>
+  </svg>
+</div>
+
+<!-- ── CLOSING ────────────────────────────────────── -->
+<div class="closing-section">
+  <h2>Thank you,<br>Regina</h2>
+  <p>We're excited about the opportunity to work with you on this. Any questions before you're ready to sign — just reach out and we'll be happy to talk it through.</p>
+  <div class="signature-wrap">
+    <div class="signature-placeholder">[ Signature ]</div>
+  </div>
+  <div class="sig-name">Max Paterson &nbsp;·&nbsp; Director</div>
+</div>
+
+<!-- ── T&C ACCORDION ──────────────────────────────── -->
+<div class="tnc-section">
+  <details class="tnc-accordion">
+    <summary>Terms &amp; Conditions <span class="tnc-chevron">+</span></summary>
+    <div class="tnc-body">
+      <h3>1. Confidentiality</h3>
+      <p>Both parties agree to maintain strict confidentiality regarding all business information belonging to the service provider. The recipient shall not disclose any confidential information to any third party without prior written consent. This obligation remains in effect during the term of this Agreement and for five (5) years thereafter.</p>
+      <h3>2. Cancellations</h3>
+      <p>Cancellation fees apply based on the notice period provided:</p>
+      <ul>
+        <li><strong>30% fee</strong> — if notice is given 7 days or more before the scheduled start date.</li>
+        <li><strong>50% fee</strong> — if notice is given less than 7 days before the start date.</li>
+        <li><strong>100% fee</strong> — if notice is given less than 24 hours before the start date.</li>
+      </ul>
+      <p>Cancellations made at least one month in advance, confirmed in writing, will not incur any fees if reasonable efforts are made to avoid cancellation.</p>
+      <h3>3. Payment Terms</h3>
+      <p>Invoices may be issued following the first round of revisions or upon delivery of footage. The total quoted cost, including expenses and any agreed price adjustments, must be paid within <strong>one (1) calendar month</strong> of the final day of production.</p>
+      <p>Payments must be made via <strong>bank transfer</strong> only. Late payments will incur a <strong>5% charge</strong>, compounded every 14 days, beginning after the one-month payment window.</p>
+      <h3>4. Revisions and Approvals</h3>
+      <p>Two (2) rounds of minor revisions are included in the quoted fee. Additional revisions or significant creative changes will be charged separately at the service provider's standard hourly rate.</p>
+      <p>Clients must provide feedback or approval within <strong>two (2) working days</strong> of receiving revised materials to keep the project on schedule. Delays in client responses may affect delivery timelines without penalty to the service provider.</p>
+      <h3>5. Intellectual Property and Usage Rights</h3>
+      <p>The service provider retains full copyright and ownership of all creative materials until full payment has been received. Upon payment, the client receives <strong>non-exclusive, unlimited rights</strong> to use the final deliverables for their intended purpose.</p>
+      <p>The service provider retains the right to use completed work for promotional and portfolio use unless expressly prohibited in writing.</p>
+      <h3>6. Expenses and Additional Costs</h3>
+      <p>Out-of-pocket expenses (including travel, accommodation, materials, or other project-specific costs) will be invoiced in addition to the quoted amount, subject to prior agreement.</p>
+      <h3>7. Force Majeure</h3>
+      <p>Neither party shall be liable for failure or delay in performance caused by circumstances beyond reasonable control, including natural disasters, strikes, illness, equipment failure, or government actions. Each party will notify the other promptly upon becoming aware of such circumstances.</p>
+      <h3>8. Termination</h3>
+      <p>Either party may terminate this Agreement in writing if the other materially breaches its obligations and fails to remedy such breach within 10 business days of notice. Termination does not absolve the client of payment obligations for work completed before termination.</p>
+      <h3>9. Limitation of Liability</h3>
+      <p>The service provider's total liability under this Agreement shall not exceed the total amount paid by the client for the services rendered. The provider shall not be liable for indirect, consequential, or incidental damages.</p>
+      <h3>10. Governing Law</h3>
+      <p>This Agreement shall be governed by and construed in accordance with the laws of <strong>England and Wales</strong>. Any disputes arising under or in connection with this Agreement shall be subject to the exclusive jurisdiction of the courts of <strong>England and Wales</strong>.</p>
+      <h3>11. Agreement</h3>
+      <p>By signing this document, both parties confirm they have read, understood, and agree to the terms and conditions outlined in this quotation.</p>
+      <hr class="tnc-divider">
+    </div>
+  </details>
+</div>
+
+<!-- ── ACCEPT & SIGN ─────────────────────────────── -->
+<div class="cta-section" id="accept-section">
+  <div id="cta-initial">
+    <h3>Let's get started</h3>
+    <p style="font-size:15px;color:var(--grey-400);margin:0 0 32px;">Ready to confirm your booking? Click below to review and sign.</p>
+    <button type="button" id="show-sig-btn" class="accept-btn">Accept Quote</button>
+    <p style="font-size:12px;color:var(--grey-400);margin-top:16px;">This quotation is valid until 6 May 2026</p>
+  </div>
+  <div id="sign-form" class="sign-form-wrap" style="display:none;">
+    <h3>Sign to Confirm</h3>
+    <p style="font-size:15px;color:var(--grey-400);margin:0 0 32px;">Please provide your name and signature to accept the terms above.</p>
+    <label class="sign-label" for="signer-name">Full Name</label>
+    <input type="text" id="signer-name" class="sign-name-input" value="Regina Quartey" autocomplete="name">
+    <div class="sign-canvas-wrap">
+      <canvas id="sig-canvas"></canvas>
+      <div class="sig-baseline"></div>
+      <div class="sig-baseline-label">Sign here</div>
+      <button type="button" id="sig-clear" class="sig-clear-btn">Clear</button>
+    </div>
+    <p class="sign-hint">Draw your signature in the box above</p>
+    <p class="sign-note">By signing, you confirm you have read and agree to the Terms &amp; Conditions above.</p>
+    <button type="button" id="accept-btn" class="accept-btn">Confirm &amp; Sign</button>
+    <p style="margin-top:16px;"><button type="button" id="back-btn" style="background:none;border:none;color:var(--grey-400);font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0;">Go back</button></p>
+  </div>
+  <div id="accepted-state" style="display:none;text-align:center;">
+    <div class="accepted-badge">Quote Accepted</div>
+    <p class="accepted-msg">Signed by <strong id="accepted-name-display"></strong> on <span id="accepted-date-display"></span></p>
+    <button type="button" id="download-pdf-btn" class="accept-btn">Download PDF</button>
+  </div>
+</div>
+
+<!-- hidden blue logo for PDF generation -->
+<img id="vf-logo-blue" src="" style="display:none;" alt="">
+
+<!-- ── FOOTER CARD ────────────────────────────────── -->
+<div class="footer-wrap">
+  <div class="footer-card">
+    <div class="footer-logo"><a href="https://www.valley.film" target="_blank" rel="noopener" style="display:block;line-height:0;"><span style="font-weight:800;font-size:18px">Valley Films</span></a></div>
+    <div class="footer-links">
+      <a href="https://www.valley.film/about">About</a>
+      <a href="https://www.valley.film/contact">Contact</a>
+    </div>
+    <div class="footer-meta">
+      max@valley.film<br>
+      Created @ 29 April 2026
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.2.0/dist/signature_pad.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script>
+  // ── Quote data & pricing ─────────────────────────
+  const VF     = {"pageId": "9dce52d3-affe-4b0a-b7b3-9164e2d9be75", "quoteRef": "VF-0075", "clientName": "Regina Quartey", "clientCompany": "Exequitive", "projectTitle": "July Brandbox", "productionDate": "16:00\u201316:30 \u00b7 10th July 2026", "total": "\u00a31,208", "basePrice": 1208, "validUntil": "6 May 2026", "generatedDate": "29 April 2026", "quoteType": "Package Based", "defaultPkgId": "34f47fd0-3620-81cf-ac50-edb008f094b6"};
+  const PRICING = {"basePrice": 1208, "expenses": 65, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "desc": "Extra cut beyond what is included in the package (up to 90s)."}, {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Extra Revision Work", "price": 40, "desc": "Charged hourly after included revision rounds are used."}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "desc": "Burnt-in or SRT subtitles per video."}], "addons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround", "price": 250, "desc": "Delivery within 24\u201348 hours of shoot. Applied per project."}, {"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "desc": "Cull and edit of photography from shoot day."}, {"id": "34f47fd0-3620-81e2-b77d-c78d07516482", "name": "Rough Cut / Light Edit", "price": 350, "desc": "Selects edit with basic pacing and cuts \u2014 no colour grade or motion graphics. Ideal for internal review or simple social use."}], "packages": [{"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "raw_onsite"};
+
+  const _pstate = {
+    package:  VF.defaultPkgId,
+    delivery: PRICING.defaultDelivery || 'raw_onsite',
+    postProd: null,
+    addons:   new Set(),
+  };
+
+  function _fmtGBP(n) {
+    return '£' + n.toLocaleString('en-GB', {minimumFractionDigits:0, maximumFractionDigits:0});
+  }
+
+  function _computeTotal() {
+    if (VF.quoteType === 'Package Based') {
+      const pkg = (PRICING.packages || []).find(x => x.id === _pstate.package);
+      if (!pkg) return null;
+      let t = pkg.price;
+      for (const id of _pstate.addons) {
+        const a = PRICING.addons.find(x => x.id === id);
+        if (a) t += a.price;
+      }
+      return t;
+    }
+    // Itemized
+    if (!PRICING.basePrice) return null;
+    let t = PRICING.basePrice;
+    const d = PRICING.delivery.find(x => x.id === _pstate.delivery);
+    if (d) t += d.price;
+    if (_pstate.postProd) {
+      const p = PRICING.postProduction.find(x => x.id === _pstate.postProd);
+      if (p) t += p.price;
+    }
+    for (const id of _pstate.addons) {
+      const a = PRICING.addons.find(x => x.id === id);
+      if (a) t += a.price;
+    }
+    t += (PRICING.expenses || 0) + (PRICING.storage || 0);
+    return t;
+  }
+
+  function _renderBreakdown() {
+    const container = document.getElementById('breakdown-rows');
+    if (!container) return;
+    const rows = [];
+    if (VF.quoteType === 'Package Based') {
+      const pkg = (PRICING.packages || []).find(x => x.id === _pstate.package);
+      if (pkg) rows.push({label: pkg.name, amt: pkg.price, cls: 'base-row'});
+      for (const id of _pstate.addons) {
+        const a = PRICING.addons.find(x => x.id === id);
+        if (a) rows.push({label: a.name, amt: a.price, cls: ''});
+      }
+    } else {
+      if (PRICING.basePrice) rows.push({label:'Production Fee', amt:PRICING.basePrice, cls:'base-row'});
+      const d = PRICING.delivery.find(x => x.id === _pstate.delivery);
+      if (d) rows.push({label:d.name, amt:d.price, cls:''});
+      if (_pstate.postProd) {
+        const p = PRICING.postProduction.find(x => x.id === _pstate.postProd);
+        if (p) rows.push({label:p.name, amt:p.price, cls:''});
+      }
+      for (const id of _pstate.addons) {
+        const a = PRICING.addons.find(x => x.id === id);
+        if (a) rows.push({label:a.name, amt:a.price, cls:''});
+      }
+      if (PRICING.expenses) rows.push({label:'Expenses', amt:PRICING.expenses, cls:'fixed-row'});
+      if (PRICING.storage > 0) rows.push({label:'Storage & Backups', amt:PRICING.storage, cls:'fixed-row'});
+    }
+    container.innerHTML = rows.map(r => {
+      const amtStr = r.cls === 'base-row' ? _fmtGBP(r.amt)
+                   : r.amt === 0 ? 'Included'
+                   : '+' + _fmtGBP(r.amt);
+      return `<div class="breakdown-row ${r.cls}"><span>${r.label}</span><span>${amtStr}</span></div>`;
+    }).join('');
+  }
+
+  function _updateTotal() {
+    const el = document.getElementById('quote-total');
+    if (!el) return;
+    const t = _computeTotal();
+    el.textContent = t !== null ? _fmtGBP(t) : 'TBC';
+    _renderBreakdown();
+  }
+
+  function _updateDeliveryHint() {
+    const el = document.getElementById('delivery-desc');
+    if (!el) return;
+    const d = PRICING.delivery.find(x => x.id === _pstate.delivery);
+    el.textContent = d ? d.desc : '';
+  }
+
+  // Package cards — radio select
+  document.querySelectorAll('.pkg-card[data-pkg-id]').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.pkg-card[data-pkg-id]').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      _pstate.package = card.dataset.pkgId;
+      _updateTotal();
+    });
+  });
+
+  // Delivery pills — radio
+  document.querySelectorAll('.pill-btn[data-delivery-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.pill-btn[data-delivery-id]').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      _pstate.delivery = btn.dataset.deliveryId;
+      _updateTotal();
+      _updateDeliveryHint();
+    });
+  });
+  _updateDeliveryHint();
+
+  // Post-production — toggle one or none
+  document.querySelectorAll('.toggle-card[data-postprod-id]').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.postprodId;
+      if (_pstate.postProd === id) {
+        card.classList.remove('selected');
+        _pstate.postProd = null;
+      } else {
+        document.querySelectorAll('.toggle-card[data-postprod-id]').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        _pstate.postProd = id;
+      }
+      _updateTotal();
+    });
+  });
+
+  // Add-ons — multi-select
+  document.querySelectorAll('.toggle-card[data-addon-id]').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.addonId;
+      if (_pstate.addons.has(id)) {
+        _pstate.addons.delete(id);
+        card.classList.remove('selected');
+      } else {
+        _pstate.addons.add(id);
+        card.classList.add('selected');
+      }
+      _updateTotal();
+    });
+  });
+
+  _updateTotal();
+  // ── Quote data ────────────────────────────────────
+
+  // ── Restore accepted state from localStorage ──────
+  const _storeKey = 'vf_accepted_' + VF.quoteRef;
+  const _stored = localStorage.getItem(_storeKey);
+  if (_stored) {
+    try {
+      const s = JSON.parse(_stored);
+      _showAccepted(s.name, s.date);
+    } catch(e) {}
+  }
+
+  // ── Show signature form on "Accept Quote" click ───
+  document.getElementById('show-sig-btn').addEventListener('click', () => {
+    // Expand T&C so client sees them before signing
+    const tnc = document.querySelector('.tnc-accordion');
+    if (tnc && !tnc.open) tnc.open = true;
+
+    document.getElementById('cta-initial').style.display = 'none';
+    document.getElementById('sign-form').style.display = 'block';
+    if (!_sigPad) _initPad();
+
+    // Scroll T&C into view so client reads before scrolling to sign form
+    setTimeout(() => {
+      if (tnc) {
+        tnc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
+  });
+
+  // ── Back button ───────────────────────────────────
+  document.getElementById('back-btn').addEventListener('click', () => {
+    document.getElementById('sign-form').style.display = 'none';
+    document.getElementById('cta-initial').style.display = 'block';
+  });
+
+  // ── Signature pad ─────────────────────────────────
+  const _canvas = document.getElementById('sig-canvas');
+  let _sigPad = null;
+
+  function _initPad() {
+    if (typeof SignaturePad === 'undefined' || !_canvas) return;
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    _canvas.width  = _canvas.offsetWidth  * ratio;
+    _canvas.height = _canvas.offsetHeight * ratio;
+    _canvas.getContext('2d').scale(ratio, ratio);
+    _sigPad = new SignaturePad(_canvas, {
+      backgroundColor: 'rgba(0,0,0,0)',
+      penColor: '#0a0f1e',
+      minWidth: 1.5,
+      maxWidth: 3,
+    });
+  }
+
+  // Pad is initialised when the form is revealed (canvas has no dimensions while hidden)
+
+  window.addEventListener('resize', () => {
+    if (!_sigPad) return;
+    const d = _sigPad.toData();
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    _canvas.width  = _canvas.offsetWidth  * ratio;
+    _canvas.height = _canvas.offsetHeight * ratio;
+    _canvas.getContext('2d').scale(ratio, ratio);
+    _sigPad.clear();
+    _sigPad.fromData(d);
+  });
+
+  document.getElementById('sig-clear').addEventListener('click', () => _sigPad && _sigPad.clear());
+
+  // ── Accept handler ────────────────────────────────
+  document.getElementById('accept-btn').addEventListener('click', async () => {
+    const name = document.getElementById('signer-name').value.trim();
+    if (!name) { alert('Please enter your name.'); return; }
+    if (!_sigPad || _sigPad.isEmpty()) { alert('Please draw your signature.'); return; }
+
+    const sigDataUrl = _sigPad.toDataURL('image/png');
+    const now = new Date();
+    const timestamp = now.toISOString();
+    const dateStr = now.toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+
+    const btn = document.getElementById('accept-btn');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+
+    // Always show accepted state and generate PDF — notification is fire-and-forget
+    const finalTotal = _computeTotal() !== null ? _fmtGBP(_computeTotal()) : VF.total;
+    const selDelivery = _pstate.delivery;
+    const selPostProd = _pstate.postProd;
+    const selAddons   = Array.from(_pstate.addons);
+    localStorage.setItem(_storeKey, JSON.stringify({name, date: dateStr, total: finalTotal}));
+    _showAccepted(name, dateStr);
+    _generatePDF(name, sigDataUrl, dateStr, finalTotal);
+
+    // Notify backend (non-blocking)
+    fetch('/api/webhook', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action:          'accepted',
+        page_id:         VF.pageId,
+        quoteRef:        VF.quoteRef,
+        signerName:      name,
+        signatureDataUrl: sigDataUrl,
+        timestamp,
+        projectTitle:    VF.projectTitle,
+        total:           finalTotal,
+        selectedDelivery: selDelivery,
+        selectedPostProd: selPostProd,
+        selectedAddons:  selAddons,
+        clientCompany:   VF.clientCompany,
+        productionDate:  VF.productionDate,
+        validUntil:      VF.validUntil,
+      }),
+    }).catch(() => {/* silent — client flow already complete */});
+  });
+
+  document.getElementById('download-pdf-btn').addEventListener('click', () => {
+    const s = _stored ? JSON.parse(_stored) : {};
+    _generatePDF(s.name || VF.clientName, null, s.date || '', s.total || VF.total);
+  });
+
+  function _showAccepted(name, dateStr) {
+    document.getElementById('cta-initial').style.display = 'none';
+    document.getElementById('sign-form').style.display = 'none';
+    document.getElementById('accepted-state').style.display = 'block';
+    document.getElementById('accepted-name-display').textContent = name;
+    document.getElementById('accepted-date-display').textContent = dateStr;
+  }
+
+  // ── PDF generation ────────────────────────────────
+  function _generatePDF(signerName, sigDataUrl, dateStr, totalStr) {
+    if (typeof window.jspdf === 'undefined') { alert('PDF library not loaded. Please try again.'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+
+    const W = 210, M = 20, CW = W - M * 2;
+    let y = M;
+    const blue = [26,86,255], dark = [10,15,30], grey = [130,130,130], light = [220,220,220];
+
+    // Logo — preserve aspect ratio
+    const logoEl = document.getElementById('vf-logo-blue');
+    if (logoEl && logoEl.src.startsWith('data:')) {
+      try {
+        const logoW = 40;
+        const logoH = logoEl.naturalHeight > 0 ? logoW * (logoEl.naturalHeight / logoEl.naturalWidth) : 14;
+        doc.addImage(logoEl.src, 'PNG', M, y, logoW, logoH);
+      } catch(e) {}
+    }
+    // Quote ref
+    doc.setFontSize(8); doc.setTextColor(...grey);
+    doc.text(VF.quoteRef, W - M, y + 10, {align:'right'});
+    y += 26;
+
+    // Rule
+    doc.setDrawColor(...light); doc.setLineWidth(0.4);
+    doc.line(M, y, W - M, y); y += 10;
+
+    // Title
+    doc.setFontSize(20); doc.setTextColor(...dark); doc.setFont(undefined,'bold');
+    doc.text('Quotation Accepted', M, y); y += 7;
+    doc.setFontSize(9); doc.setTextColor(...grey); doc.setFont(undefined,'normal');
+    doc.text('This document confirms acceptance of the quoted services below.', M, y); y += 12;
+
+    // Details
+    const rows = [
+      ['Project',        VF.projectTitle || 'TBC'],
+      ['Prepared for',   signerName + (VF.clientCompany ? ', ' + VF.clientCompany : '')],
+      ['Production',     VF.productionDate || 'TBC'],
+      ['Total',          totalStr || VF.total || 'TBC'],
+      ['Valid until',    VF.validUntil],
+      ['Quote issued',   VF.generatedDate],
+    ];
+    doc.setFontSize(9);
+    for (const [label, value] of rows) {
+      doc.setTextColor(...grey); doc.setFont(undefined,'normal');
+      doc.text(label, M, y);
+      doc.setTextColor(...dark); doc.setFont(undefined,'bold');
+      doc.text(String(value), M + 48, y);
+      y += 7;
+    }
+    y += 6;
+
+    // Rule
+    doc.setDrawColor(...light); doc.line(M, y, W - M, y); y += 10;
+
+    // Signature
+    doc.setFontSize(8); doc.setTextColor(...grey); doc.setFont(undefined,'bold');
+    doc.text('SIGNATURE', M, y); y += 6;
+    if (sigDataUrl) {
+      try { doc.addImage(sigDataUrl, 'PNG', M, y, 80, 30); y += 32; } catch(e) { y += 6; }
+    }
+    doc.setDrawColor(...light); doc.line(M, y, M + 80, y); y += 5;
+    doc.setFontSize(10); doc.setTextColor(...dark); doc.setFont(undefined,'bold');
+    doc.text(signerName || '', M, y); y += 5;
+    doc.setFontSize(8); doc.setTextColor(...grey); doc.setFont(undefined,'normal');
+    doc.text(dateStr || '', M, y); y += 12;
+
+    // Key terms
+    doc.setDrawColor(...light); doc.line(M, y, W - M, y); y += 8;
+    doc.setFontSize(8); doc.setTextColor(...grey); doc.setFont(undefined,'bold');
+    doc.text('KEY TERMS', M, y); y += 6;
+    doc.setFont(undefined,'normal'); doc.setTextColor(...dark);
+    [
+      '2 rounds of revisions included',
+      '3 working days turnaround for revisions',
+      'Payment within 1 calendar month of final production day',
+      'Late payments incur a 5% charge compounded every 14 days',
+      'Governed by the laws of England and Wales',
+    ].forEach(t => { doc.text('•  ' + t, M + 2, y); y += 6; });
+
+    // Footer
+    doc.setDrawColor(...light); doc.line(M, 278, W - M, 278);
+    doc.setFontSize(8); doc.setTextColor(...grey);
+    doc.text('valley.film', M, 284);
+    doc.text('max@valley.film', W - M, 284, {align:'right'});
+
+    const fname = VF.quoteRef + '_' + (VF.projectTitle || 'Quote').replace(/[^a-zA-Z0-9]/g,'_') + '_Accepted.pdf';
+    doc.save(fname);
+  }
+</script>
+<!-- Tracking Pixel for Notion 'Viewed' Status -->
+<img src="/api/webhook?action=viewed&page_id=9dce52d3-affe-4b0a-b7b3-9164e2d9be75" width="1" height="1" style="display:none;" alt="" />
+</body>
+</html>
