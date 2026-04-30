@@ -1092,6 +1092,46 @@
     transition: color 0.2s;
   }
 
+  /* ── CONFIRMATION SUMMARY ──────────────────────── */
+  .conf-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--grey-100);
+    gap: 16px;
+  }
+  .conf-row:last-child { border-bottom: none; }
+  .conf-row-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--grey-400);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .conf-row-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--grey-900);
+    text-align: right;
+  }
+  .conf-row-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--grey-400);
+    margin-top: 3px;
+    letter-spacing: 0.3px;
+  }
+  #conf-total {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--blue);
+    letter-spacing: -1px;
+    text-transform: none;
+  }
+
   @media (max-width: 600px) {
     .pill-group { gap: 6px; }
     .pill-btn { font-size: 12px; padding: 9px 14px; }
@@ -1212,7 +1252,7 @@
 </div>
 
 <!-- ── PRODUCTION SERVICES ────────────────────── -->
-<div class="white-section">
+<div class="white-section" id="pricing-section">
   <div class="section-eyebrow">Production Services</div>
   <div class="section-heading">Quotation</div>
   <div class="pkg-grid"><div class="pkg-card " data-pkg-id="34f47fd0-3620-813b-ab04-cff5f8bd1655" data-pkg-price="750"><div class="pkg-name">Core</div><div class="pkg-price">£750</div><div class="pkg-rate-note">£750/day</div><div class="pkg-desc">1x social cut (up to 60s), colour grade</div><ul class="pkg-includes"><li>Crew: Solo DP</li><li>1x social cut (up to 60s)</li><li>colour grade</li></ul></div><div class="pkg-card selected" data-pkg-id="34f47fd0-3620-81cf-ac50-edb008f094b6" data-pkg-price="1050"><div class="pkg-badge">Recommended</div><div class="pkg-name">Primary</div><div class="pkg-price">£1,050</div><div class="pkg-rate-note">£1,050/day</div><div class="pkg-desc">2x social cuts + 1x hero edit (2–5 min), colour grade</div><ul class="pkg-includes"><li>Crew: DP + 1stAC</li><li>2x social cuts + 1x hero edit (2–5 min)</li><li>colour grade</li></ul></div><div class="pkg-card " data-pkg-id="34f47fd0-3620-81a6-9d86-eeba47824bd5" data-pkg-price="1400"><div class="pkg-name">Premium</div><div class="pkg-price">£1,400</div><div class="pkg-rate-note">£1,400/day</div><div class="pkg-desc">Full delivery suite: social cuts + hero edit + long-form, grade, stills</div><ul class="pkg-includes"><li>Crew: DP + 1stAC & Spark</li><li>Full delivery suite: social cuts + hero edit + long-form</li><li>grade</li><li>stills</li></ul></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="0"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Stills Package</div><div class="toggle-card-desc">Cull and edit of photography from shoot day.</div></div><div class="toggle-card-price">Included</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="0"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Colour Grade / Transcode</div><div class="toggle-card-desc">Simple transcoding of footage & colour grade to get this edit ready</div></div><div class="toggle-card-price">Included</div></div></div>
@@ -1224,6 +1264,30 @@
     <div class="breakdown-total">
       <span>Total</span>
       <strong id="quote-total">£1,208</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIRMATION SUMMARY (shown after signing) ── -->
+<div id="confirmed-summary" class="white-section" style="display:none;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">
+    <div style="width:44px;height:44px;border-radius:50%;background:rgba(26,86,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(26,86,255,1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div>
+      <div class="section-eyebrow" style="margin-bottom:0;">Booking Confirmed</div>
+      <div style="font-size:13px;color:var(--grey-400);margin-top:2px;">Signed by <strong id="conf-signer-name" style="color:var(--grey-700);"></strong> &middot; <span id="conf-signed-date"></span></div>
+    </div>
+  </div>
+
+  <hr style="border:none;border-top:1px solid var(--grey-100);margin:28px 0;">
+
+  <div id="conf-items" style="margin-bottom:24px;"></div>
+
+  <div class="price-breakdown" style="margin-top:0;">
+    <div class="breakdown-total">
+      <span>Total Confirmed</span>
+      <strong id="conf-total"></strong>
     </div>
   </div>
 </div>
@@ -1312,7 +1376,7 @@
   <div id="accepted-state" style="display:none;text-align:center;">
     <div class="accepted-badge">Quote Accepted</div>
     <p class="accepted-msg">Signed by <strong id="accepted-name-display"></strong> on <span id="accepted-date-display"></span></p>
-    <button type="button" id="download-pdf-btn" class="accept-btn">Download PDF</button>
+    <button type="button" id="download-pdf-btn" class="accept-btn">Download Confirmation</button>
   </div>
 </div>
 
@@ -1635,7 +1699,7 @@
   if (_stored) {
     try {
       const s = JSON.parse(_stored);
-      _showAccepted(s.name, s.date);
+      _showAccepted(s);
     } catch(e) {}
   }
 
@@ -1716,9 +1780,30 @@
     const selDelivery = _pstate.delivery;
     const selPostProd = _pstate.postProd;
     const selAddons   = Array.from(_pstate.addons);
-    localStorage.setItem(_storeKey, JSON.stringify({name, date: dateStr, total: finalTotal}));
-    _showAccepted(name, dateStr);
+    // Snapshot the full confirmed state for Phase 2 summary
+    const rushTierSnap   = _rushTiers[_pstate.rushTier];
+    const pkgSnap        = (PRICING.packages || []).find(x => x.id === _pstate.package);
+    const snapshot = {
+      name,
+      date: dateStr,
+      total: finalTotal,
+      package:       pkgSnap  ? pkgSnap.name  : null,
+      packagePrice:  pkgSnap  ? _fmtGBP(pkgSnap.price) : null,
+      delivery:      selDelivery,
+      postProd:      selPostProd,
+      addons:        selAddons,
+      extraRevisions: _pstate.extraRevisions,
+      totalRevisions: _defaultRevisions + _pstate.extraRevisions,
+      rushSublabel:  rushTierSnap ? rushTierSnap.sublabel : '2 Week Delivery',
+      rushDate:      rushTierSnap ? (rushTierSnap.date || '') : '',
+      rushPrice:     rushTierSnap ? rushTierSnap.price : 0,
+      travel:        PRICING.travel || null,
+    };
+    localStorage.setItem(_storeKey, JSON.stringify(snapshot));
+    _showAccepted(snapshot);
     _generatePDF(name, sigDataUrl, dateStr, finalTotal);
+    // Scroll to confirmed summary
+    setTimeout(() => document.getElementById('confirmed-summary')?.scrollIntoView({behavior:'smooth', block:'start'}), 300);
 
     // Notify backend (non-blocking)
     fetch('/api/webhook', {
@@ -1747,13 +1832,83 @@
     const s = _stored ? JSON.parse(_stored) : {};
     _generatePDF(s.name || VF.clientName, null, s.date || '', s.total || VF.total);
   });
+  document.getElementById('download-conf-btn')?.addEventListener('click', () => {
+    const s = _stored ? JSON.parse(_stored) : {};
+    _generatePDF(s.name || VF.clientName, null, s.date || '', s.total || VF.total);
+  });
 
-  function _showAccepted(name, dateStr) {
-    document.getElementById('cta-initial').style.display = 'none';
-    document.getElementById('sign-form').style.display = 'none';
+  function _showAccepted(snap) {
+    const name    = snap.name    || '';
+    const dateStr = snap.date    || '';
+    const total   = snap.total   || VF.total;
+
+    // ── CTA section → accepted state ────────────────
+    document.getElementById('cta-initial').style.display    = 'none';
+    document.getElementById('sign-form').style.display      = 'none';
     document.getElementById('accepted-state').style.display = 'block';
     document.getElementById('accepted-name-display').textContent = name;
     document.getElementById('accepted-date-display').textContent = dateStr;
+
+    // ── Hide interactive pricing, show confirmed summary ─
+    const pricingSec = document.getElementById('pricing-section');
+    const confSec    = document.getElementById('confirmed-summary');
+    if (pricingSec) pricingSec.style.display = 'none';
+    if (!confSec)   return;
+
+    // Populate header
+    document.getElementById('conf-signer-name').textContent = name;
+    document.getElementById('conf-signed-date').textContent = dateStr;
+    document.getElementById('conf-total').textContent        = total;
+
+    // Build confirmed rows
+    const rows = [];
+    const _row = (label, value, sub) => {
+      const subHtml = sub ? `<div class="conf-row-sub">${sub}</div>` : '';
+      rows.push(`<div class="conf-row">
+        <div class="conf-row-label">${label}</div>
+        <div class="conf-row-value">${value}${subHtml}</div>
+      </div>`);
+    };
+
+    // Package or production fee
+    if (snap.package) {
+      _row('Package', snap.package, snap.packagePrice || null);
+    } else if (PRICING.basePrice) {
+      _row('Production Fee', _fmtGBP(PRICING.basePrice));
+    }
+
+    // Selected addons / post-prod
+    if (snap.postProd) {
+      const p = PRICING.postProduction.find(x => x.id === snap.postProd);
+      if (p) _row('Post Production', p.name);
+    }
+    if (snap.addons && snap.addons.length) {
+      snap.addons.forEach(id => {
+        const a = PRICING.addons.find(x => x.id === id);
+        if (a) _row('Add-on', a.name);
+      });
+    }
+
+    // Delivery timeline
+    const deadlineLabel = snap.rushDate || snap.rushSublabel || '2 Week Delivery';
+    const deadlineSub   = snap.rushDate ? snap.rushSublabel : null;
+    _row('1st Draft', deadlineLabel, deadlineSub);
+
+    // Revisions
+    const revTotal = snap.totalRevisions || _defaultRevisions;
+    _row('Revisions', revTotal + ' Round' + (revTotal !== 1 ? 's' : ''));
+
+    // Travel
+    if (snap.travel) {
+      const tr = snap.travel;
+      _row('Van Hire', _fmtGBP(tr.van_cost), `${tr.shooting_days} day${tr.shooting_days !== 1 ? 's' : ''}`);
+      _row('Mileage', _fmtGBP(tr.mile_cost), `${tr.round_trip_miles} miles @ 45p`);
+      _row('Parking', 'Billed @ cost');
+      if (tr.cc_cost > 0) _row('Congestion Charge', _fmtGBP(tr.cc_cost));
+    }
+
+    document.getElementById('conf-items').innerHTML = rows.join('');
+    confSec.style.display = 'block';
   }
 
   // ── PDF generation ─────────────────────────────────────────────────────────
