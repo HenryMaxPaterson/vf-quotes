@@ -1736,7 +1736,7 @@
         </div>
   </div>
   <div class="sub-label">Deliverables</div>
-  <span id="deliv-list"><span class="tag" data-deliv-id="dl_3373a4" style="vertical-align:top;"><span data-deliv-title>Hero Interview Video (3 min)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_973cf7" style="vertical-align:top;"><span data-deliv-title>Hero Interview Video (3 min) - Square</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1080</span></span><span class="tag" data-deliv-id="dl_463c28" style="vertical-align:top;"><span data-deliv-title>Short Interview Snippets (Varies)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_d29926" style="vertical-align:top;"><span data-deliv-title>Short Interview Snippets (Varies) - Square</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1080</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
+  <span id="deliv-list"><span class="tag" data-deliv-id="dl_1c3ecf" style="vertical-align:top;"><span data-deliv-title>Talking Head Interview (3 min)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_8aba14" style="vertical-align:top;"><span data-deliv-title>Talking Head Interview (3 min)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1080</span></span><span class="tag" data-deliv-id="dl_b1cdec" style="vertical-align:top;"><span data-deliv-title>Short Interview Snippets (Variable duration)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_29f979" style="vertical-align:top;"><span data-deliv-title>Short Interview Snippets (Variable duration)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1080</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
   <div style="margin-top:24px;">
     <div class="brief-grid" style="margin-bottom:0;">
       <div class="brief-item"><div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/></svg>1st Draft Deadline</div><div class="brief-item-value"><div class="stepper-row" style="align-items:flex-start;gap:6px;"><button class="stepper-btn" id="deadline-faster" aria-label="Faster delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div style="flex:1;min-width:0;"><span id="deadline-label" data-editable data-single-line style="font-size:15px;font-weight:600;color:var(--grey-900);">TBC</span><div id="deadline-sublabel" style="font-size:10px;color:var(--grey-400);font-weight:500;margin-top:3px;letter-spacing:0.3px;">2 Week Delivery</div></div><button class="stepper-btn" id="deadline-slower" disabled aria-label="Slower delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div>
@@ -3498,7 +3498,7 @@ NOTES / RISKS
       } catch(_) {/* continue regardless */}
 
       // Build Gmail compose URL — try LLM-personalised intro, fall back to template
-      const firstName = VF.clientName.split(‘ ‘)[0];
+      const firstName = VF.clientName.split(' ')[0];
       const subject   = `Your Valley Films Quotation — ${VF.projectTitle} (${VF.quoteRef})`;
       const _bodyFooter = [
         ``,
@@ -3514,22 +3514,22 @@ NOTES / RISKS
         `Director, Valley Films`,
         `max@valley.film`,
         `valley.film`,
-      ].join(‘\n’);
+      ].join('\n');
       const _bodyTemplate = [
         `Hi ${firstName},`,
         ``,
-        `Thank you for getting in touch — it’s great to have the chance to work with you on ${VF.projectTitle}.`,
+        `Thank you for getting in touch — it's great to have the chance to work with you on ${VF.projectTitle}.`,
         ``,
-        `I’ve put a quotation together for you. You can view, choose your options, and sign off at the link below:`,
+        `I've put a quotation together for you. You can view, choose your options, and sign off at the link below:`,
         _bodyFooter,
-      ].join(‘\n’);
+      ].join('\n');
       let body = _bodyTemplate;
       try {
-        const emailResp = await fetch(‘https://vf-quotes.vercel.app/api/webhook’, {
-          method:  ‘POST’,
-          headers: {‘Content-Type’: ‘application/json’},
+        const emailResp = await fetch('https://vf-quotes.vercel.app/api/webhook', {
+          method:  'POST',
+          headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            action:       ‘generate_email_body’,
+            action:       'generate_email_body',
             page_id:      VF.pageId,
             projectTitle: VF.projectTitle,
             clientName:   VF.clientName,
@@ -3538,7 +3538,7 @@ NOTES / RISKS
         });
         if (emailResp.ok) {
           const emailData = await emailResp.json();
-          if (emailData.body) body = emailData.body + ‘\n’ + _bodyFooter;
+          if (emailData.body) body = emailData.body + '\n' + _bodyFooter;
         }
       } catch (_) {/* fall back to template */}
 
@@ -3739,7 +3739,7 @@ NOTES / RISKS
     lv('Accepted by', signerName + (VF.clientCompany ? ', ' + VF.clientCompany : ''));
     lv('Production date', VF.productionDate);
     lv('Location', 'London, England, United Kingdom');
-    lv('Deliverables', 'Hero Interview Video (3 min), Hero Interview Video (3 min) - Square, Short Interview Snippets (Varies), Short Interview Snippets (Varies) - Square');
+    lv('Deliverables', 'Talking Head Interview (3 min), Talking Head Interview (3 min), Short Interview Snippets (Variable duration), Short Interview Snippets (Variable duration)');
     lv('Turnaround', '3 Working Days');
     y += 2; rule();
 
