@@ -3494,7 +3494,7 @@ NOTES / RISKS
       } catch(_) {/* continue regardless */}
 
       // Build Gmail compose URL — try LLM-personalised intro, fall back to template
-      const firstName = VF.clientName.split(‘ ‘)[0];
+      const firstName = VF.clientName.split(' ')[0];
       const subject   = `Your Valley Films Quotation — ${VF.projectTitle} (${VF.quoteRef})`;
       const _bodyFooter = [
         ``,
@@ -3510,7 +3510,7 @@ NOTES / RISKS
         `Director, Valley Films`,
         `max@valley.film`,
         `valley.film`,
-      ].join(‘\n’);
+      ].join('\n');
       const _bodyTemplate = [
         `Hi ${firstName},`,
         ``,
@@ -3518,14 +3518,14 @@ NOTES / RISKS
         ``,
         `I’ve put a quotation together for you. You can view, choose your options, and sign off at the link below:`,
         _bodyFooter,
-      ].join(‘\n’);
+      ].join('\n');
       let body = _bodyTemplate;
       try {
-        const emailResp = await fetch(‘https://vf-quotes.vercel.app/api/webhook’, {
-          method:  ‘POST’,
-          headers: {‘Content-Type’: ‘application/json’},
+        const emailResp = await fetch('https://vf-quotes.vercel.app/api/webhook', {
+          method:  'POST',
+          headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            action:       ‘generate_email_body’,
+            action:       'generate_email_body',
             page_id:      VF.pageId,
             projectTitle: VF.projectTitle,
             clientName:   VF.clientName,
@@ -3534,7 +3534,7 @@ NOTES / RISKS
         });
         if (emailResp.ok) {
           const emailData = await emailResp.json();
-          if (emailData.body) body = emailData.body + ‘\n’ + _bodyFooter;
+          if (emailData.body) body = emailData.body + '\n' + _bodyFooter;
         }
       } catch (_) {/* fall back to template */}
 
