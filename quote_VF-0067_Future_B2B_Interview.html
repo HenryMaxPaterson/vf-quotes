@@ -1661,7 +1661,7 @@
   body.draft-mode [data-editable]:focus { outline: none; }
 </style>
 </head>
-<body class="">
+<body class="draft-mode">
 
 <!-- ── DRAFT BANNER (hidden until JS enables draft mode) ── -->
 <div id="draft-banner">
@@ -1894,7 +1894,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
   // ── Quote data & pricing ─────────────────────────
-  const VF     = {"pageId": "d14822dc-1fff-4791-ac6f-e23293b0de1a", "quoteRef": "VF-0067", "clientName": "TBD Client", "clientCompany": "", "clientEmail": "", "projectTitle": "Future B2B Interview", "productionDate": "2nd June", "productionDateISO": "2026-06-02", "total": "TBC", "basePrice": 0, "validUntil": "12 May 2026", "generatedDate": "5 May 2026", "quoteType": "Package Based", "jobType": "Production Services", "defaultPkgId": "", "isDraft": false, "financialStatus": "Generation Failed", "briefIssues": "", "briefQuestions": "", "qcNotes": "", "quoteUrl": "https://quotes.valley.film/quote_VF-0067_Future_B2B_Interview.html", "quoteFilename": "quote_VF-0067_Future_B2B_Interview.html"};
+  const VF     = {"pageId": "d14822dc-1fff-4791-ac6f-e23293b0de1a", "quoteRef": "VF-0067", "clientName": "TBD Client", "clientCompany": "", "clientEmail": "", "projectTitle": "Future B2B Interview", "productionDate": "2nd June", "productionDateISO": "2026-06-02", "total": "TBC", "basePrice": 0, "validUntil": "12 May 2026", "generatedDate": "5 May 2026", "quoteType": "Package Based", "jobType": "Production Services", "defaultPkgId": "", "isDraft": true, "financialStatus": "Requested", "briefIssues": "", "briefQuestions": "", "qcNotes": "*   [Deliverables] is empty, making the scope of work unclear despite the description of \"produce a compelling video.\"", "quoteUrl": "https://quotes.valley.film/quote_VF-0067_Future_B2B_Interview.html", "quoteFilename": "quote_VF-0067_Future_B2B_Interview.html"};
   const PRICING = {"basePrice": 0, "expenses": 65, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "rough_cut", "name": "Rough Cut / Light Edit", "price": 350, "desc": "Basic pacing and cuts \u2014 no colour grade or motion graphics. Ideal for internal review or simple social use."}], "addons": [{"id": "stills", "name": "Stills Package", "price": 125, "desc": "Cull and edit of photography from shoot day."}], "discounts": [], "packages": [], "allTemplates": [], "defaultDelivery": "dropbox", "revisionAddon": null, "rushAddons": [{"id": "rush", "name": "Rush Turnaround", "price": 250, "desc": "Delivery within 24\u201348 hours of shoot. Applied per project.", "daysOut": 7}], "defaultRevisions": 2, "defaultDeadline": "16th April", "travel": null, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null};
 
   // Split rush addons: slower-than-2-weeks (daysOut > 14) come before the default 2-week tier
