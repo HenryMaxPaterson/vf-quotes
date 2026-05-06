@@ -115,6 +115,26 @@
 
   .hero-sub strong { color: white; font-weight: 600; }
 
+  /* "Edit client in Notion" link — visible only in draft mode (operator
+     doesn't want clients seeing the edit shortcut on the published quote). */
+  .client-notion-link {
+    display: none;
+    margin-left: 12px;
+    color: rgba(255,255,255,0.7);
+    font-size: 11px;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 3px 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 4px;
+    vertical-align: middle;
+    line-height: 1.6;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  body.draft-mode .client-notion-link { display: inline-flex; align-items: center; gap: 4px; }
+  .client-notion-link:hover { color: white; border-color: rgba(255,255,255,0.5); }
+  .client-notion-link svg { flex-shrink: 0; }
+
   .hero-eyebrow {
     font-size: 11px;
     font-weight: 700;
@@ -183,6 +203,37 @@
   .brief-item:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+  }
+
+  /* Internal-only brief items (Job Type / Default Delivery / Quote Type) —
+     visible to the operator in draft mode only, hidden in the rendered quote
+     so the client doesn't see internal classification metadata. */
+  .brief-item-internal {
+    display: none;
+    border-style: dashed !important;
+    background: rgba(255, 247, 237, 0.5) !important;
+  }
+  body.draft-mode .brief-item-internal { display: block; }
+  .brief-item-internal .brief-item-label::after {
+    content: " · internal";
+    color: var(--grey-400);
+    font-weight: 400;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* The inline <select> swap-in for select-type brief items. Matches the
+     surrounding brief-item-value styling so the dropdown doesn't jolt the
+     layout when it appears. */
+  .brief-item-value select.prod-field-input {
+    font: inherit;
+    color: inherit;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid var(--blue);
+    padding: 1px 4px;
+    border-radius: 3px;
+    cursor: pointer;
   }
 
   .brief-item-label {
@@ -1052,6 +1103,9 @@
     line-height: 1.65;
     white-space: pre-wrap;
   }
+  .quote-notes-text strong { color: var(--grey-900); font-weight: 700; }
+  .quote-notes-text ul.qn-list { margin: 4px 0 8px 0; padding-left: 18px; white-space: normal; }
+  .quote-notes-text ul.qn-list li { margin: 2px 0; }
 
   /* ── PRICE BREAKDOWN ─────────────────────────── */
   .price-breakdown {
@@ -1385,6 +1439,9 @@
     opacity: 0.6;
     transition: opacity 0.15s;
     vertical-align: middle;
+    /* Keep the × out of contenteditable selections so it can't be backspaced. */
+    user-select: none;
+    -webkit-user-select: none;
   }
   .draft-remove-btn-inline:hover { opacity: 1; }
   body.draft-mode .draft-remove-btn-inline { display: inline-block; }
@@ -1450,6 +1507,42 @@
   #draft-warnings .dw-issue    { background: #fee2e2; color: #991b1b; }
   #draft-warnings .dw-question { background: #dbeafe; color: #1e40af; }
   #draft-warnings .dw-qc       { background: #fef3c7; color: #92400e; }
+  #draft-warnings .dw-warning  { background: #ffedd5; color: #9a3412; }
+
+  /* Interactive brief-question form (draft mode only) */
+  #draft-warnings .brief-q-list { margin: 8px 0 0 0; }
+  #draft-warnings .brief-q-row {
+    display: flex; flex-direction: column; gap: 4px;
+    margin: 8px 0; padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(30, 64, 175, 0.18);
+    border-radius: 6px;
+  }
+  #draft-warnings .brief-q-text {
+    font-weight: 600; color: #1e3a8a; font-size: 12px; line-height: 1.4;
+  }
+  #draft-warnings .brief-q-answer {
+    width: 100%; min-height: 32px; resize: vertical;
+    padding: 6px 8px; font: inherit; font-size: 12px; line-height: 1.4;
+    border: 1px solid rgba(30, 64, 175, 0.25); border-radius: 4px;
+    background: #ffffff; color: #1e293b;
+  }
+  #draft-warnings .brief-q-answer:focus {
+    outline: none; border-color: #1e40af;
+    box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.18);
+  }
+  #draft-warnings .brief-q-submit-btn {
+    margin-top: 10px; padding: 6px 14px;
+    font: inherit; font-size: 12px; font-weight: 600;
+    color: #ffffff; background: #1e40af;
+    border: none; border-radius: 6px; cursor: pointer;
+  }
+  #draft-warnings .brief-q-submit-btn:hover    { background: #1e3a8a; }
+  #draft-warnings .brief-q-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  #draft-warnings .brief-q-status {
+    display: inline-block; margin-left: 10px;
+    font-size: 11px; color: #1e3a8a;
+  }
   #draft-warnings ul { margin: 4px 0 4px 18px; padding: 0; list-style: disc; }
   #draft-warnings li { margin: 2px 0; }
 
@@ -1577,6 +1670,10 @@
     font-size: 11px;
     margin-right: 10px;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    /* Smooth the colour change between Saving/Saved/Error states so the
+       indicator never visually flickers as fast typing toggles between
+       "Edited" (default colour) and "✓ Saved" (green). */
+    transition: color 250ms ease-out;
   }
   #draft-autosave-indicator.saving { color: #fde68a; }
   #draft-autosave-indicator.saved  { color: #86efac; }
@@ -1619,6 +1716,69 @@
   /* Per add-on discount control (only visible in draft mode) */
   .toggle-card-discount-row { display: none; margin-top: 6px; font-size: 11px; }
   body.draft-mode .toggle-card-discount-row { display: block; }
+
+  /* ── "Add custom add-on" card (visible in draft mode only) ────────────── */
+  .addon-add-card {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 80px;
+    border: 2px dashed var(--grey-300) !important;
+    background: transparent !important;
+    color: var(--grey-500);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  body.draft-mode .addon-add-card { display: flex; }
+  .addon-add-card:hover { border-color: var(--blue) !important; color: var(--blue); }
+  .addon-add-plus  { font-size: 28px; line-height: 1; font-weight: 300; }
+  .addon-add-label { font-size: 12px; font-weight: 500; }
+
+  /* ── Add-on quantity stepper (visible in draft mode only) ─────────────── */
+  .addon-qty-stepper {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: 11px;
+    user-select: none;
+  }
+  body.draft-mode .addon-qty-stepper { display: inline-flex; }
+  .addon-qty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid var(--grey-300);
+    background: #fff;
+    color: var(--grey-700);
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .addon-qty-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .addon-qty-btn:active { background: var(--grey-100); }
+  .addon-qty-value {
+    min-width: 18px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--grey-900);
+    font-weight: 600;
+  }
+  .addon-qty-label {
+    margin-left: 4px;
+    color: var(--grey-500);
+    font-size: 10px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
   .draft-addon-discount-btn {
     border: 1px dashed var(--grey-300);
     background: transparent;
@@ -1632,6 +1792,32 @@
   }
   .draft-addon-discount-btn:hover { border-color: var(--blue); color: var(--blue); }
   .addon-discount-label { font-size: 10px; color: var(--green); font-weight: 600; }
+
+  /* Discount chip overlay — shown top-right of any toggle-card / pkg-card
+     that has an active operator-applied discount. Visible in BOTH draft mode
+     (so the operator can see what they've applied) and the rendered quote
+     (so the client sees the discount as a clear chip rather than just a
+     reduced price). */
+  .addon-discount-chip {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    z-index: 2;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #ffffff;
+    background: var(--green, #16a34a);
+    border-radius: 999px;
+    box-shadow: 0 1px 4px rgba(22, 163, 74, 0.35);
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+    pointer-events: none;
+  }
+  /* Toggle-cards need position:relative so the chip's absolute positioning
+     hangs off the right edge of the card. Already set in draft mode (line
+     ~4253); add it for view mode too so chips render in both. */
+  .toggle-card, .pkg-card { position: relative; }
 
   /* "+ Add Package" placeholder card */
   body.draft-mode .pkg-add-card:hover {
@@ -1709,6 +1895,7 @@
     <div class="hero-title">Quotation</div>
     <div class="hero-sub">
       <strong data-editable data-single-line>Prepared for Regina Quartey, Exequitive</strong>
+      <a href="https://www.notion.so/33747fd0362081849d36d16e0d527d85" target="_blank" rel="noopener" class="client-notion-link" title="Open this client in Notion (Buyer Type, multiplier, etc.)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Edit client in Notion</a>
     </div>
   </div>
   <!-- wave into light body -->
@@ -1728,19 +1915,35 @@
     
         <div class="brief-item">
           <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Project</div>
-          <div class="brief-item-value" data-editable data-single-line>July Brandbox</div>
+          <div class="brief-item-value" data-editable data-single-line data-prod-field="project_title" data-prod-type="text" data-prod-value="July Brandbox">July Brandbox</div>
         </div>
         <div class="brief-item">
           <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Location</div>
-          <div class="brief-item-value" data-editable data-single-line><a href="https://www.google.com/maps/search/London,+England,+United+Kingdom" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">London</a></div>
+          <div class="brief-item-value" data-editable data-single-line data-prod-field="location" data-prod-type="text" data-prod-value="London, England, United Kingdom"><a href="https://www.google.com/maps/search/London,+England,+United+Kingdom" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">London</a></div>
         </div>
         <div class="brief-item">
           <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Production Date</div>
-          <div class="brief-item-value" data-editable data-single-line>16:00–16:30 · 10th July</div>
+          <div class="brief-item-value" data-prod-field="production_date" data-prod-type="date" data-prod-value="2026-07-10">16:00–16:30 · 10th July</div>
+        </div>
+        <div class="brief-item">
+          <div class="brief-item-label">Shooting Days</div>
+          <div class="brief-item-value" data-prod-field="shooting_days" data-prod-type="number" data-prod-value="1">1 day</div>
+        </div>
+        <div class="brief-item brief-item-internal">
+          <div class="brief-item-label">Job Type</div>
+          <div class="brief-item-value" data-prod-field="job_type" data-prod-type="select" data-prod-value="Commercial" data-prod-options="[&quot;Event&quot;, &quot;Commercial&quot;, &quot;Documentary&quot;, &quot;Social Content&quot;]">Commercial</div>
+        </div>
+        <div class="brief-item brief-item-internal">
+          <div class="brief-item-label">Default Delivery</div>
+          <div class="brief-item-value" data-prod-field="default_delivery" data-prod-type="select" data-prod-value="Dropbox Delivery" data-prod-options="[&quot;Raw Footage On-Site&quot;, &quot;Hard Drive Purchase&quot;, &quot;Dropbox Delivery&quot;]">Dropbox Delivery</div>
+        </div>
+        <div class="brief-item brief-item-internal">
+          <div class="brief-item-label">Quote Type</div>
+          <div class="brief-item-value" data-prod-field="quote_type" data-prod-type="select" data-prod-value="Package Based" data-prod-options="[&quot;Package Based&quot;, &quot;Itemized&quot;]">Package Based</div>
         </div>
   </div>
   <div class="sub-label">Deliverables</div>
-  <span id="deliv-list"><span class="tag" data-deliv-id="dl_01bd88" style="vertical-align:top;"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_9b437f" style="vertical-align:top;"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
+  <span id="deliv-list"><span class="tag" data-deliv-id="dl_3748e7" style="vertical-align:top;"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_8bf305" style="vertical-align:top;"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
   <div style="margin-top:24px;">
     <div class="brief-grid" style="margin-bottom:0;">
       <div class="brief-item"><div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/></svg>1st Draft Deadline</div><div class="brief-item-value"><div class="stepper-row" style="align-items:flex-start;gap:6px;"><button class="stepper-btn" id="deadline-faster" aria-label="Faster delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div style="flex:1;min-width:0;"><span id="deadline-label" data-editable data-single-line style="font-size:15px;font-weight:600;color:var(--grey-900);">24th April</span><div id="deadline-sublabel" style="font-size:10px;color:var(--grey-400);font-weight:500;margin-top:3px;letter-spacing:0.3px;">2 Week Delivery</div></div><button class="stepper-btn" id="deadline-slower" disabled aria-label="Slower delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div>
@@ -1761,9 +1964,9 @@
 <div class="white-section" id="pricing-section">
   <div class="section-eyebrow">Production Services</div>
   <div class="section-heading">Quotation</div>
-  <div class="pkg-grid" id="pkg-grid"><div class="pkg-card " data-pkg-id="34f47fd0-3620-813b-ab04-cff5f8bd1655" data-pkg-price="750"><div class="pkg-name" data-editable data-single-line>Core</div><div class="pkg-price" data-editable data-single-line data-field="price">£750</div><div class="pkg-rate-note">£750/day</div><div class="pkg-desc" data-editable>1x social cut (up to 60s), colour grade</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: Solo DP</li><li data-editable data-single-line>1x social cut (up to 60s)</li><li data-editable data-single-line>colour grade</li></ul></div><div class="pkg-card selected" data-pkg-id="34f47fd0-3620-81cf-ac50-edb008f094b6" data-pkg-price="1050"><div class="pkg-badge">Recommended</div><div class="pkg-name" data-editable data-single-line>Primary</div><div class="pkg-price" data-editable data-single-line data-field="price">£1,050</div><div class="pkg-rate-note">£1,050/day</div><div class="pkg-desc" data-editable>2x social cuts + 1x hero edit (2–5 min), colour grade</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: DP + 1stAC</li><li data-editable data-single-line>2x social cuts + 1x hero edit (2–5 min)</li><li data-editable data-single-line>colour grade</li></ul></div><div class="pkg-card " data-pkg-id="34f47fd0-3620-81a6-9d86-eeba47824bd5" data-pkg-price="1400"><div class="pkg-name" data-editable data-single-line>Premium</div><div class="pkg-price" data-editable data-single-line data-field="price">£1,400</div><div class="pkg-rate-note">£1,400/day</div><div class="pkg-desc" data-editable>Full delivery suite: social cuts + hero edit + long-form, grade, stills</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: DP + 1stAC & Spark</li><li data-editable data-single-line>Full delivery suite: social cuts + hero edit + long-form</li><li data-editable data-single-line>grade</li><li data-editable data-single-line>stills</li></ul></div><div class="pkg-card pkg-add-card" id="pkg-add-card" style="display:none;align-items:center;justify-content:center;border:2px dashed var(--grey-200);background:transparent;cursor:pointer;min-height:240px;color:var(--grey-500);font-weight:600;"><div style="text-align:center;line-height:1.5;"><div style="font-size:32px;font-weight:300;color:var(--grey-400);">+</div><div style="font-size:13px;">Add Package</div></div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div></div>
+  <div class="pkg-grid" id="pkg-grid"><div class="pkg-card " data-pkg-id="34f47fd0-3620-8132-b8ac-cde2813c1a88" data-pkg-price="575"><div class="pkg-name" data-editable data-single-line>Core</div><div class="pkg-price" data-editable data-single-line data-field="price">£575</div><div class="pkg-desc" data-editable>Footage delivery (no edit)</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: Solo DP</li><li data-editable data-single-line>Footage delivery (no edit)</li></ul></div><div class="pkg-card selected" data-pkg-id="34f47fd0-3620-81e6-aeb3-faa26eb085f5" data-pkg-price="850"><div class="pkg-badge">Recommended</div><div class="pkg-name" data-editable data-single-line>Primary</div><div class="pkg-price" data-editable data-single-line data-field="price">£850</div><div class="pkg-desc" data-editable>Footage delivery (no edit)</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: DP + 1stAC</li><li data-editable data-single-line>Footage delivery (no edit)</li></ul></div><div class="pkg-card " data-pkg-id="34f47fd0-3620-81f7-a35e-f74fae800de6" data-pkg-price="1100"><div class="pkg-name" data-editable data-single-line>Premium</div><div class="pkg-price" data-editable data-single-line data-field="price">£1,100</div><div class="pkg-desc" data-editable>Footage delivery + basic selects edit</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: DP + 1stAC & Spark</li><li data-editable data-single-line>Footage delivery + basic selects edit</li></ul></div><div class="pkg-card pkg-add-card" id="pkg-add-card" style="display:none;align-items:center;justify-content:center;border:2px dashed var(--grey-200);background:transparent;cursor:pointer;min-height:240px;color:var(--grey-500);font-weight:600;"><div style="text-align:center;line-height:1.5;"><div style="font-size:32px;font-weight:300;color:var(--grey-400);">+</div><div style="font-size:13px;">Add Package</div></div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div>
 
-  <div class="quote-notes-block"><div class="quote-notes-label">Notes</div><div class="quote-notes-text" data-editable>This is a very comprehensive draft. To make it "bulletproof" for an AI quotation generator, you want to shift from a descriptive style to a </div></div>
+  <div class="quote-notes-block"><div class="quote-notes-label">Notes</div><div class="quote-notes-text" data-editable>This is a very comprehensive draft. To make it &quot;bulletproof&quot; for an AI quotation generator, you want to shift from a descriptive style to a</div></div>
 
   <div class="price-breakdown">
     <div id="breakdown-rows"></div>
@@ -1902,12 +2105,17 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
   // ── Quote data & pricing ─────────────────────────
-  const VF     = {"pageId": "9dce52d3-affe-4b0a-b7b3-9164e2d9be75", "quoteRef": "VF-0075", "clientName": "Regina Quartey", "clientCompany": "Exequitive", "clientEmail": "hello@exequtive.org", "projectTitle": "July Brandbox", "productionDate": "16:00\u201316:30 \u00b7 10th July", "productionDateISO": "2026-07-10", "total": "TBC", "basePrice": 0, "validUntil": "13 May 2026", "generatedDate": "6 May 2026", "quoteType": "Package Based", "jobType": "Production Services", "defaultPkgId": "34f47fd0-3620-81cf-ac50-edb008f094b6", "isDraft": true, "financialStatus": "Generated", "briefIssues": "", "briefQuestions": "", "qcNotes": "*   [Buyer type] Missing.", "quoteUrl": "https://quotes.valley.film/quote_VF-0075_July_Brandbox.html", "quoteFilename": "quote_VF-0075_July_Brandbox.html"};
-  const PRICING = {"basePrice": 0, "expenses": 65, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-81e2-b77d-c78d07516482", "name": "Colour Grade / Transcode", "price": 350, "price_core": 350, "price_primary": 350, "price_premium": 350, "desc": "Simple transcoding of footage & colour grade to get this edit ready", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "discounts": [], "packages": [{"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "dropbox", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "24th April", "travel": null, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null};
+  const VF     = {"pageId": "9dce52d3-affe-4b0a-b7b3-9164e2d9be75", "quoteRef": "VF-0075", "clientName": "Regina Quartey", "clientCompany": "Exequitive", "clientEmail": "hello@exequtive.org", "projectTitle": "July Brandbox", "productionDate": "16:00\u201316:30 \u00b7 10th July", "productionDateISO": "2026-07-10", "total": "TBC", "basePrice": 0, "validUntil": "13 May 2026", "generatedDate": "6 May 2026", "quoteType": "Package Based", "jobType": "Commercial", "defaultPkgId": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "isDraft": true, "financialStatus": "Generated", "briefIssues": "", "briefQuestions": "", "qcNotes": "*   [Job type] \"Production Services\" does not match the defined job type categories (e.g., Social Content, Corporate Film) listed in the operator's conventions, which are critical for applying specific rules.\n*   [Buyer type] The Buyer type field is empty, which is necessary for applying specific pricing and package suggestions and for sanity-checking the Quote type.", "warnings": [], "quoteUrl": "https://quotes.valley.film/quote_VF-0075_July_Brandbox.html", "quoteFilename": "quote_VF-0075_July_Brandbox.html"};
+  const PRICING = {"basePrice": 0, "expenses": 65, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-81e2-b77d-c78d07516482", "name": "Colour Grade / Transcode", "price": 350, "price_core": 350, "price_primary": 350, "price_premium": 350, "desc": "Simple transcoding of footage & colour grade to get this edit ready", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "discounts": [], "packages": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "dropbox", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "24th April", "travel": null, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null};
+  // Initial Editor State as saved on the Notion Production page. Used by
+  // draft-mode features that pre-fill from prior saves (e.g. brief Q&A inputs).
+  window._editor_state_initial = {};
 
-  // Split rush addons: slower-than-2-weeks (daysOut > 14) come before the default 2-week tier
+  // Split rush addons: slower-than-2-weeks (daysOut > 14) come before the
+  // default 2-week tier; faster (≤14) come after. Both sorted SLOWEST → FASTEST
+  // so the picker reads naturally as: 2 weeks → 1 week → 3 days → 24h.
   const _slowerAddons = (PRICING.rushAddons || []).filter(a => a.daysOut > 14).sort((a,b) => b.daysOut - a.daysOut);
-  const _fasterAddons = (PRICING.rushAddons || []).filter(a => a.daysOut <= 14).sort((a,b) => a.daysOut - b.daysOut);
+  const _fasterAddons = (PRICING.rushAddons || []).filter(a => a.daysOut <= 14).sort((a,b) => b.daysOut - a.daysOut);
   const _pstate = {
     package:        VF.defaultPkgId,
     delivery:       PRICING.defaultDelivery || 'raw_onsite',
@@ -1967,9 +2175,35 @@
     const key  = 'price_' + tier;
     return (addon[key] !== undefined && addon[key] !== null) ? addon[key] : addon.price;
   }
+  // £ amount of any operator-applied discount on this addon (for the current
+  // tier price). Supports {value, type:'pct'|'fixed'}, plus a legacy plain
+  // number that's treated as a fixed £ amount.
+  function _addonDiscountAmount(addon) {
+    const disc = (_pstate.addonDiscounts || {})[addon.id];
+    if (!disc) return 0;
+    if (typeof disc === 'number') return Math.max(0, Math.round(disc));
+    const v = parseFloat(disc.value || 0);
+    if (!v || v <= 0) return 0;
+    if (disc.type === 'pct') {
+      const base = _addonPriceForCurrentTier(addon);
+      return Math.max(0, Math.round(base * v / 100));
+    }
+    return Math.max(0, Math.round(v));
+  }
+  function _addonNetPrice(addon) {
+    // Per-unit net price (after operator discount). Multiply by quantity for
+    // the line total — see _addonLineTotal below.
+    return Math.max(0, _addonPriceForCurrentTier(addon) - _addonDiscountAmount(addon));
+  }
+  function _addonLineTotal(addon) {
+    // What this addon contributes to the quote total: net unit price × qty.
+    // _pstate.addonQty defaults to 1 for any addon without an explicit value.
+    const qty = (_pstate.addonQty && _pstate.addonQty[addon.id]) || 1;
+    return _addonNetPrice(addon) * qty;
+  }
 
   function _computeBaseTotal() {
-    // Base from package or itemized (before discounts)
+    // Base from package or itemized (after addon-level discounts, before whole-quote discounts)
     let t = null;
     if (VF.quoteType === 'Package Based') {
       const pkg = (PRICING.packages || []).find(x => x.id === _pstate.package);
@@ -1977,7 +2211,7 @@
       t = pkg.price;
       for (const id of _pstate.addons) {
         const a = PRICING.addons.find(x => x.id === id);
-        if (a) t += _addonPriceForCurrentTier(a);
+        if (a) t += _addonLineTotal(a);
       }
     } else {
       if (!PRICING.basePrice) return null;
@@ -1990,7 +2224,7 @@
       }
       for (const id of _pstate.addons) {
         const a = PRICING.addons.find(x => x.id === id);
-        if (a) t += _addonPriceForCurrentTier(a);
+        if (a) t += _addonLineTotal(a);
       }
       t += (PRICING.expenses || 0) + (PRICING.storage || 0);
     }
@@ -2054,12 +2288,32 @@
     const container = document.getElementById('breakdown-rows');
     if (!container) return;
     const rows = [];
+    // Helper: push an addon row, plus a sibling discount row when the
+    // operator's applied a per-addon discount (so the breakdown stays honest).
+    const _pushAddonRows = (a) => {
+      // Quantity > 1 multiplies both the price and any discount; suffixed in
+      // the label as "x N" so the operator and client can see the maths.
+      const qty       = (_pstate.addonQty && _pstate.addonQty[a.id]) || 1;
+      const unitPrice = _addonPriceForCurrentTier(a);
+      const lineLabel = qty > 1 ? `${a.name} × ${qty}` : a.name;
+      rows.push({label: lineLabel, amt: unitPrice * qty, cls: ''});
+      const unitDisc = _addonDiscountAmount(a);
+      const discAmt  = unitDisc * qty;
+      if (unitDisc > 0) {
+        const disc = (_pstate.addonDiscounts || {})[a.id] || {};
+        const isPct = disc.type === 'pct';
+        const lbl = isPct
+          ? `  ↳ ${a.name} discount (${disc.value}%)`
+          : `  ↳ ${a.name} discount`;
+        rows.push({label: lbl, amt: discAmt, cls: 'discount-row addon-discount-row'});
+      }
+    };
     if (VF.quoteType === 'Package Based') {
       const pkg = (PRICING.packages || []).find(x => x.id === _pstate.package);
       if (pkg) rows.push({label: pkg.name, amt: pkg.price, cls: 'base-row'});
       for (const id of _pstate.addons) {
         const a = PRICING.addons.find(x => x.id === id);
-        if (a) rows.push({label: a.name, amt: _addonPriceForCurrentTier(a), cls: ''});
+        if (a) _pushAddonRows(a);
       }
     } else {
       if (PRICING.basePrice) rows.push({label:'Production Fee', amt:PRICING.basePrice, cls:'base-row'});
@@ -2071,7 +2325,7 @@
       }
       for (const id of _pstate.addons) {
         const a = PRICING.addons.find(x => x.id === id);
-        if (a) rows.push({label:a.name, amt:_addonPriceForCurrentTier(a), cls:''});
+        if (a) _pushAddonRows(a);
       }
       if (PRICING.expenses) rows.push({label:'Expenses', amt:PRICING.expenses, cls:'fixed-row'});
       if (PRICING.storage > 0) rows.push({label:'Storage & Backups', amt:PRICING.storage, cls:'fixed-row'});
@@ -2244,10 +2498,36 @@
     });
   });
 
+  // ── Add-on quantity state ───────────────────────────────────────────────
+  // Per-addon quantity. Empty = qty defaults to 1. Pre-populated from any
+  // saved Editor State so a regenerated quote keeps the operator's earlier
+  // qty choices. Independent of the on/off `_pstate.addons` set — quantity
+  // applies only when the addon is selected.
+  _pstate.addonQty = {};
+  {
+    const savedQty = (window._editor_state_initial && window._editor_state_initial.addon_qty) || {};
+    Object.keys(savedQty).forEach(k => {
+      const n = parseInt(savedQty[k], 10);
+      if (Number.isFinite(n) && n >= 1) _pstate.addonQty[k] = n;
+    });
+  }
+  function _addonQtyOf(addonId) {
+    const n = _pstate.addonQty[addonId];
+    return (Number.isFinite(n) && n >= 1) ? n : 1;
+  }
+  function _renderAddonQty(addonId) {
+    const valueEl = document.querySelector('.addon-qty-value[data-addon-id="' + addonId + '"]');
+    if (valueEl) valueEl.textContent = String(_addonQtyOf(addonId));
+  }
+
   // Add-ons — multi-select
   document.querySelectorAll('.toggle-card[data-addon-id]').forEach(card => {
     card.addEventListener('click', (e) => {
+      // Don't toggle on clicks inside editable text OR on quantity / discount
+      // controls — those have their own handlers and shouldn't co-fire the
+      // select/deselect behaviour of the card.
       if (e.target.closest('[data-editable]')) return;
+      if (e.target.closest('[data-no-edit]')) return;
       const id = card.dataset.addonId;
       if (_pstate.addons.has(id)) {
         _pstate.addons.delete(id);
@@ -2257,6 +2537,68 @@
         card.classList.add('selected');
       }
       _updateTotal();
+    });
+    // ── Quantity stepper handlers ─────────────────────────────────────────
+    const stepperEl = card.querySelector('.addon-qty-stepper');
+    if (stepperEl) {
+      const id      = stepperEl.dataset.addonId;
+      const qtyMin  = parseInt(stepperEl.dataset.qtyMin || '1', 10);
+      const qtyMax  = parseInt(stepperEl.dataset.qtyMax || '99', 10);
+      // Initialise from saved state if present
+      _renderAddonQty(id);
+      const adjust = (delta) => {
+        const next = Math.max(qtyMin, Math.min(qtyMax, _addonQtyOf(id) + delta));
+        if (next === 1) {
+          // Drop the entry so we don't fill editor_state with no-ops
+          delete _pstate.addonQty[id];
+        } else {
+          _pstate.addonQty[id] = next;
+        }
+        _renderAddonQty(id);
+        // Auto-select the addon when qty goes above 1, so the operator
+        // doesn't have to also click the card to "turn it on".
+        if (next > 1 && !_pstate.addons.has(id)) {
+          _pstate.addons.add(id);
+          card.classList.add('selected');
+        }
+        _updateTotal();
+      };
+      const minusBtn = stepperEl.querySelector('.addon-qty-minus');
+      const plusBtn  = stepperEl.querySelector('.addon-qty-plus');
+      if (minusBtn) minusBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); e.preventDefault(); adjust(-1);
+      });
+      if (plusBtn) plusBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); e.preventDefault(); adjust(+1);
+      });
+    }
+    // Sync inline edits back to PRICING.addons so the breakdown reflects
+    // the operator's current name/desc/price text (rather than what the
+    // server originally rendered). Fires on blur — the user's done editing.
+    const id = card.dataset.addonId;
+    const a = (PRICING.addons || []).find(x => x.id === id);
+    if (!a) return;
+    const nameEl  = card.querySelector('.toggle-card-name');
+    const descEl  = card.querySelector('.toggle-card-desc');
+    const priceEl = card.querySelector('.toggle-card-price');
+    if (nameEl) nameEl.addEventListener('blur', () => {
+      const t = (nameEl.textContent || '').trim();
+      if (t && t !== a.name) { a.name = t; _updateTotal(); }
+    });
+    if (descEl) descEl.addEventListener('blur', () => {
+      a.desc = (descEl.textContent || '').trim();
+    });
+    if (priceEl) priceEl.addEventListener('blur', () => {
+      const digits = (priceEl.textContent || '').replace(/[^0-9.]/g, '');
+      if (digits) {
+        const n = parseInt(digits, 10);
+        if (Number.isFinite(n) && n !== a.price) {
+          a.price = n;
+          card.dataset.price = n;
+          card.dataset.basePrice = n;
+          _updateTotal();
+        }
+      }
     });
   });
 
@@ -2577,12 +2919,11 @@
         ['name', 'desc'].forEach(k => {
           if (curr[k] !== orig[k]) diff[k] = curr[k];
         });
-        // Price separately — exclude any difference that's purely the addon discount
-        // (already captured in addon_discounts below)
-        const discount = (_pstate.addonDiscounts || {})[curr.id] || 0;
-        const adjustedOrigPrice = Math.max(0, (orig.price || 0) - discount);
-        if (curr.price !== adjustedOrigPrice && curr.price !== orig.price) {
-          diff.price = curr.price + discount;  // store base price (pre-discount)
+        // Price detection: addon discounts no longer mutate the addon price
+        // (they're stored separately in state.addon_discounts), so any price
+        // difference here is a genuine operator price edit.
+        if (curr.price !== orig.price) {
+          diff.price = curr.price;
         }
         if (Object.keys(diff).length) addonEdits[curr.id] = diff;
       });
@@ -2594,6 +2935,35 @@
       const customDiscounts = _pstate.customDiscounts || [];
       if (customDiscounts.length) state.custom_discounts = customDiscounts;
 
+      // ── Add-on quantities (only non-default values; qty=1 is implicit) ─
+      const addonQty = _pstate.addonQty || {};
+      const qtyOut = {};
+      Object.keys(addonQty).forEach(k => {
+        const n = parseInt(addonQty[k], 10);
+        if (Number.isFinite(n) && n > 1) qtyOut[k] = n;
+      });
+      if (Object.keys(qtyOut).length) state.addon_qty = qtyOut;
+
+      // ── Custom add-ons (inline-created for this quote only) ─────────────
+      // Persisted in editor_state so they re-appear on regeneration. NOT
+      // written back to the Notion Add-ons DB — these are intentionally
+      // quote-scoped one-offs.
+      const customAddons = _pstate.customAddons || [];
+      if (customAddons.length) {
+        // Capture current name/price/desc from the live cards (operator may
+        // have edited inline after the modal). Find the LIVE addon object in
+        // PRICING.addons since that's what blur handlers update.
+        state.custom_addons = customAddons.map(ca => {
+          const live = (PRICING.addons || []).find(a => a.id === ca.id) || ca;
+          return {
+            id:    live.id,
+            name:  live.name,
+            price: live.price,
+            desc:  live.desc || '',
+          };
+        });
+      }
+
       // ── Text overrides ──────────────────────────────────────────────────
       const currDelivs = (typeof _collectDeliverables === 'function')
         ? _collectDeliverables() : null;
@@ -2601,6 +2971,14 @@
       const notesEl = document.querySelector('.quote-notes-text');
       if (notesEl && notesEl.textContent.trim() !== _originalQuoteNotes) {
         state.quote_notes_override = notesEl.textContent.trim();
+      }
+
+      // ── Brief Q&A — operator-typed answers to LLM-flagged ambiguities ──
+      // process_brief() reads these on the next re-extraction and treats them
+      // as authoritative context for the LLM.
+      if (typeof window._collectBriefQA === 'function') {
+        const qas = window._collectBriefQA().filter(qa => qa.a);
+        if (qas.length) state.brief_qa = qas;
       }
 
       return state;
@@ -2767,41 +3145,83 @@
     function _setAutosaveStatus(text, cls) {
       const el = document.getElementById('draft-autosave-indicator');
       if (!el) return;
-      el.textContent = text || '';
-      el.className   = cls  || '';
+      const newText = text || '';
+      const newCls  = cls  || '';
+      // No-op if nothing changed — without this the indicator flickers on
+      // every keystroke because each input event re-asserts the same
+      // "Edited — saving in 3s" text and forces a className recompute.
+      if (el.textContent === newText && el.className === newCls) return;
+      el.textContent = newText;
+      el.className   = newCls;
     }
     function _scheduleAutosave() {
       if (_autosaveTimer) clearTimeout(_autosaveTimer);
       _setAutosaveStatus('Edited — saving in 3s', '');
       _autosaveTimer = setTimeout(_doAutosave, 3000);
     }
+    // Track consecutive autosave failures so we can back off instead of
+    // spamming retries against a flapping endpoint, and so the operator sees a
+    // useful diagnostic message rather than just "Save failed".
+    let _autosaveFailCount = 0;
     async function _doAutosave() {
       _setAutosaveStatus('Saving…', 'saving');
       try {
-        // Commit any open contenteditables first so they're captured
+        // Commit any open contenteditables first so they're captured —
+        // EXCEPT the one the operator is currently typing in. Forcing blur
+        // on the active element yanks the cursor away mid-keystroke and
+        // sometimes triggers a layout-shift scroll. Read its current text
+        // separately; the natural blur handler will commit it on tab-out.
+        const activeEl = document.activeElement;
         document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+          if (el === activeEl) return;
           el.contentEditable = 'false';
           el.classList.remove('editing');
         });
         const editorState = _buildEditorState();
-        const resp = await fetch('https://vf-quotes.vercel.app/api/webhook', {
-          method:  'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            action:       'save_draft',
-            page_id:      VF.pageId,
-            filename:     VF.quoteFilename,
-            editor_state: editorState,
-          }),
-        });
-        if (!resp.ok) throw new Error('non-200');
+        let resp;
+        try {
+          resp = await fetch('https://vf-quotes.vercel.app/api/webhook', {
+            method:  'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              action:       'save_draft',
+              page_id:      VF.pageId,
+              filename:     VF.quoteFilename,
+              editor_state: editorState,
+            }),
+          });
+        } catch (netErr) {
+          // Network-level failure (offline, DNS, CORS preflight, etc.) — fetch
+          // throws rather than returning a Response. Report distinctly so the
+          // operator knows it's a connection issue, not a server reject.
+          throw new Error('network unreachable: ' + (netErr.message || netErr.name || 'unknown'));
+        }
+        if (!resp.ok) {
+          // Try to read the response body for a useful diagnostic
+          let bodyHint = '';
+          try {
+            const text = await resp.text();
+            bodyHint = text ? ' — ' + text.slice(0, 160) : '';
+          } catch (_) {}
+          throw new Error('HTTP ' + resp.status + bodyHint);
+        }
+        _autosaveFailCount = 0;
         _lastSaveTime = Date.now();
         _setAutosaveStatus('✓ Saved', 'saved');
         // Switch to relative time display
         setTimeout(_refreshSavedRelative, 5000);
       } catch (e) {
-        _setAutosaveStatus('Save failed — retrying soon', 'error');
-        setTimeout(_doAutosave, 15000);  // retry once after 15s
+        _autosaveFailCount += 1;
+        const msg = (e && e.message) ? e.message : String(e);
+        // Surface the actual cause in the status pill — short enough to fit
+        // but specific enough to debug ("HTTP 502" / "network unreachable: …").
+        _setAutosaveStatus('Save failed: ' + msg.slice(0, 60), 'error');
+        // Also log the full error so the operator can grab it from devtools.
+        try { console.warn('[autosave] failed', e); } catch (_) {}
+        // Exponential backoff: 15s, 30s, 60s, 120s, then cap. Stops the
+        // page hammering a downed webhook every 15s indefinitely.
+        const delaySec = Math.min(120, 15 * Math.pow(2, _autosaveFailCount - 1));
+        setTimeout(_doAutosave, delaySec * 1000);
       }
     }
     function _refreshSavedRelative() {
@@ -2877,14 +3297,60 @@
           + _bullets(VF.briefIssues) + '</div>');
       }
       if ((VF.briefQuestions || '').trim()) {
-        sections.push('<div class="dw-section"><span class="dw-label dw-question">Question</span>'
-          + 'The brief was unclear about these — confirm or clarify:'
-          + _bullets(VF.briefQuestions) + '</div>');
+        const _qLines = (VF.briefQuestions || '')
+          .split('\n')
+          .map(l => l.replace(/^[•\-\*\s]+/, '').trim())
+          .filter(Boolean);
+        // Look up any prior answers from saved Editor State so the operator
+        // doesn't lose typed answers across regenerations.
+        const _priorQA = (window._editor_state_initial && window._editor_state_initial.brief_qa) || [];
+        const _ansFor = (q) => {
+          const m = _priorQA.find(x => (x.q || '').trim() === q);
+          return m ? (m.a || '') : '';
+        };
+        if (VF.isDraft) {
+          // Draft mode: render each question with an answer input and a submit
+          // button that triggers re-extraction with the typed answers as context.
+          const _items = _qLines.map((q, i) => {
+            const _qEsc = q.replace(/"/g, '&quot;');
+            const _aEsc = String(_ansFor(q) || '').replace(/"/g, '&quot;');
+            return ('<div class="brief-q-row" data-brief-q="' + _qEsc + '">'
+              + '<div class="brief-q-text">' + q + '</div>'
+              + '<textarea class="brief-q-answer" rows="1" '
+                + 'placeholder="Type the answer here, then hit Re-extract below" '
+                + 'data-q-index="' + i + '">' + _aEsc + '</textarea>'
+              + '</div>');
+          }).join('');
+          sections.push('<div class="dw-section"><span class="dw-label dw-question">Questions</span>'
+            + 'The brief was unclear about these. Type your answers and click '
+            + 'Re-extract — the system will re-read the brief with your answers in context.'
+            + '<div class="brief-q-list">' + _items + '</div>'
+            + '<button id="brief-q-submit" class="brief-q-submit-btn" type="button">'
+            + 'Re-extract brief with these answers'
+            + '</button>'
+            + '<div id="brief-q-status" class="brief-q-status"></div>'
+            + '</div>');
+        } else {
+          // Read-only mode: keep the original static bullet list.
+          sections.push('<div class="dw-section"><span class="dw-label dw-question">Question</span>'
+            + 'The brief was unclear about these — confirm or clarify:'
+            + _bullets(VF.briefQuestions) + '</div>');
+        }
       }
       if ((VF.qcNotes || '').trim()) {
         sections.push('<div class="dw-section"><span class="dw-label dw-qc">QC</span>'
           + 'Auto-checker spotted possible inconsistencies:'
           + _bullets(VF.qcNotes) + '</div>');
+      }
+      // System warnings — collected by the generator (£0 add-ons, missing
+      // Shooting Days, Notion writeback failures, etc.). Each entry is a
+      // pre-formatted sentence; render as a list.
+      const _warnings = Array.isArray(VF.warnings) ? VF.warnings.filter(Boolean) : [];
+      if (_warnings.length) {
+        const items = _warnings.map(w => '<li>' + String(w) + '</li>').join('');
+        sections.push('<div class="dw-section"><span class="dw-label dw-warning">Heads up</span>'
+          + 'The generator flagged these while building this quote:'
+          + '<ul>' + items + '</ul></div>');
       }
       if (sections.length) {
         box.innerHTML = sections.join('');
@@ -2897,6 +3363,58 @@
       }
     }
     _renderWarnings();
+
+    // ── Brief Q&A: collect typed answers + submit-and-re-extract handler ──
+    function _collectBriefQA() {
+      return Array.from(document.querySelectorAll('#draft-warnings .brief-q-row'))
+        .map(row => ({
+          q: row.dataset.briefQ || '',
+          a: (row.querySelector('.brief-q-answer')?.value || '').trim(),
+        }))
+        .filter(qa => qa.q);
+    }
+    // Expose so _buildEditorState can include answers in the autosaved JSON.
+    window._collectBriefQA = _collectBriefQA;
+    // Each keystroke schedules an autosave so typed answers aren't lost on
+    // refresh, even before the user clicks Re-extract.
+    document.querySelectorAll('#draft-warnings .brief-q-answer').forEach(el => {
+      el.addEventListener('input', _scheduleAutosave);
+    });
+    // Re-extract button: persist current state, set the Trigger field on Notion
+    // to "Re-process Brief", and tell the user to wait ~30s for regeneration.
+    document.getElementById('brief-q-submit')?.addEventListener('click', async () => {
+      const btn = document.getElementById('brief-q-submit');
+      const status = document.getElementById('brief-q-status');
+      const qas = _collectBriefQA();
+      const answered = qas.filter(qa => qa.a).length;
+      if (!answered) {
+        if (status) status.textContent = 'Type at least one answer first.';
+        return;
+      }
+      btn.disabled = true;
+      if (status) status.textContent = 'Saving answers…';
+      try {
+        // Force an immediate save so the latest answers are in Notion before
+        // the trigger fires; otherwise the re-extraction may run before the
+        // 3-second autosave debounce flushes.
+        await _doAutosave();
+        if (status) status.textContent = 'Triggering re-extraction…';
+        const resp = await fetch('https://vf-quotes.vercel.app/api/webhook', {
+          method:  'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            action:  'set_trigger',
+            page_id: VF.pageId,
+            trigger: 'Re-process Brief',
+          }),
+        });
+        if (!resp.ok) throw new Error('non-200 from webhook');
+        if (status) status.textContent = '✓ Queued — refresh in ~30s to see updated quote.';
+      } catch (e) {
+        if (status) status.textContent = 'Failed: ' + e.message;
+        btn.disabled = false;
+      }
+    });
 
     // ── Shortcuts cheatsheet panel ─────────────────────────────────────────
     function _renderShortcutsPanel() {
@@ -2999,6 +3517,201 @@
     // Attach to existing data-editable elements
     document.querySelectorAll('[data-editable]').forEach(_attachEditable);
 
+    // ── Inline-edit save handler for Production fields ─────────────────────
+    // Brief grid items annotated with `data-prod-field` PATCH the matching
+    // Notion property via the webhook on blur. For text fields we use the
+    // contenteditable text as-is. For number/date we swap in a real
+    // <input> on focus so the operator gets the right keyboard / picker.
+    function _saveProdField(field, value) {
+      const url = 'https://vf-quotes.vercel.app/api/webhook';
+      return fetch(url, {
+        method:  'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          action:  'update_production_field',
+          page_id: VF.pageId,
+          field:   field,
+          value:   value,
+        }),
+      }).then(r => {
+        if (!r.ok) return r.text().then(t => { throw new Error('HTTP ' + r.status + ': ' + t.slice(0, 120)); });
+        return r.json();
+      });
+    }
+    function _flashProdFieldStatus(el, ok, msg) {
+      // Tiny status pill that fades out — non-intrusive feedback that the
+      // PATCH actually reached Notion (or didn't).
+      const old = el.querySelector('.prod-field-status');
+      if (old) old.remove();
+      const pill = document.createElement('span');
+      pill.className = 'prod-field-status';
+      pill.style.cssText = 'margin-left:6px;font-size:10px;padding:1px 6px;border-radius:3px;'
+        + (ok ? 'background:#dcfce7;color:#166534;' : 'background:#fee2e2;color:#991b1b;');
+      pill.textContent = ok ? '✓ saved' : '⚠ ' + (msg || 'failed');
+      el.appendChild(pill);
+      setTimeout(() => { try { pill.remove(); } catch (_) {} }, ok ? 2500 : 8000);
+    }
+    document.querySelectorAll('[data-prod-field]').forEach(el => {
+      const field    = el.dataset.prodField;
+      const editType = el.dataset.prodType || 'text';
+      const initial  = el.dataset.prodValue || '';
+
+      if (editType === 'select') {
+        // Swap in a real <select> on click, populated from the schema's
+        // allowed options. On change, save and swap the display text back.
+        let opts = [];
+        try { opts = JSON.parse(el.dataset.prodOptions || '[]'); } catch (_) {}
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function (e) {
+          if (this.querySelector('select')) return;
+          if (e.target.closest('a, button')) return;
+          e.stopPropagation();
+          const sublabel = this.querySelector('div');  // sublabel divs preserved
+          const displayText = this.firstChild ? this.firstChild.textContent : this.textContent;
+          this.dataset.prodDisplay = displayText;
+
+          const sel = document.createElement('select');
+          sel.className = 'prod-field-input';
+          // Add an empty option only if the current value isn't in the options
+          // list (e.g. the production page has a value the schema doesn't allow
+          // anymore — let the operator see + replace it).
+          if (initial && !opts.includes(initial)) {
+            const o0 = document.createElement('option');
+            o0.value = initial; o0.textContent = initial + ' (legacy)';
+            sel.appendChild(o0);
+          }
+          for (const opt of opts) {
+            const o = document.createElement('option');
+            o.value = opt; o.textContent = opt;
+            if (opt === initial) o.selected = true;
+            sel.appendChild(o);
+          }
+
+          this.innerHTML = '';
+          this.appendChild(sel);
+          if (sublabel) this.appendChild(sublabel);
+          sel.focus();
+
+          const finish = async (saveIt) => {
+            const newVal = sel.value;
+            if (!saveIt || newVal === initial) {
+              el.innerHTML = '';
+              el.appendChild(document.createTextNode(displayText));
+              if (sublabel) el.appendChild(sublabel);
+              return;
+            }
+            // Optimistic UI
+            el.innerHTML = '';
+            el.appendChild(document.createTextNode(newVal));
+            if (sublabel) el.appendChild(sublabel);
+            try {
+              const result = await _saveProdField(field, newVal);
+              el.dataset.prodValue = newVal;
+              _flashProdFieldStatus(el, true);
+              if (result && result.regen_queued) {
+                _setAutosaveStatus('Field saved — regenerating quote in ~30s', 'saving');
+              }
+            } catch (err) {
+              _flashProdFieldStatus(el, false, err.message);
+            }
+          };
+          // Save on change OR blur (mobile: change fires when picker closes;
+          // desktop: blur after picking from dropdown). Esc cancels.
+          let done = false;
+          sel.addEventListener('change', () => { if (!done) { done = true; finish(true); } });
+          sel.addEventListener('blur',   () => { if (!done) { done = true; finish(false); } });
+          sel.addEventListener('keydown', (ke) => {
+            if (ke.key === 'Escape') { done = true; finish(false); }
+          });
+        });
+      } else if (editType === 'date' || editType === 'number') {
+        // Swap in a real <input> on click so the operator gets the native
+        // picker / numeric keyboard. Snapshot the display text so we can
+        // restore it if they cancel (Esc) without saving.
+        el.style.cursor = 'text';
+        el.addEventListener('click', function (e) {
+          if (this.querySelector('input')) return;
+          if (e.target.closest('a, button')) return;
+          e.stopPropagation();
+          const displayText = this.firstChild ? this.firstChild.textContent : this.textContent;
+          this.dataset.prodDisplay = displayText;
+          const input = document.createElement('input');
+          input.type  = editType;
+          input.value = initial || '';
+          if (editType === 'number') { input.min = '0'; input.step = '1'; input.style.width = '5em'; }
+          input.style.cssText += ';font:inherit;color:inherit;background:rgba(255,255,255,0.6);'
+                              + 'border:1px solid var(--blue);padding:1px 4px;border-radius:3px;';
+          // Replace the contenteditable's text with the input, preserve sublabel
+          const sublabel = this.querySelector('div');  // sublabel is a child <div>
+          this.innerHTML = '';
+          this.appendChild(input);
+          if (sublabel) this.appendChild(sublabel);
+          input.focus();
+          if (editType === 'number') input.select();
+
+          let aborted = false;
+          input.addEventListener('keydown', (ke) => {
+            if (ke.key === 'Escape') { aborted = true; input.blur(); }
+            if (ke.key === 'Enter')  { input.blur(); }
+          });
+          input.addEventListener('blur', async () => {
+            const newVal = input.value;
+            if (aborted || newVal === initial) {
+              // Restore display
+              el.innerHTML = '';
+              const span = document.createTextNode(displayText);
+              el.appendChild(span);
+              if (sublabel) el.appendChild(sublabel);
+              return;
+            }
+            // Optimistic UI: show the new value immediately while we save
+            el.innerHTML = '';
+            el.appendChild(document.createTextNode(
+              editType === 'number'
+                ? (parseInt(newVal, 10) + ' day' + (parseInt(newVal, 10) === 1 ? '' : 's'))
+                : newVal));
+            if (sublabel) el.appendChild(sublabel);
+            try {
+              const result = await _saveProdField(field, newVal);
+              el.dataset.prodValue = newVal;
+              _flashProdFieldStatus(el, true);
+              // If the field affects pricing, the webhook auto-queued a
+              // regenerate. Tell the operator to wait for it to finish.
+              if (result && result.regen_queued) {
+                _setAutosaveStatus('Field saved — regenerating quote in ~30s', 'saving');
+              }
+            } catch (err) {
+              _flashProdFieldStatus(el, false, err.message);
+            }
+          });
+        });
+      } else {
+        // Text field: rely on contenteditable + blur. Save when text changes.
+        el.addEventListener('blur', async () => {
+          // The first child is the visible text node (or nested element);
+          // sublabels are subsequent <div> children we mustn't include.
+          let newText = '';
+          for (const child of el.childNodes) {
+            if (child.nodeType === 3) newText += child.textContent;       // text node
+            else if (child.nodeType === 1 && child.tagName !== 'DIV')      // links etc.
+              newText += child.textContent || '';
+            else if (child.classList && child.classList.contains('prod-field-status'))
+              continue;
+            else if (child.tagName === 'DIV') break;                       // sublabel
+          }
+          newText = newText.trim();
+          if (!newText || newText === initial) return;
+          try {
+            await _saveProdField(field, newText);
+            el.dataset.prodValue = newText;
+            _flashProdFieldStatus(el, true);
+          } catch (err) {
+            _flashProdFieldStatus(el, false, err.message);
+          }
+        }, true);  // capture so we get blur before contenteditable cleanup
+      }
+    });
+
     // ── Auto-discover additional editable text (make everything editable) ──
     const _excludeSel = '#draft-banner, #draft-banner *, #draft-add-discount-btn, #breakdown-rows, #breakdown-rows *, #quote-total, button, a, input, canvas, [data-no-edit]';
     document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, li, strong, em, td, th, dt, dd').forEach(el => {
@@ -3016,20 +3729,57 @@
       _attachEditable(el);
     });
 
-    // ── Add × delete buttons to package include items ──
-    function _addLiRemoveBtn(li) {
+    // ── Package "includes" list editing ──────────────────────────────────
+    // Each package card has a UL of bullet points the operator can edit
+    // inline. The bullets need three behaviours: × to remove, + to add new,
+    // and a blur-sync that pushes the typed text back into
+    // PRICING.packages[i].includes — without that sync, the edits don't
+    // round-trip into editor_state and get lost on regeneration.
+    function _syncPkgIncludesFromDom(pkgId) {
+      const card = document.querySelector('.pkg-card[data-pkg-id="' + pkgId + '"]');
+      if (!card) return;
+      const pkg = (PRICING.packages || []).find(p => p.id === pkgId);
+      if (!pkg) return;
+      // Read each LI's text (excluding any nested × button text)
+      const items = [];
+      card.querySelectorAll('.pkg-includes li').forEach(li => {
+        // Clone so we can strip the remove button without mutating the live DOM
+        const clone = li.cloneNode(true);
+        clone.querySelectorAll('.draft-remove-btn-inline').forEach(b => b.remove());
+        const t = (clone.textContent || '').trim();
+        if (t) items.push(t);
+      });
+      pkg.includes = items;
+    }
+    function _addLiRemoveBtn(li, pkgId) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'draft-remove-btn-inline';
       btn.innerHTML = '×';
       btn.title = 'Remove this line';
-      btn.addEventListener('click', (e) => { e.stopPropagation(); li.remove(); });
+      btn.setAttribute('contenteditable', 'false');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        li.remove();
+        if (pkgId) _syncPkgIncludesFromDom(pkgId);
+      });
+      btn.addEventListener('mousedown', (e) => { e.stopPropagation(); });
       li.appendChild(btn);
+      // Blur on the LI text → push the edited content back into PRICING
+      li.addEventListener('blur', () => {
+        if (pkgId) _syncPkgIncludesFromDom(pkgId);
+      }, true);  // capture phase so we get the event before the LI loses focus
     }
-    document.querySelectorAll('.pkg-includes li').forEach(_addLiRemoveBtn);
+    document.querySelectorAll('.pkg-card[data-pkg-id]').forEach(card => {
+      const pkgId = card.dataset.pkgId;
+      card.querySelectorAll('.pkg-includes li').forEach(li => _addLiRemoveBtn(li, pkgId));
+    });
 
     // ── Add "+ Add line" button to each package includes list ──
-    document.querySelectorAll('.pkg-includes').forEach(ul => {
+    document.querySelectorAll('.pkg-card[data-pkg-id]').forEach(card => {
+      const pkgId = card.dataset.pkgId;
+      const ul    = card.querySelector('.pkg-includes');
+      if (!ul) return;
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'draft-add-row-btn';
@@ -3041,9 +3791,23 @@
         newLi.setAttribute('data-single-line', '');
         newLi.textContent = 'New item';
         ul.insertBefore(newLi, btn);
-        _addLiRemoveBtn(newLi);
+        _addLiRemoveBtn(newLi, pkgId);
         _attachEditable(newLi);
-        setTimeout(() => newLi.click(), 10);
+        // Click to enter edit mode, then select-all so the placeholder is
+        // replaced by the operator's first keystroke (same pattern as the
+        // deliverable add button).
+        setTimeout(() => {
+          newLi.click();
+          setTimeout(() => {
+            if (newLi.contentEditable === 'true' && newLi.textContent.trim()) {
+              const range = document.createRange();
+              range.selectNodeContents(newLi);
+              const sel = window.getSelection();
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
+          }, 30);
+        }, 10);
       });
       ul.appendChild(btn);
     });
@@ -3132,7 +3896,15 @@
       x.innerHTML = '×';
       x.title = 'Remove this deliverable';
       x.style.marginLeft = '4px';
+      // Mark the button as non-editable so it can't be part of a contenteditable
+      // selection; combined with CSS `user-select: none` on the class, this
+      // prevents the operator from accidentally including the × in a text
+      // selection and deleting it with backspace.
+      x.setAttribute('contenteditable', 'false');
       x.addEventListener('click', (e) => { e.stopPropagation(); pill.remove(); });
+      // mousedown stopPropagation prevents the surrounding contenteditable
+      // span from handling the click (which would put the cursor near the ×).
+      x.addEventListener('mousedown', (e) => { e.stopPropagation(); });
       pill.appendChild(x);
     }
     const _delivList = document.getElementById('deliv-list');
@@ -3158,7 +3930,22 @@
       _delivList.appendChild(pill);
       _wireDelivPill(pill);
       const titleEl = pill.querySelector('[data-deliv-title]');
-      setTimeout(() => titleEl && titleEl.click(), 10);
+      // Click to enter edit mode, then select the placeholder text so the
+      // operator's first keystroke replaces it (no need to manually delete
+      // "New deliverable" before typing).
+      setTimeout(() => {
+        if (!titleEl) return;
+        titleEl.click();
+        setTimeout(() => {
+          if (titleEl.contentEditable === 'true' && titleEl.textContent.trim()) {
+            const range = document.createRange();
+            range.selectNodeContents(titleEl);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+        }, 30);
+      }, 10);
     });
 
     // Serialise deliverables back into a list of {title, spec} for webhook payload
@@ -3170,53 +3957,78 @@
       })).filter(d => d.title);
     }
 
-    // ── Add-on inline discount: per-card "− Discount" button ─────────────────
-    _pstate.addonDiscounts = {};   // { addon_id: discount_amount_in_pounds }
-    function _applyAddonDiscount(addonId, discount) {
-      const addon = (PRICING.addons || []).find(a => a.id === addonId);
-      const card  = document.querySelector('.toggle-card[data-addon-id="' + addonId + '"]');
-      if (!addon || !card) return;
-      const base  = parseInt(card.dataset.basePrice, 10) || addon.price + (_pstate.addonDiscounts[addonId] || 0);
-      const newPrice = Math.max(0, base - discount);
-      addon.price = newPrice;
-      card.dataset.price = newPrice;
-      const priceEl = card.querySelector('.toggle-card-price');
-      if (priceEl) priceEl.textContent = '+£' + newPrice.toLocaleString('en-GB');
-      const labelEl = card.querySelector('.addon-discount-label[data-addon-id="' + addonId + '"]');
-      if (labelEl) {
-        labelEl.textContent = discount > 0
-          ? '  −£' + discount.toLocaleString('en-GB') + ' applied'
-          : '';
+    // ── Add-on inline discount ────────────────────────────────────────────
+    // Storage: _pstate.addonDiscounts = { addon_id: { value, type } }
+    //   type: 'fixed' (£ amount)  |  'pct' (percentage of base price)
+    // The addon's price label is NOT modified — instead a small chip overlay
+    // shows the discount in the top-right of the card, and a separate negative
+    // line appears in the price breakdown below.
+    _pstate.addonDiscounts = {};
+    // Pre-populate from saved Editor State (operator's prior session) so chips
+    // appear on initial render. Migrate the legacy plain-number format.
+    {
+      const saved = (window._editor_state_initial && window._editor_state_initial.addon_discounts) || {};
+      Object.keys(saved).forEach(k => {
+        const v = saved[k];
+        _pstate.addonDiscounts[k] = (typeof v === 'number')
+          ? { value: v, type: 'fixed' }
+          : v;
+      });
+    }
+    function _renderDiscountChip(addonId) {
+      const card = document.querySelector('.toggle-card[data-addon-id="' + addonId + '"]');
+      if (!card) return;
+      const disc = _pstate.addonDiscounts[addonId];
+      let chip = card.querySelector('.addon-discount-chip');
+      if (disc && parseFloat(disc.value || 0) > 0) {
+        if (!chip) {
+          chip = document.createElement('span');
+          chip.className = 'addon-discount-chip';
+          card.appendChild(chip);
+        }
+        chip.textContent = (disc.type === 'pct')
+          ? '−' + disc.value + '%'
+          : '−£' + Math.round(disc.value).toLocaleString('en-GB');
+      } else if (chip) {
+        chip.remove();
       }
-      if (discount > 0) _pstate.addonDiscounts[addonId] = discount;
-      else delete _pstate.addonDiscounts[addonId];
+      // Hide the legacy "− Discount applied" text label — chip replaces it.
+      const labelEl = card.querySelector('.addon-discount-label[data-addon-id="' + addonId + '"]');
+      if (labelEl) labelEl.textContent = '';
+    }
+    function _applyAddonDiscount(addonId, spec) {
+      // spec: null/undefined to clear, or a value/type object
+      const v = spec ? parseFloat(spec.value || 0) : 0;
+      if (spec && v > 0) {
+        _pstate.addonDiscounts[addonId] = { value: v, type: spec.type === 'pct' ? 'pct' : 'fixed' };
+      } else {
+        delete _pstate.addonDiscounts[addonId];
+      }
+      _renderDiscountChip(addonId);
       _updateTotal();
     }
+    // Render any pre-populated chips on first paint
+    Object.keys(_pstate.addonDiscounts).forEach(_renderDiscountChip);
     document.querySelectorAll('.draft-addon-discount-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         e.preventDefault();
         const addonId = btn.dataset.addonId;
-        const current = _pstate.addonDiscounts[addonId] || 0;
-        const card = document.querySelector('.toggle-card[data-addon-id="' + addonId + '"]');
-        const basePrice = parseInt(card?.dataset.basePrice, 10) || 0;
+        const current = _pstate.addonDiscounts[addonId] || { value: 0, type: 'fixed' };
         const r = await _openModal({
           title: 'Discount on this add-on',
-          body: 'Reduce the price by a fixed £ amount or a percentage of the base. Set to 0 to clear.',
+          body: 'Apply a flat £ amount or a percentage of the base price. Set value to 0 to clear.',
           fields: [
             { id: 'kind',  label: 'Type',   type: 'radio',
                options: [{value:'fixed', label:'£ amount'}, {value:'pct', label:'Percentage (%)'}],
-               value: 'fixed' },
-            { id: 'value', label: 'Amount', type: 'number', required: true, min: 0, value: current },
+               value: current.type || 'fixed' },
+            { id: 'value', label: 'Amount', type: 'number', required: true, min: 0, value: current.value || 0 },
           ],
           submitLabel: 'Apply',
         });
         if (r === null) return;
-        let amt = parseFloat(r.value) || 0;
-        if (r.kind === 'pct' && basePrice > 0) {
-          amt = Math.round(basePrice * amt / 100);
-        }
-        _applyAddonDiscount(addonId, Math.round(amt));
+        const amt = parseFloat(r.value) || 0;
+        _applyAddonDiscount(addonId, amt > 0 ? { value: amt, type: r.kind } : null);
       });
     });
 
@@ -3270,8 +4082,9 @@
         includesHtml;
       _pkgGrid.insertBefore(card, _pkgAddCard);
       // Wire all editables, remove btn, includes editor
+      const newPkgId = pkg.id;
       card.querySelectorAll('[data-editable]').forEach(_attachEditable);
-      card.querySelectorAll('.pkg-includes li').forEach(_addLiRemoveBtn);
+      card.querySelectorAll('.pkg-includes li').forEach(li => _addLiRemoveBtn(li, newPkgId));
       const includesUl = card.querySelector('.pkg-includes');
       if (includesUl) {
         const addLi = document.createElement('button');
@@ -3285,9 +4098,20 @@
           newLi.setAttribute('data-single-line', '');
           newLi.textContent = 'New item';
           includesUl.insertBefore(newLi, addLi);
-          _addLiRemoveBtn(newLi);
+          _addLiRemoveBtn(newLi, newPkgId);
           _attachEditable(newLi);
-          setTimeout(() => newLi.click(), 10);
+          setTimeout(() => {
+            newLi.click();
+            setTimeout(() => {
+              if (newLi.contentEditable === 'true' && newLi.textContent.trim()) {
+                const range = document.createRange();
+                range.selectNodeContents(newLi);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+              }
+            }, 30);
+          }, 10);
         });
         includesUl.appendChild(addLi);
       }
@@ -3359,6 +4183,179 @@
     if (_pkgAddCard) {
       _pkgAddCard.addEventListener('click', _openPkgPicker);
     }
+
+    // ── Custom add-on creation ────────────────────────────────────────────
+    // Mirror of the package adder, but for one-off add-ons specific to this
+    // quote. Doesn't write back to the Add-ons DB in Notion (would clutter
+    // it with one-off line items); instead the new addon lives in
+    // editor_state.custom_addons and is re-injected on every regeneration.
+    _pstate.customAddons = [];
+    // Restore from saved state — the Python side will have re-injected the
+    // addon objects into PRICING.addons, but we need to (a) remember which
+    // ones are operator-created so they save back to editor_state and (b)
+    // mark them as selected (operator created them deliberately).
+    {
+      const savedCustoms = (window._editor_state_initial && window._editor_state_initial.custom_addons) || [];
+      savedCustoms.forEach(ca => {
+        _pstate.customAddons.push(ca);
+        _pstate.addons.add(ca.id);
+        const card = document.querySelector('.toggle-card[data-addon-id="' + ca.id + '"]');
+        if (card) card.classList.add('selected');
+      });
+    }
+
+    function _renderAddonCardDom(addon) {
+      // Build a minimal toggle-card matching the server-rendered shape so the
+      // existing wireup (click-to-toggle, qty stepper, price edit, × remove,
+      // name/desc edit-sync) all work without extra special cases.
+      const grid = document.querySelector('.toggle-cards-grid:has(#addon-add-card)')
+                || document.getElementById('addon-add-card')?.parentElement;
+      if (!grid) return;
+      const id   = addon.id;
+      const card = document.createElement('div');
+      card.className = 'toggle-card';
+      card.setAttribute('data-addon-id', id);
+      card.dataset.price     = addon.price;
+      card.dataset.basePrice = addon.price;
+      card.innerHTML =
+        '<div class="toggle-card-check">' +
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none">' +
+            '<path d="M2 7l3 3 7-7" stroke="white" stroke-width="2.4" ' +
+            'stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '</div>' +
+        '<div class="toggle-card-body">' +
+          '<div class="toggle-card-name" data-editable data-single-line>' + addon.name + '</div>' +
+          '<div class="toggle-card-desc" data-editable>' + (addon.desc || '') + '</div>' +
+          '<div class="addon-qty-stepper" data-no-edit data-addon-id="' + id +
+              '" data-qty-min="1" data-qty-max="99">' +
+            '<button type="button" class="addon-qty-btn addon-qty-minus" ' +
+              'data-addon-id="' + id + '" aria-label="Decrease quantity">−</button>' +
+            '<span class="addon-qty-value" data-addon-id="' + id + '">1</span>' +
+            '<button type="button" class="addon-qty-btn addon-qty-plus" ' +
+              'data-addon-id="' + id + '" aria-label="Increase quantity">+</button>' +
+            '<span class="addon-qty-label">qty</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="toggle-card-price" data-editable data-single-line>+£' +
+          Number(addon.price).toLocaleString('en-GB') + '</div>';
+      // Insert before the "Add" card so the "+" stays at the end of the grid
+      const addCard = document.getElementById('addon-add-card');
+      if (addCard && addCard.parentElement === grid) {
+        grid.insertBefore(card, addCard);
+      } else {
+        grid.appendChild(card);
+      }
+      // Pre-select since the operator just typed it in
+      _pstate.addons.add(id);
+      card.classList.add('selected');
+      // Wire all the same handlers the server-rendered cards get
+      card.querySelectorAll('[data-editable]').forEach(_attachEditable);
+      _wireAddonCard(card);
+      // × remove button (mirrors the per-addon remove the server cards have)
+      const rmBtn = document.createElement('button');
+      rmBtn.type = 'button';
+      rmBtn.className = 'draft-remove-btn';
+      rmBtn.innerHTML = '×';
+      rmBtn.title = 'Remove this add-on';
+      rmBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (PRICING.addons) PRICING.addons = PRICING.addons.filter(a => a.id !== id);
+        _pstate.addons.delete(id);
+        delete _pstate.addonQty[id];
+        _pstate.customAddons = _pstate.customAddons.filter(a => a.id !== id);
+        card.remove();
+        _updateTotal();
+      });
+      card.appendChild(rmBtn);
+    }
+
+    // Re-extracted as a function so we can call it for newly-rendered cards.
+    function _wireAddonCard(card) {
+      const id = card.dataset.addonId;
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('[data-editable]')) return;
+        if (e.target.closest('[data-no-edit]')) return;
+        if (_pstate.addons.has(id)) {
+          _pstate.addons.delete(id);
+          card.classList.remove('selected');
+        } else {
+          _pstate.addons.add(id);
+          card.classList.add('selected');
+        }
+        _updateTotal();
+      });
+      const stepperEl = card.querySelector('.addon-qty-stepper');
+      if (stepperEl) {
+        const qtyMin = parseInt(stepperEl.dataset.qtyMin || '1', 10);
+        const qtyMax = parseInt(stepperEl.dataset.qtyMax || '99', 10);
+        _renderAddonQty(id);
+        const adjust = (delta) => {
+          const next = Math.max(qtyMin, Math.min(qtyMax, _addonQtyOf(id) + delta));
+          if (next === 1) delete _pstate.addonQty[id];
+          else            _pstate.addonQty[id] = next;
+          _renderAddonQty(id);
+          if (next > 1 && !_pstate.addons.has(id)) {
+            _pstate.addons.add(id);
+            card.classList.add('selected');
+          }
+          _updateTotal();
+        };
+        const minusBtn = stepperEl.querySelector('.addon-qty-minus');
+        const plusBtn  = stepperEl.querySelector('.addon-qty-plus');
+        if (minusBtn) minusBtn.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); adjust(-1); });
+        if (plusBtn)  plusBtn.addEventListener('click',  (e) => { e.stopPropagation(); e.preventDefault(); adjust(+1); });
+      }
+      const a = (PRICING.addons || []).find(x => x.id === id);
+      if (a) {
+        const nameEl  = card.querySelector('.toggle-card-name');
+        const priceEl = card.querySelector('.toggle-card-price');
+        if (nameEl) nameEl.addEventListener('blur', () => {
+          const t = (nameEl.textContent || '').trim();
+          if (t && t !== a.name) { a.name = t; _updateTotal(); }
+        });
+        if (priceEl) priceEl.addEventListener('blur', () => {
+          const digits = (priceEl.textContent || '').replace(/[^0-9.]/g, '');
+          if (digits) {
+            const n = parseInt(digits, 10);
+            if (Number.isFinite(n) && n !== a.price) {
+              a.price = n;
+              card.dataset.price = n;
+              card.dataset.basePrice = n;
+              _updateTotal();
+            }
+          }
+        });
+      }
+    }
+
+    async function _openAddonAdder() {
+      const r = await _openModal({
+        title: 'Custom add-on for this quote',
+        body:  'Lives only on this quote — won\'t be added to your Notion Add-ons DB.',
+        fields: [
+          { id: 'name',  label: 'Name',         type: 'text',   required: true,  value: 'Custom add-on' },
+          { id: 'price', label: 'Price (£)', type: 'number', required: true,  min: 0, value: 100 },
+          { id: 'desc',  label: 'Description',  type: 'text',   placeholder: 'Optional one-line description' },
+        ],
+        submitLabel: 'Add',
+      });
+      if (!r) return;
+      const id = 'custom_addon_' + Date.now();
+      const newAddon = {
+        id, name: r.name, price: Number(r.price) || 0, desc: r.desc || '',
+        price_core: Number(r.price) || 0, price_primary: Number(r.price) || 0, price_premium: Number(r.price) || 0,
+        exclude_job_types: [], require_job_types: [], group: '', auto_include_if: '',
+        qty_stepper: false, min_qty: 1, max_qty: 99, default_qty: 1, per_day: false,
+        days_out: null, custom: true,
+      };
+      PRICING.addons.push(newAddon);
+      _pstate.customAddons.push(newAddon);
+      _renderAddonCardDom(newAddon);
+      _updateTotal();
+    }
+
+    document.getElementById('addon-add-card')?.addEventListener('click', _openAddonAdder);
 
     // ── Dynamic recalc on price-relevant text edits ──────────────────────────
     // When the user edits an addon/postprod/delivery card's price, parse it and
@@ -3451,8 +4448,16 @@
         el.classList.remove('editing');
       });
 
+      // Track webhook outcome so we can show the operator a clear status
+      // message AFTER the email opens. Previously this fire-and-forget
+      // try/catch meant Notion-status update failures (e.g. "Quotation Sent"
+      // missing as a status option, or Vercel→Notion network blip) were
+      // completely invisible — operator clicked Send, status never moved,
+      // and there was no way to know why.
+      let _approveStatusOk    = false;
+      let _approveStatusError = '';
       try {
-        await fetch('https://vf-quotes.vercel.app/api/webhook', {
+        const resp = await fetch('https://vf-quotes.vercel.app/api/webhook', {
           method:  'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
@@ -3468,7 +4473,16 @@
             addonDiscounts:  _pstate.addonDiscounts || {},
           }),
         });
-      } catch(_) {/* continue regardless */}
+        if (resp.ok) {
+          _approveStatusOk = true;
+        } else {
+          let body = '';
+          try { body = (await resp.text()).slice(0, 160); } catch (_) {}
+          _approveStatusError = 'HTTP ' + resp.status + (body ? ' — ' + body : '');
+        }
+      } catch (e) {
+        _approveStatusError = 'network: ' + (e && e.message ? e.message : String(e));
+      }
 
       // Build Gmail compose URL — try LLM-personalised intro, fall back to template
       const firstName = VF.clientName.split(' ')[0];
@@ -3520,16 +4534,28 @@
       const bd = encodeURIComponent(body);
       window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}&body=${bd}`, '_blank');
 
-      // Update banner to reflect approved state
-      btn.textContent = '✓ Email Drafted';
-      btn.style.background = 'var(--green)';
-      btn.disabled = false;
-      const hint = document.getElementById('draft-edit-hint');
-      if (hint) hint.textContent = 'Approved — quote ready to send';
+      // Update banner to reflect approved state — colour and copy depends on
+      // whether the Notion status update actually succeeded. Operator needs
+      // to know if the status WAS NOT moved to "Quotation Sent" so they can
+      // either fix it manually in Notion or retry.
+      const hint  = document.getElementById('draft-edit-hint');
       const dot   = document.querySelector('.draft-dot');
       const label = document.querySelector('.draft-label');
-      if (dot)   { dot.style.background = 'var(--green)'; dot.style.animation = 'none'; }
-      if (label) { label.textContent = 'Approved'; label.style.color = 'var(--green)'; }
+      btn.disabled = false;
+      if (_approveStatusOk) {
+        btn.textContent = '✓ Email Drafted';
+        btn.style.background = 'var(--green)';
+        if (hint) hint.textContent = 'Approved — Notion marked Quotation Sent';
+        if (dot)   { dot.style.background = 'var(--green)'; dot.style.animation = 'none'; }
+        if (label) { label.textContent = 'Approved'; label.style.color = 'var(--green)'; }
+      } else {
+        btn.textContent = '⚠ Email opened — Notion not updated';
+        btn.style.background = '#f59e0b';
+        if (hint) hint.textContent = 'Email drafted, but Notion status didn\'t move: ' + (_approveStatusError || 'unknown');
+        if (dot)   { dot.style.background = '#f59e0b'; dot.style.animation = 'none'; }
+        if (label) { label.textContent = 'Notion update failed'; label.style.color = '#f59e0b'; }
+        try { console.warn('[approve-and-send] webhook failed:', _approveStatusError); } catch (_) {}
+      }
     });
   }
 
