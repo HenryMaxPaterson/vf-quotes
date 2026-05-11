@@ -123,30 +123,27 @@
   .hero {
     position: relative;
     min-height: 460px;
-    background: var(--dark);
-     background-size: cover; background-position: center;
+    background: var(--vf-bg);
+    background-size: cover; background-position: center;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     padding: 56px 64px;
-    color: white;
+    color: var(--vf-ink);
   }
 
   .hero::before {
-    /* Valley signature blue blob — same gradient stops as the marketing
-       site hero (vf-blue → vf-blue-800 → vf-blue-900 → transparent) but
-       softened with a darkening overlay so hero text stays readable. */
+    /* Subtle blue tint for light-mode hero — low opacity blob matching the
+       valley.film about/contact page treatment. */
     content: '';
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(to top, rgba(7,8,12,0.95) 0%, rgba(7,8,12,0.45) 60%, rgba(7,8,12,0.2) 100%),
-      radial-gradient(ellipse 70% 80% at 15% 50%,
-        rgba(9,94,223,0.55) 0%,
-        rgba(5,46,110,0.45) 35%,
-        rgba(3,32,76,0.30) 65%,
-        transparent 80%);
+      radial-gradient(ellipse 65% 85% at 12% 65%,
+        rgba(9,94,223,0.10) 0%,
+        rgba(5,46,110,0.06) 45%,
+        transparent 75%);
     z-index: 0;
   }
 
@@ -197,23 +194,23 @@
     letter-spacing: -0.04em;
     line-height: 0.96;
     margin-bottom: 18px;
-    color: white;
+    color: var(--vf-ink);
     text-wrap: balance;
   }
   .hero-title em {
     font-style: italic;
     font-weight: 500;
-    color: var(--vf-blue-400);
+    color: var(--vf-blue);
   }
 
   .hero-sub {
     font-size: 15px;
-    color: rgba(255,255,255,0.55);
+    color: var(--vf-ink-3);
     font-weight: 400;
     letter-spacing: 0.2px;
   }
 
-  .hero-sub strong { color: white; font-weight: 600; }
+  .hero-sub strong { color: var(--vf-ink); font-weight: 600; }
 
   /* "Edit client in Notion" link — visible only in draft mode (operator
      doesn't want clients seeing the edit shortcut on the published quote). */
@@ -243,7 +240,7 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.55);
+    color: var(--vf-ink-3);
     margin-bottom: 16px;
   }
 
@@ -2265,7 +2262,7 @@
   body.draft-mode .section-restore-btn[style*="display"] { display: inline-block !important; }
 
   /* ── "View as client" preview mode ─────────────────────────────────────
-     When the operator clicks 👁 View as client, body gains the
+     When the operator clicks <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client, body gains the
      `client-preview` class. We keep the banner visible (so they can toggle
      back) but hide every draft-only chrome: × buttons, + Add cards, hover
      outlines, restore buttons, etc. The body retains `draft-mode` so JS
@@ -2428,126 +2425,35 @@
   body.draft-mode [data-editable]:focus { outline: none; }
 
   /* ═══════════════════════════════════════════════════════════════════════
-     DESIGN REFRESH — valley.film alignment
+     DESIGN REFRESH — valley.film alignment (light mode)
      ═══════════════════════════════════════════════════════════════════════ */
-
-  /* ── 1. DARK BRIEF SECTION ────────────────────────────────────────────────
-     Flip .light-section from #F7F8FA to vf-night-2 so the brief flows
-     seamlessly from the dark hero, matching the website's dark-first aesthetic. */
-  .light-section { background: var(--vf-night-2); }
-
-  .light-section .section-eyebrow { color: rgba(255,255,255,0.45); }
-  .light-section .section-heading { color: white; }
-  .light-section .section-heading em { color: var(--vf-blue-400); }
-
-  .light-section .sub-label,
-  .light-section .deliverables-header {
-    color: rgba(255,255,255,0.55);
-    border-bottom-color: rgba(255,255,255,0.08) !important;
-  }
-  .light-section .brief-item {
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.08);
-    box-shadow: none;
-  }
-  .light-section .brief-item:hover {
-    background: rgba(255,255,255,0.07);
-    box-shadow: none;
-  }
-  .light-section .brief-item-label { color: rgba(255,255,255,0.38); }
-  .light-section .brief-item-value { color: white; }
-  .light-section .brief-item-value a { color: var(--vf-blue-400); }
-  .light-section #deadline-label,
-  .light-section #rev-count-label { color: white !important; }
-  .light-section #deadline-sublabel,
-  .light-section #rev-sublabel { color: rgba(255,255,255,0.38) !important; }
-  .light-section .stepper-btn {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.65);
-  }
-  .light-section .stepper-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,0.14);
-    color: white;
-  }
 
   /* Section transitions — straight edges, no waves */
 
-  /* ── 2 & 3. EYEBROW INDEX — blue accent number ────────────────────────────
-     Matches website .eyebrow .idx: vf-blue-400 on dark, vf-blue on light. */
+  /* ── EYEBROW INDEX ────────────────────────────────────────────────────── */
   .eyebrow-idx {
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.12em;
-    color: var(--vf-blue-400);
+    color: var(--vf-blue);
   }
-  .white-section .eyebrow-idx { color: var(--vf-blue); }
 
-  /* ── 4. HERO CORNER MARKS ─────────────────────────────────────────────────
-     Signature L-bracket corners from the valley.film hero. */
+  /* ── HERO CORNER MARKS ─────────────────────────────────────────────────── */
   .hero-corner {
     position: absolute;
     width: 22px; height: 22px;
     z-index: 3;
-    opacity: 0.35;
+    opacity: 0.18;
   }
-  .hero-corner-bl { bottom: 64px; left: 64px; border-left: 1.5px solid white; border-bottom: 1.5px solid white; }
-  .hero-corner-br { bottom: 64px; right: 64px; border-right: 1.5px solid white; border-bottom: 1.5px solid white; }
+  .hero-corner-bl { bottom: 64px; left: 64px; border-left: 1.5px solid var(--vf-ink); border-bottom: 1.5px solid var(--vf-ink); }
+  .hero-corner-br { bottom: 64px; right: 64px; border-right: 1.5px solid var(--vf-ink); border-bottom: 1.5px solid var(--vf-ink); }
   @media (max-width: 600px) {
     .hero-corner-bl { left: 20px; bottom: 40px; }
     .hero-corner-br { right: 20px; bottom: 40px; }
   }
 
-  /* ── 5. NAV SCROLL BEHAVIOUR ──────────────────────────────────────────────
-     Start transparent over the dark hero; transition to frosted on scroll,
-     exactly mirroring the website nav behaviour. */
-  .vf-client-nav {
-    background: transparent !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-bottom-color: transparent !important;
-    box-shadow: none !important;
-    transition: background 300ms var(--ease-out),
-                backdrop-filter 300ms var(--ease-out),
-                border-color 300ms var(--ease-out),
-                box-shadow 300ms var(--ease-out);
-  }
-  .vf-client-nav.is-scrolled {
-    background: rgba(7,8,12,0.80) !important;
-    backdrop-filter: blur(20px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
-    border-bottom-color: rgba(255,255,255,0.08) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06) !important;
-  }
-
-  /* ── 6. PILL FILTER CHIP REFINEMENT ──────────────────────────────────────
-     Tighter to the website's filter chip: lighter unselected border,
-     ink fill when selected rather than blue. */
-  .pill-btn {
-    font-size: 13px;
-    padding: 8px 16px;
-    border-color: rgba(10,15,26,0.14);
-    color: var(--vf-ink-3);
-    letter-spacing: -0.005em;
-    font-weight: 500;
-  }
-  .pill-btn:hover {
-    background: rgba(10,15,26,0.04);
-    border-color: var(--vf-ink-4);
-    color: var(--vf-ink);
-  }
-  .pill-btn.selected {
-    background: var(--vf-ink);
-    color: white;
-    border-color: var(--vf-ink);
-    box-shadow: 0 2px 8px rgba(10,15,26,0.18);
-  }
-
-  /* ── VALLEY FILMS CLIENT NAV ──────────────────────────────────────────────
-     Persistent branded header for clients. Mirrors the website nav glass-blur
-     treatment exactly: same bg, backdrop-filter, border, and inset highlight.
-     Hidden in draft mode — the operator draft banner takes over. */
+  /* ── NAV — stays dark frosted (matches valley.film about/contact) ──────── */
   .vf-client-nav {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -2557,11 +2463,12 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 32px;
-    background: rgba(7, 8, 12, 0.72);
+    background: rgba(7, 8, 12, 0.82);
     backdrop-filter: blur(20px) saturate(140%);
     -webkit-backdrop-filter: blur(20px) saturate(140%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: background 300ms ease;
   }
   body:not(.draft-mode) { padding-top: 56px; }
   body.draft-mode .vf-client-nav { display: none; }
@@ -2586,9 +2493,28 @@
     color: rgba(255, 255, 255, 0.30);
   }
 
-  /* ── SECTION MAX-WIDTH ───────────────────────────────────────────────────
-     Mirrors the website's 1280px container. Horizontal padding grows on wide
-     screens so content stays centered at ~1152px, matching valley.film. */
+  /* ── PILL FILTER CHIP ────────────────────────────────────────────────────── */
+  .pill-btn {
+    font-size: 13px;
+    padding: 8px 16px;
+    border-color: rgba(10,15,26,0.14);
+    color: var(--vf-ink-3);
+    letter-spacing: -0.005em;
+    font-weight: 500;
+  }
+  .pill-btn:hover {
+    background: rgba(10,15,26,0.04);
+    border-color: var(--vf-ink-4);
+    color: var(--vf-ink);
+  }
+  .pill-btn.selected {
+    background: var(--vf-ink);
+    color: white;
+    border-color: var(--vf-ink);
+    box-shadow: 0 2px 8px rgba(10,15,26,0.18);
+  }
+
+  /* ── SECTION MAX-WIDTH ────────────────────────────────────────────────────── */
   .light-section,
   .white-section,
   .closing-section,
@@ -2597,9 +2523,7 @@
     padding-right: clamp(24px, calc(50% - 576px), 9999px);
   }
 
-  /* ── CTA SECTION → DARK ──────────────────────────────────────────────────
-     Match the website's dark primary CTA sections: vf-night bg, centred blue
-     blob glow, all text flipped to white. */
+  /* ── CTA SECTION → DARK ─────────────────────────────────────────────────── */
   .cta-section {
     background: var(--vf-night);
     color: white;
@@ -2629,14 +2553,13 @@
     font-weight: 700;
   }
 
-  /* ── HERO SECOND BLOB ────────────────────────────────────────────────────
-     Website hero has two blobs; add a secondary right-side blob to match. */
+  /* ── HERO SECOND BLOB ───────────────────────────────────────────────────── */
   .hero-blob-2 {
     position: absolute;
     width: 600px; height: 600px;
     border-radius: 50%;
     filter: blur(90px);
-    opacity: 0.28;
+    opacity: 0.07;
     right: -120px; top: -60px;
     background: radial-gradient(circle,
       var(--vf-blue-500) 0%,
@@ -2666,7 +2589,7 @@
     <div class="draft-banner-right">
       <span id="draft-total-display"></span>
       <span id="draft-autosave-indicator"></span>
-      <button id="draft-preview-btn" class="draft-save-btn" title="Preview what the client will see (hides all editor controls)">👁 View as client</button>
+      <button id="draft-preview-btn" class="draft-save-btn" title="Preview what the client will see (hides all editor controls)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client</button>
       <button id="draft-revert-btn" class="draft-save-btn" title="Undo all edits and restore the original quote">↺ Revert</button>
       <button id="draft-save-btn" class="draft-save-btn">Save Draft</button>
       <button id="draft-approve-btn" class="draft-approve-btn">Approve &amp; Send →</button>
@@ -4554,7 +4477,7 @@
       const _previewBtn = document.getElementById('draft-preview-btn');
       _previewBtn?.addEventListener('click', () => {
         const previewing = document.body.classList.toggle('client-preview');
-        _previewBtn.innerHTML = previewing ? '✎ Back to editor' : '👁 View as client';
+        _previewBtn.innerHTML = previewing ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><polyline points="9 11 12 14 22 4"/></svg>Back to editor' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client';
         _previewBtn.title = previewing
           ? 'Return to editing mode'
           : 'Preview what the client will see (hides all editor controls)';
