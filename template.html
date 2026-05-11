@@ -122,7 +122,7 @@
   /* ── HERO ─────────────────────────────── */
   .hero {
     position: relative;
-    min-height: 460px;
+    min-height: 92vh;
     background: var(--vf-bg);
     background-size: cover; background-position: center;
     overflow: hidden;
@@ -3794,7 +3794,8 @@
   });
 
   // ── Draft / Template Review mode ─────────────────────────────────────────
-  if (VF.isDraft) {
+  const _isClientView = new URLSearchParams(window.location.search).get('view') === 'client';
+  if (VF.isDraft && !_isClientView) {
     // Show banner and shift page down to avoid overlap
     document.body.classList.add('draft-mode');
     document.body.style.paddingTop = '44px';
@@ -4542,19 +4543,12 @@
     {
       const _previewBtn = document.getElementById('draft-preview-btn');
       _previewBtn?.addEventListener('click', () => {
-        const previewing = document.body.classList.toggle('client-preview');
-        _previewBtn.innerHTML = previewing ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><polyline points="9 11 12 14 22 4"/></svg>Back to editor' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client';
-        _previewBtn.title = previewing
-          ? 'Return to editing mode'
-          : 'Preview what the client will see (hides all editor controls)';
-        // While previewing, suppress the editing hint in the banner center
-        const _hint = document.getElementById('draft-edit-hint');
-        if (_hint) _hint.style.visibility = previewing ? 'hidden' : '';
-        // Drop focus from any actively-edited element so it doesn't show
-        // a caret on screen while previewing.
-        if (previewing && document.activeElement && document.activeElement.blur) {
-          document.activeElement.blur();
-        }
+        // Open the same page in a new tab with ?view=client — the page detects
+        // that param at init and skips draft mode entirely so the operator sees
+        // the exact client experience (no banner, no editor controls).
+        const url = new URL(window.location.href);
+        url.searchParams.set('view', 'client');
+        window.open(url.toString(), '_blank', 'noopener');
       });
     }
 
