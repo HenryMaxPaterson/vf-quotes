@@ -2453,44 +2453,91 @@
     .hero-corner-br { right: 20px; bottom: 40px; }
   }
 
-  /* ── NAV — stays dark frosted (matches valley.film about/contact) ──────── */
+  /* ── CLIENT NAV — matches valley.film nav exactly ──────────────────────── */
   .vf-client-nav {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 80;
-    height: 56px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 32px;
-    background: rgba(7, 8, 12, 0.82);
+    background: rgba(7,8,12,0.28);
     backdrop-filter: blur(20px) saturate(140%);
     -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    transition: background 300ms ease;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    transition: background 220ms;
   }
-  body:not(.draft-mode) { padding-top: 56px; }
-  body.draft-mode .vf-client-nav { display: none; }
+  /* In draft mode: banner (44px) sits above, nav sits below it */
+  body:not(.draft-mode) { padding-top: 60px; }
+  body.draft-mode .vf-client-nav { top: 44px; }
+  body.draft-mode { padding-top: 104px; }
 
-  .vf-client-nav-brand {
+  /* Logo / brand */
+  .vf-nav-brand {
     display: inline-flex;
     align-items: center;
-    line-height: 0;
+    cursor: pointer;
+    padding: 6px 12px;
+    margin: -6px -12px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid transparent;
     text-decoration: none;
     opacity: 0.9;
     transition: opacity 200ms;
+    line-height: 0;
   }
-  .vf-client-nav-brand:hover { opacity: 1; }
-  .vf-client-nav-logo { height: 20px; width: auto; display: block; }
+  .vf-nav-brand:hover { opacity: 1; }
+  .vf-nav-brand img { height: 24px; width: auto; display: block; }
 
-  .vf-client-nav-meta {
+  /* Right pill — quote ref + status chip (mirrors .nav .menu on valley.film) */
+  .vf-nav-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 999px;
+    padding: 4px;
+  }
+  .vf-nav-ref {
+    padding: 7px 14px;
+    border-radius: 999px;
     font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.30);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.45);
+    white-space: nowrap;
+  }
+  /* Status chip — blue tinted by default (To Sign), green when signed */
+  .vf-nav-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: rgba(74,124,255,0.18);
+    color: #9CB7FF;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    transition: background 200ms, color 200ms;
+  }
+  .vf-nav-status.is-signed {
+    background: rgba(16,185,129,0.15);
+    color: #34d399;
+  }
+  .vf-nav-status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.8;
+    flex-shrink: 0;
   }
 
   /* ── PILL FILTER CHIP ────────────────────────────────────────────────────── */
@@ -2612,10 +2659,16 @@
 <!-- Frosted-glass branded header, visible to clients only (hidden in draft mode).
      Mirrors the valley.film nav exactly so the quote feels like part of the site. -->
 <header class="vf-client-nav">
-  <a href="https://valley.film" target="_blank" rel="noopener" class="vf-client-nav-brand">
-    <img src="https://valley.film/assets/logo-white.png" alt="Valley Films" class="vf-client-nav-logo">
+  <a href="https://valley.film" target="_blank" rel="noopener" class="vf-nav-brand">
+    <img src="https://valley.film/assets/logo-white.png" alt="Valley Films">
   </a>
-  <span class="vf-client-nav-meta" style="color:rgba(255,255,255,0.5);">Design Template</span>
+  <div class="vf-nav-pill">
+    <span class="vf-nav-ref" id="vf-nav-quote-ref"></span>
+    <span class="vf-nav-status" id="vf-nav-status">
+      <span class="vf-nav-status-dot"></span>
+      <span id="vf-nav-status-text"></span>
+    </span>
+  </div>
 </header>
 
 <!-- ── HERO ───────────────────────────────────────── -->
@@ -2858,7 +2911,20 @@
   // draft-mode features that pre-fill from prior saves (e.g. brief Q&A inputs).
   window._editor_state_initial = {};
 
-  // Split rush addons: slower-than-2-weeks (daysOut > 14) come before the
+  // ── Populate client nav pill ──────────────────────────────────────────
+  (function() {
+    const refEl  = document.getElementById('vf-nav-quote-ref');
+    const statEl = document.getElementById('vf-nav-status');
+    const txtEl  = document.getElementById('vf-nav-status-text');
+    if (refEl && VF.quoteRef) refEl.textContent = VF.quoteRef;
+    if (statEl && txtEl) {
+      const signed = VF.financialStatus === 'Signed';
+      txtEl.textContent = signed ? 'Signed' : 'To Sign';
+      if (signed) statEl.classList.add('is-signed');
+    }
+  })();
+
+    // Split rush addons: slower-than-2-weeks (daysOut > 14) come before the
   // default 2-week tier; faster (≤14) come after. Both sorted SLOWEST → FASTEST
   // so the picker reads naturally as: 2 weeks → 1 week → 3 days → 24h.
   const _slowerAddons = (PRICING.rushAddons || []).filter(a => a.daysOut > 14).sort((a,b) => b.daysOut - a.daysOut);
@@ -4762,7 +4828,6 @@
         '<span class="ds-row"><kbd>⌘</kbd>+<kbd>S</kbd> Save Draft</span>' +
         '<span class="ds-row"><kbd>⌘</kbd>+<kbd>Enter</kbd> Approve &amp; Send</span>' +
         '<span class="ds-row"><kbd>⌘</kbd>+<kbd>P</kbd> View as client</span>' +
-        '<span class="ds-row"><kbd>⌘</kbd>+<kbd>R</kbd> Revert all edits</span>' +
         '<span class="ds-row"><kbd>⌘</kbd>+<kbd>K</kbd> Re-extract brief</span>' +
         '<span class="ds-row"><kbd>⌘</kbd>+<kbd>D</kbd> Add custom discount</span>' +
         '<span class="ds-row"><kbd>⌘</kbd>+<kbd>/</kbd> Jump to total</span>' +
@@ -4787,7 +4852,7 @@
     }
     _shortcutsBtn?.addEventListener('click', _toggleShortcuts);
 
-    // ── Keyboard shortcuts (Cmd+S/Enter/P/R/K/D/?, g+letter for nav, Esc) ──
+    // ── Keyboard shortcuts (Cmd+S/Enter/P/K/D/?, g+letter for nav, Esc) ──
     // Two-key vim-style "g <letter>" sequences for jumping between sections.
     // _gPending tracks whether the leading "g" was just pressed — cleared
     // after 1.2s (long enough to be deliberate, short enough not to surprise).
@@ -4842,18 +4907,7 @@
         document.getElementById('draft-preview-btn')?.click();
         return;
       }
-      // Cmd+R → Revert all edits. Note: browsers typically reserve Cmd+R for
-      // page reload; we only preventDefault when the revert button is
-      // present and the operator is in draft mode, otherwise the reload
-      // shortcut keeps working as expected.
-      if (mod && (e.key === 'r' || e.key === 'R')) {
-        const revertBtn = document.getElementById('draft-revert-btn');
-        if (revertBtn && document.body.classList.contains('draft-mode')) {
-          e.preventDefault();
-          revertBtn.click();
-          return;
-        }
-      }
+
       // Cmd+K → Re-extract brief from Notion (fastest path back when the
       // operator has updated the brief text and wants the LLM to re-parse).
       if (mod && (e.key === 'k' || e.key === 'K')) {
