@@ -1,20 +1,24 @@
-exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+export default async function handler(req, res) {
+  // CORS preflight
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(200).end();
   }
 
-  const NOTION_TOKEN  = process.env.NOTION_TOKEN;
-  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
-  let body;
-  try { body = JSON.parse(event.body); }
-  catch (e) { return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) }; }
+  const NOTION_TOKEN   = process.env.NOTION_TOKEN;
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
   const {
     pageId, quoteRef, signerName, signatureDataUrl,
     timestamp, projectTitle, total, clientCompany,
     productionDate, validUntil,
-  } = body;
+  } = req.body;
 
   const notionHeaders = {
     'Authorization': `Bearer ${NOTION_TOKEN}`,
@@ -22,7 +26,7 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json',
   };
 
-  // ── 1. Update Notion ──────────────────────────────
+  // ── 1. Update Notion ──────────────────────────────────────────────────────
   if (NOTION_TOKEN) {
     try {
       await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
@@ -41,7 +45,7 @@ exports.handler = async (event) => {
     }
   }
 
-  // ── 2. Send confirmation email via Resend ─────────
+  // ── 2. Send confirmation email via Resend ─────────────────────────────────
   if (RESEND_API_KEY) {
     try {
       const signedDate = new Date(timestamp).toLocaleDateString('en-GB', {
@@ -61,9 +65,9 @@ exports.handler = async (event) => {
           subject: `Quote Accepted: ${quoteRef} — ${signerName}`,
           html: `
             <div style="font-family:Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
-              <div style="background:#1A56FF;padding:28px 32px;border-radius:12px 12px 0 0;">
+              <div style="background:#095EDF;padding:28px 32px;border-radius:12px 12px 0 0;">
                 <p style="color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin:0 0 6px;">Valley Films</p>
-                <h1 style="color:white;margin:0;font-size:24px;font-weight:900;letter-spacing:-0.5px;">Quote Accepted</h1>
+                <h1 style="color:white;margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">Quote Accepted</h1>
               </div>
               <div style="border:1px solid #e4e4e4;border-top:none;padding:28px 32px;border-radius:0 0 12px 12px;">
                 <p style="font-size:14px;color:#555;margin:0 0 24px;">
@@ -104,9 +108,6 @@ exports.handler = async (event) => {
     }
   }
 
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    body: JSON.stringify({ success: true }),
-  };
-};
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  return res.status(200).json({ success: true });
+}
