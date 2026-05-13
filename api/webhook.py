@@ -183,6 +183,26 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(body).encode())
             return
 
+        # ── Manual status update from editor ──────────────────────────────────
+        if action == "update_status" and page_id:
+            new_status = data.get("status", "")
+            allowed = {"Draft", "Quotation Sent", "Viewed", "Revision Requested", "Signed"}
+            if new_status not in allowed:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "reason": f"unknown status '{new_status}'"}).encode())
+                return
+            ok = update_notion_status(page_id, new_status)
+            print(f"Manual status update: {page_id} → {new_status} ({'ok' if ok else 'failed'})")
+            self.send_response(200 if ok else 500)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok" if ok else "error"}).encode())
+            return
+
         # ── Approve: publish to client ─────────────────────────────────────────
         if action == "approved_for_sending" and page_id:
             filename = data.get("filename", "")
