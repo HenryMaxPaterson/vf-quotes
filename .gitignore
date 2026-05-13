@@ -6,3 +6,4 @@
 
 # Local preview output from test_local.sh — not for the public site.
 preview/
+.claude/
