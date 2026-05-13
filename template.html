@@ -778,7 +778,24 @@
     color: var(--vf-ink-4);
     opacity: 0.85;
   }
-  .line-items-table .li-row-hidden { display: none; }
+  /* Animated collapse — rows stay in the DOM as table-rows so the transition
+     can play. The td padding + line-height shrink to zero; opacity fades out. */
+  .line-items-table .li-row { transition: opacity 220ms ease; }
+  .line-items-table .li-row .li-cell {
+    transition: padding 220ms ease, line-height 220ms ease, border-color 220ms ease;
+  }
+  .line-items-table .li-row.li-row-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .line-items-table .li-row.li-row-hidden .li-cell {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 0;
+    border-color: transparent;
+    overflow: hidden;
+  }
+  .line-items-table .li-row.li-row-hidden .li-cell > * { visibility: hidden; }
   .line-items-table tbody tr.li-section-header:first-child td {
     padding-top: 4px;
   }
@@ -1568,8 +1585,18 @@
     border-color: var(--blue);
   }
 
-  .toggle-card-check svg { opacity: 0; transition: opacity 0.1s; }
-  .toggle-card.selected .toggle-card-check svg { opacity: 1; }
+  .toggle-card-check svg {
+    opacity: 0;
+    transform: scale(0.4);
+    transform-origin: center;
+    transition:
+      opacity 180ms ease,
+      transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .toggle-card.selected .toggle-card-check svg {
+    opacity: 1;
+    transform: scale(1);
+  }
 
   .toggle-card-body { flex: 1; min-width: 0; }
 
@@ -1958,28 +1985,42 @@
     gap: 10px;
     flex-shrink: 0;
   }
+  /* Visual grouping in the banner: a small thin divider between groups
+     (drawn as a sibling pseudo-element on the next button), buttons keep
+     their pill shape. */
   .draft-banner-right #draft-preview-btn {
-    margin-left: 8px;
-    border-left: 1px solid rgba(255,255,255,0.10);
-    padding-left: 16px;
-    border-radius: 0;
-    background: transparent !important;
+    position: relative;
+    margin-left: 14px;
+  }
+  .draft-banner-right #draft-preview-btn::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 14px;
+    background: rgba(255,255,255,0.10);
   }
   .draft-banner-right #draft-revert-btn { margin-right: 4px; }
-  .draft-banner-right #draft-approve-btn {
-    margin-left: 6px;
-  }
-  /* Subtle separator between Heads up / Changes / Shortcuts buttons */
+  .draft-banner-right #draft-approve-btn { margin-left: 6px; }
+
+  /* Subtle separator between Heads-up / Changes / Shortcuts groups */
   .draft-banner-center #draft-changes-btn {
-    border-left: 1px solid rgba(255,255,255,0.10);
-    padding-left: 12px;
-    margin-left: 4px;
-    border-radius: 0;
-    background: transparent !important;
+    position: relative;
+    margin-left: 12px;
   }
-  .draft-banner-center #draft-shortcuts-btn {
-    margin-left: 2px;
+  .draft-banner-center #draft-changes-btn::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 12px;
+    background: rgba(255,255,255,0.10);
   }
+  .draft-banner-center #draft-shortcuts-btn { margin-left: 2px; }
 
   .draft-approve-btn {
     /* Pill primary CTA — matches the website's nav .cta button. */
@@ -2732,12 +2773,42 @@
   /* When the deliverables section is hidden in the live editor, also hide
      the "+ Restore" button while previewing as client. */
   body.client-preview #deliv-section-restore { display: none !important; }
-  /* Visual cue on the preview button when active. */
-  body.client-preview #draft-preview-btn {
-    background: rgba(255,255,255,0.18);
-    color: white;
-    border-color: rgba(255,255,255,0.45);
+  /* Visual cue on the preview button when active. Doubled-up selector
+     (id + .is-active) gives it sufficient specificity to win over any
+     other rule that targets the button, and !important on the colour
+     keeps it safe from future selector additions. */
+  body.client-preview #draft-preview-btn,
+  #draft-preview-btn.is-active {
+    background: var(--vf-blue) !important;
+    color: white !important;
+    border-color: var(--vf-blue) !important;
+    box-shadow: 0 2px 10px rgba(9,94,223,0.32);
   }
+  body.client-preview #draft-preview-btn:hover,
+  #draft-preview-btn.is-active:hover {
+    background: var(--vf-blue-500) !important;
+    border-color: var(--vf-blue-500) !important;
+  }
+  /* "Previewing as client" pill badge floats top-center of the banner when active */
+  body.client-preview #draft-banner::after {
+    content: 'PREVIEWING AS CLIENT';
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--vf-blue);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    padding: 5px 14px;
+    border-radius: 999px;
+    box-shadow: 0 4px 14px rgba(9,94,223,0.30);
+    pointer-events: none;
+    z-index: 1000;
+  }
+  body.client-preview #draft-banner { position: relative; }
   .addon-add-plus  { font-size: 28px; line-height: 1; font-weight: 300; }
   .addon-add-label { font-size: 12px; font-weight: 500; }
 
@@ -3118,6 +3189,251 @@
     font-weight: 700;
   }
 
+  /* ── Generic confirm modal ────────────────────────────────────────────── */
+  #vf-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(7,8,12,0.42);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: vf-fade-in 140ms ease;
+  }
+  #vf-confirm-overlay.open { display: flex; }
+  #vf-confirm-card {
+    background: white;
+    border-radius: 18px;
+    padding: 28px 28px 22px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 24px 72px rgba(10,15,26,0.18), 0 4px 12px rgba(10,15,26,0.06);
+    animation: vf-slide-up 200ms ease;
+  }
+  #vf-confirm-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--vf-ink);
+    margin-bottom: 12px;
+  }
+  #vf-confirm-body {
+    font-size: 14px;
+    color: var(--vf-ink-2);
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+  .vf-confirm-recap {
+    background: rgba(9,94,223,0.04);
+    border: 1px solid rgba(9,94,223,0.10);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .vf-confirm-recap > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .vf-confirm-recap span {
+    color: var(--vf-ink-3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .vf-confirm-recap strong {
+    color: var(--vf-ink);
+    font-weight: 600;
+    font-size: 14px;
+    text-align: right;
+  }
+  #vf-confirm-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  #vf-confirm-cancel, #vf-confirm-ok {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 150ms, border-color 150ms, color 150ms, transform 150ms;
+  }
+  #vf-confirm-cancel {
+    background: transparent;
+    color: var(--vf-ink-2);
+    border-color: rgba(10,15,26,0.14);
+  }
+  #vf-confirm-cancel:hover {
+    background: rgba(10,15,26,0.04);
+    color: var(--vf-ink);
+  }
+  #vf-confirm-ok {
+    background: var(--vf-blue);
+    color: white;
+    border-color: var(--vf-blue);
+  }
+  #vf-confirm-ok:hover {
+    background: var(--vf-blue-500);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(9,94,223,0.25);
+  }
+  #vf-confirm-ok:focus-visible,
+  #vf-confirm-cancel:focus-visible {
+    outline: 3px solid rgba(9,94,223,0.30);
+    outline-offset: 2px;
+  }
+
+  
+  /* ── Mobile editor banner: tighter layout, hide non-essentials ─────── */
+  @media (max-width: 760px) {
+    #draft-banner-inner {
+      padding: 8px 12px;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .draft-banner-left { font-size: 11px; gap: 4px; }
+    .draft-mode-text { display: none; }
+    .draft-banner-center { gap: 2px; flex: 0 0 auto; }
+    .draft-banner-center #draft-heads-btn span:not(.dh-count),
+    .draft-banner-center #draft-changes-btn span:not(.dc-count-badge) { display: none; }
+    .draft-banner-center #draft-changes-btn::before { display: none; }
+    .draft-banner-right { gap: 6px; }
+    .draft-banner-right #draft-preview-btn::before { display: none; }
+    .draft-banner-right #draft-preview-btn {
+      padding: 6px 10px;
+      margin-left: 0;
+    }
+    .draft-banner-right #draft-preview-btn span,
+    .draft-banner-right #draft-revert-btn { display: none; }
+    #draft-total-display, #draft-autosave-indicator {
+      display: none;
+    }
+    .draft-approve-btn { padding: 7px 14px; font-size: 12px; }
+  }
+
+  /* ── #5 Focus-visible rings for keyboard navigation ─────────────────── */
+  /* Light blue ring on interactive elements when reached via keyboard.
+     We intentionally use :focus-visible (not :focus) so mouse users don't
+     see rings on every click. */
+  [data-editable]:focus-visible,
+  .pill-btn:focus-visible,
+  .toggle-card:focus-visible,
+  .pkg-card:focus-visible,
+  .stepper-btn:focus-visible,
+  .addon-qty-btn:focus-visible,
+  .draft-approve-btn:focus-visible,
+  .draft-save-btn:focus-visible,
+  .accept-btn:focus-visible,
+  .vf-nav-status:focus-visible,
+  .vf-pw-input:focus-visible,
+  .vf-pw-submit:focus-visible {
+    outline: 3px solid rgba(9,94,223,0.34);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+  .pill-btn:focus-visible,
+  .vf-nav-status:focus-visible,
+  .draft-approve-btn:focus-visible,
+  .draft-save-btn:focus-visible,
+  .accept-btn:focus-visible {
+    border-radius: 999px;
+  }
+  .stepper-btn:focus-visible,
+  .addon-qty-btn:focus-visible { border-radius: 9px; }
+  /* Section header (accordion) keyboard activation */
+  .line-items-table .li-section-header.is-collapsible:focus-visible td {
+    outline: 3px solid rgba(9,94,223,0.34);
+    outline-offset: -2px;
+  }
+
+  /* ── #7 Body fade-in on init ─────────────────────────────────────────── */
+  body { opacity: 0; transition: opacity 220ms ease; }
+  body.vf-ready { opacity: 1; }
+
+  /* ── #8 Location link visible hover affordance ───────────────────────── */
+  .brief-item-value a[href*="google.com/maps"] {
+    border-bottom: 1px dashed rgba(10,15,26,0.18);
+    transition: border-color 150ms, color 150ms;
+  }
+  .brief-item-value a[href*="google.com/maps"]:hover {
+    color: var(--vf-blue) !important;
+    border-bottom-color: var(--vf-blue);
+  }
+
+  /* ── #9 Status chip subtle dropdown affordance for clients ───────────── */
+  /* On hover the chip lifts slightly so clients understand it's a state badge
+     (interactive in editor only — clients can't click it). */
+  .vf-nav-status:hover { filter: brightness(1.06); }
+
+  /* ── #10 Per-section subtotal — clearer hierarchy when collapsed ─────── */
+  .line-items-table .li-section-header.is-collapsible.is-expanded .li-section-subtotal {
+    opacity: 0.7;
+    font-weight: 500;
+  }
+  .line-items-table .li-section-header.is-collapsible:not(.is-expanded) .li-section-subtotal {
+    color: var(--vf-blue);
+    font-weight: 700;
+    font-size: 12px;
+    opacity: 1;
+  }
+  .line-items-table .li-section-header.is-collapsible:not(.is-expanded) .li-section-count {
+    color: var(--vf-blue);
+    opacity: 0.7;
+  }
+
+  /* ── #6 Print styles — clean printable quote ──────────────────────────── */
+  @media print {
+    @page { margin: 14mm 12mm; }
+    body { background: white !important; opacity: 1 !important; }
+    /* Hide all editor chrome */
+    #draft-banner, .vf-client-nav, #vf-password-gate, #vf-confirm-overlay,
+    #vf-modal-overlay, .cta-section, .mega-footer, .draft-add-row-btn,
+    .draft-remove-btn, .draft-remove-btn-inline, .li-row-remove,
+    .section-remove-btn, .addon-add-card, .discount-add-card, #addon-add-card,
+    #discount-add-card, #line-items-add-btn, .li-section-header.is-collapsible .li-section-chevron,
+    .pill-btn, .toggle-card, .pkg-card, .toggle-cards, .stepper-btn { display: none !important; }
+    /* Expand T&C accordion so it always prints in full */
+    details.tnc-accordion { display: block !important; }
+    details.tnc-accordion[open] > summary, details.tnc-accordion > summary {
+      list-style: none;
+      cursor: default;
+      padding: 0;
+      margin-bottom: 12px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .tnc-chevron { display: none !important; }
+    details.tnc-accordion > .tnc-body {
+      display: block !important;
+      max-height: none !important;
+      padding: 0 !important;
+    }
+    /* Force-show line items table fully expanded — no collapse */
+    .li-row-hidden { display: table-row !important; }
+    .li-section-header.is-collapsible { background: transparent !important; }
+    /* Page break helpers */
+    .closing-section, .light-section, .white-section { break-inside: avoid; }
+    .section-heading { break-after: avoid; }
+    /* Print-friendly colours */
+    .hero, .closing-section { background: white !important; color: black !important; }
+    .hero-title em, .section-heading em, .closing-section h2 em { color: var(--vf-blue) !important; }
+    a[href]::after { content: ""; }   /* no link URLs in margins */
+    /* Force-show all internal brief items for the operator's printed copy */
+    .brief-item-internal { display: block !important; background: white !important; border: 1px solid #ccc !important; }
+  }
+
   /* ── PASSWORD GATE ────────────────────────────────────────────────────── */
   #vf-password-gate {
     position: fixed;
@@ -3299,6 +3615,18 @@
 <!-- ── Modal dialog (Batch 3 — replaces window.prompt chains) ── -->
 <div id="vf-modal-overlay" role="dialog" aria-modal="true">
   <div id="vf-modal-box"></div>
+</div>
+
+<!-- ── Generic confirm modal (for irreversible actions) ────────────────── -->
+<div id="vf-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="vf-confirm-title">
+  <div id="vf-confirm-card">
+    <div id="vf-confirm-title">Are you sure?</div>
+    <div id="vf-confirm-body"></div>
+    <div id="vf-confirm-actions">
+      <button type="button" id="vf-confirm-cancel">Cancel</button>
+      <button type="button" id="vf-confirm-ok">Confirm</button>
+    </div>
+  </div>
 </div>
 
 <!-- ── CLIENT NAV ─────────────────────────────────── -->
@@ -3629,6 +3957,42 @@
     setTimeout(() => input.focus(), 80);
   })();
 
+  // ── Generic confirm modal helper (Promise-based) ────────────────────────
+  // Used for irreversible actions like "Send to client". Returns true/false.
+  function _vfConfirm(opts) {
+    return new Promise((resolve) => {
+      const wrap = document.getElementById('vf-confirm-overlay');
+      const card = document.getElementById('vf-confirm-card');
+      const ttl  = document.getElementById('vf-confirm-title');
+      const bod  = document.getElementById('vf-confirm-body');
+      const ok   = document.getElementById('vf-confirm-ok');
+      const cn   = document.getElementById('vf-confirm-cancel');
+      if (!wrap || !card) { resolve(window.confirm(opts.title || 'Confirm?')); return; }
+      ttl.textContent = opts.title || 'Are you sure?';
+      bod.innerHTML   = opts.body  || '';
+      ok.textContent  = opts.confirm || 'Confirm';
+      cn.textContent  = opts.cancel  || 'Cancel';
+      function close(val) {
+        wrap.classList.remove('open');
+        ok.removeEventListener('click', onOk);
+        cn.removeEventListener('click', onCancel);
+        wrap.removeEventListener('click', onBg);
+        document.removeEventListener('keydown', onKey);
+        setTimeout(() => resolve(val), 120);
+      }
+      function onOk()     { close(true); }
+      function onCancel() { close(false); }
+      function onBg(e)    { if (e.target === wrap) close(false); }
+      function onKey(e)   { if (e.key === 'Escape') close(false); if (e.key === 'Enter') close(true); }
+      ok.addEventListener('click', onOk);
+      cn.addEventListener('click', onCancel);
+      wrap.addEventListener('click', onBg);
+      document.addEventListener('keydown', onKey);
+      wrap.classList.add('open');
+      setTimeout(() => ok.focus(), 50);
+    });
+  }
+
   // ── Populate client nav pill ──────────────────────────────────────────
   const _STATUS_OPTIONS = [
     { value: 'Draft',              label: 'Draft',              color: '#6B7280' },
@@ -3656,7 +4020,7 @@
     if (cls) statEl.classList.add(cls);
     const opt = _STATUS_OPTIONS.find(o => o.value === status);
     // Clients see "To Sign" for "Quotation Sent"; editors see the real status name
-    const _editorMode = VF.isDraft && new URLSearchParams(window.location.search).get('view') !== 'client';
+    const _editorMode = VF.isDraft && new URLSearchParams(window.location.search).get('view') !== 'client' && !document.body.classList.contains('client-preview');
     const _label = (status === 'Quotation Sent' && !_editorMode) ? 'To Sign' : (opt ? opt.label : status);
     txtEl.textContent = _label;
   }
@@ -5495,13 +5859,20 @@
     // leave draft mode. Toggling back is a single click.
     {
       const _previewBtn = document.getElementById('draft-preview-btn');
+      // Cache the original button HTML so we can restore it on toggle-off.
+      const _previewBtnOriginalHTML = _previewBtn ? _previewBtn.innerHTML : '';
+      const _previewBtnActiveHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M3 3l18 18"/><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828"/><path d="M16.681 16.673A8.717 8.717 0 0 1 12 18c-7 0-11-6-11-6a18.5 18.5 0 0 1 3.708-4.297M6.34 6.34A18.95 18.95 0 0 1 12 6c7 0 11 6 11 6a18.83 18.83 0 0 1-1.66 2.347"/></svg>Exit preview';
       _previewBtn?.addEventListener('click', () => {
         // Toggle client-preview class on the SAME tab — preserves in-memory _pstate
         // (addon selections etc.) so the total stays accurate. The banner stays
         // visible so they can flip back; only the editor controls hide.
         const isOn = document.body.classList.toggle('client-preview');
         _previewBtn.classList.toggle('is-active', isOn);
-        // Recompute the total in case anything CSS-driven affected the layout
+        _previewBtn.innerHTML = isOn ? _previewBtnActiveHTML : _previewBtnOriginalHTML;
+        // Refresh status chip label (shows "To Sign" in client preview, "Quotation Sent" in editor)
+        try { _applyStatusChip(VF.financialStatus || 'Quotation Sent'); } catch (_) {}
+        // Force a recompute so anything CSS-driven (visibility of editor totals
+        // vs. baseline) is in sync. Defensive — _updateTotal exists in scope.
         try { _updateTotal(); } catch (_) {}
       });
     }
@@ -7314,6 +7685,28 @@
 
     // ── Approve & Send handler ────────────────────────────────────────────────
     document.getElementById('draft-approve-btn')?.addEventListener('click', async () => {
+      // ── Approve & Send confirmation ──────────────────────────────────────
+      // Publishing is irreversible from the editor (flips isDraft to false,
+      // hits Notion, may trigger email). Surface a 2-step confirm with a
+      // recap so an accidental click can't ship a half-finished quote.
+      {
+        const _total = (typeof _computeTotal === 'function' ? _computeTotal() : null);
+        const _totalStr = _total !== null ? _fmtGBP(_total) : VF.total;
+        const _valid = VF.validUntil || '—';
+        const _client = (VF.clientCompany || VF.clientName || 'the client');
+        const _ok = await _vfConfirm({
+          title: 'Send this quote?',
+          body:
+            '<div class="vf-confirm-recap"><div><span>Client</span><strong>' + _client + '</strong></div>' +
+            '<div><span>Total</span><strong>' + _totalStr + '</strong></div>' +
+            '<div><span>Valid until</span><strong>' + _valid + '</strong></div></div>' +
+            '<p style="margin-top:14px;font-size:12px;color:var(--vf-ink-3);">Once sent, the quote becomes visible to the client and Notion status flips to "Quotation Sent". You can still edit later, but the client will already have seen this version.</p>',
+          confirm: 'Send to client',
+          cancel:  'Not yet',
+        });
+        if (!_ok) return;
+      }
+
       const btn = document.getElementById('draft-approve-btn');
       btn.textContent = 'Publishing…';
       btn.disabled = true;
@@ -7685,6 +8078,18 @@
   window.addEventListener('scroll', update, { passive: true });
   update();
 })();
+  // ── Body fade-in: switch off the 0 opacity now that init is wired ────
+  (function _vfReady() {
+    function go() {
+      requestAnimationFrame(() => document.body.classList.add('vf-ready'));
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', go, { once: true });
+    } else {
+      go();
+    }
+  })();
+
 </script>
 </body>
 </html>
