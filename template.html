@@ -3456,45 +3456,15 @@
     padding-top: 64px;
     padding-bottom: 88px;
   }
+
+  /* Signed state: Approve & Send is no longer relevant — swap it for a
+     clearly-marked "Download PDF" affordance in the same banner slot. */
+  body.is-signed #draft-approve-btn { display: none !important; }
+  body.is-signed #draft-download-pdf-btn { display: inline-flex !important; align-items: center; }
   body.is-signed .accepted-badge {
     background: rgba(16,185,129,0.10);
     color: #047857;
     border: 1px solid rgba(16,185,129,0.30);
-  }
-
-    /* ── #4 Hero kinetic marquee — slow phase strip mirroring valley.film
-     hero motion. Pure CSS animation; pauses on hover so labels stay legible. */
-  .hero-marquee-strip {
-    position: relative;
-    margin-top: 32px;
-    overflow: hidden;
-    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-  }
-  .hero-marquee-track {
-    display: inline-flex;
-    gap: 28px;
-    white-space: nowrap;
-    animation: hero-marquee-scroll 36s linear infinite;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--vf-ink-3);
-  }
-  .hero-marquee-track:hover { animation-play-state: paused; }
-  .hero-marquee-track span { display: inline-flex; align-items: center; gap: 28px; }
-  .hero-marquee-track .dot {
-    display: inline-block;
-    width: 4px; height: 4px;
-    border-radius: 50%;
-    background: var(--vf-blue);
-    opacity: 0.55;
-  }
-  @keyframes hero-marquee-scroll {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
   }
 
   /* ── #5 Section transition glows — soft blue radials between sections ──── */
@@ -3732,6 +3702,7 @@
       <button id="draft-preview-btn" class="draft-save-btn" title="Preview what the client will see (hides all editor controls)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client</button>
       <button id="draft-revert-btn" class="draft-save-btn" title="Undo all edits and restore the original quote">↺ Revert</button>
       <button id="draft-approve-btn" class="draft-approve-btn">Approve &amp; Send →</button>
+      <button id="draft-download-pdf-btn" class="draft-approve-btn" title="Download the signed PDF copy" style="display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF</button>
     </div>
   </div>
   <!-- ── Inline warnings strip — only shown when LLM flagged issues/questions/QC ── -->
@@ -3789,13 +3760,6 @@
     <div class="hero-sub">
       <strong data-editable data-single-line>Prepared for Client Name, Company Ltd.</strong>
       <a href="https://www.notion.so/" target="_blank" rel="noopener" class="client-notion-link" title="Open this client in Notion (Buyer Type, multiplier, etc.)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Edit client in Notion</a>
-    </div>
-    <!-- #4 Hero kinetic marquee — phase labels scrolling subtly under the title -->
-    <div class="hero-marquee-strip" aria-hidden="true">
-      <div class="hero-marquee-track">
-        <span>Brief<span class="dot"></span>Crew<span class="dot"></span>Camera<span class="dot"></span>Post<span class="dot"></span>Delivery<span class="dot"></span>Sign<span class="dot"></span></span>
-        <span>Brief<span class="dot"></span>Crew<span class="dot"></span>Camera<span class="dot"></span>Post<span class="dot"></span>Delivery<span class="dot"></span>Sign<span class="dot"></span></span>
-      </div>
     </div>
   </div>
 </div>
@@ -3887,6 +3851,9 @@
       <span>Total Confirmed</span>
       <strong id="conf-total"></strong>
     </div>
+  </div>
+  <div style="display:flex;justify-content:center;margin-top:24px;">
+    <button type="button" id="download-conf-btn" class="accept-btn" style="display:inline-flex;align-items:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download signed PDF</button>
   </div>
 </div>
 <!-- ── CLOSING ────────────────────────────────────── -->
@@ -4261,22 +4228,13 @@
       dropdown.classList.contains('open') ? closeDropdown() : openDropdown();
     });
 
-    dropdown.addEventListener('click', function(e) {
-      const btn = e.target.closest('.vf-status-option');
-      if (!btn) return;
-      const newStatus = btn.dataset.status;
-      closeDropdown();
-
-      // Optimistic update
+    // Internal: actually apply the new status (after any confirmation flow).
+    function _commitStatusChange(newStatus) {
       _applyStatusChip(newStatus);
       VF.financialStatus = newStatus;
-
-      // Rebuild active state in dropdown
       dropdown.querySelectorAll('.vf-status-option').forEach(b => {
         b.classList.toggle('active', b.dataset.status === newStatus);
       });
-
-      // Sync to Notion
       if (VF.pageId && VF.pageId !== 'template') {
         const ind = document.getElementById('draft-autosave-indicator');
         if (ind) { ind.textContent = 'Saving…'; ind.className = 'saving'; }
@@ -4295,6 +4253,67 @@
           setTimeout(() => { if (ind) { ind.textContent = ''; ind.className = ''; } }, 3000);
         });
       }
+    }
+
+    // Revert the page out of the signed state — undoes everything _showAccepted
+    // applied so the editor can re-send the quote. Local-only changes; the
+    // status PATCH to Notion happens in _commitStatusChange.
+    function _revertSignedState() {
+      // Clear the persisted acceptance snapshot so the page won't re-enter
+      // signed state on next reload.
+      try { localStorage.removeItem('vf_accepted_' + VF.quoteRef); } catch (_) {}
+      // Body class — un-hides closing-section thank-you + pricing + CTA via CSS
+      document.body.classList.remove('is-signed');
+      // CTA: reset to "Accept Quote" initial view
+      const ctaInit = document.getElementById('cta-initial');
+      const signForm = document.getElementById('sign-form');
+      const accepted = document.getElementById('accepted-state');
+      if (ctaInit)  ctaInit.style.display  = 'block';
+      if (signForm) signForm.style.display = 'none';
+      if (accepted) accepted.style.display = 'none';
+      // Confirmation summary: hide
+      const conf = document.getElementById('confirmed-summary');
+      if (conf) conf.style.display = 'none';
+      // Hero sub: restore original "Prepared for ..." line
+      const heroSub = document.querySelector('.hero-sub strong');
+      if (heroSub) {
+        heroSub.textContent = 'Prepared for ' + (VF.clientName || 'Client Name')
+                              + (VF.clientCompany ? ', ' + VF.clientCompany : '');
+      }
+      // Close T&C accordion (force-opened on sign)
+      document.querySelectorAll('details.tnc-accordion').forEach(d => { d.open = false; });
+      // Clear the signature canvas if present so a future sign starts fresh
+      try { if (typeof _sigPad !== 'undefined' && _sigPad) _sigPad.clear(); } catch (_) {}
+    }
+
+    dropdown.addEventListener('click', async function(e) {
+      const btn = e.target.closest('.vf-status-option');
+      if (!btn) return;
+      const newStatus = btn.dataset.status;
+      closeDropdown();
+
+      // If we're moving FROM Signed TO any other status, confirm — this
+      // undoes the client's acceptance locally and reverts the page state.
+      const wasSigned = (VF.financialStatus === 'Signed') || document.body.classList.contains('is-signed');
+      if (wasSigned && newStatus !== 'Signed' && typeof _vfConfirm === 'function') {
+        const ok = await _vfConfirm({
+          title:   'Revert signed quote?',
+          body:    '<p style="margin-bottom:14px;">This will mark the quote as <strong>' + newStatus + '</strong> and reset the page back to its pre-sign state. The client will be able to sign again.</p>' +
+                   '<p style="font-size:12px;color:var(--vf-ink-3);">Notion status updates to "' + newStatus + '". The client\'s signature record is removed from this device — historical record in Notion remains for audit.</p>',
+          confirm: 'Revert to ' + newStatus,
+          cancel:  'Keep signed',
+        });
+        if (!ok) {
+          // User backed out — re-apply the original active state in the dropdown
+          dropdown.querySelectorAll('.vf-status-option').forEach(b => {
+            b.classList.toggle('active', b.dataset.status === VF.financialStatus);
+          });
+          return;
+        }
+        _revertSignedState();
+      }
+
+      _commitStatusChange(newStatus);
     });
 
     // Close on outside click
@@ -5360,6 +5379,22 @@
 
     // Enable status chip selector now that draft-mode class is on body
     _initStatusSelector();
+
+    // Banner-level "Download PDF" button — only visible when signed.
+    // Reads the persisted acceptance snapshot and re-generates the PDF.
+    document.getElementById('draft-download-pdf-btn')?.addEventListener('click', () => {
+      const key = 'vf_accepted_' + VF.quoteRef;
+      let snap = null;
+      try { snap = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) {}
+      const name = (snap && snap.name) || VF.clientName || '';
+      const date = (snap && snap.date) || '';
+      const total = (snap && snap.total) || VF.total;
+      try {
+        _generatePDF(name, null, date, total, snap || {});
+      } catch (e) {
+        alert('Could not generate PDF: ' + (e && e.message ? e.message : 'unknown error'));
+      }
+    });
 
     // ── Preflight: verify autosave will work BEFORE the operator types ────
     // Hits a webhook endpoint that confirms the `Editor State` Notion
