@@ -53,6 +53,50 @@ def update_notion_editor_state(page_id, state):
     response.raise_for_status()
 
 
+def update_notion_property(page_id, prop_name, prop_type, value):
+    """PATCH a single Notion property on a Production page.
+
+    prop_type ∈ {'text', 'rich_text', 'title', 'number', 'date', 'select'}.
+    Returns (ok, error_msg).
+    """
+    url = f"https://api.notion.com/v1/pages/{page_id}"
+    if prop_type == "number":
+        try: val = float(value) if value not in (None, "") else None
+        except Exception: return False, f"bad number '{value}'"
+        prop = {"number": val}
+    elif prop_type == "date":
+        prop = {"date": {"start": value}} if value else {"date": None}
+    elif prop_type == "select":
+        prop = {"select": {"name": value}} if value else {"select": None}
+    elif prop_type in ("text", "rich_text"):
+        prop = {"rich_text": [{"text": {"content": str(value or "")}}]}
+    elif prop_type == "title":
+        prop = {"title": [{"text": {"content": str(value or "")}}]}
+    else:
+        return False, f"unsupported prop_type '{prop_type}'"
+
+    payload = {"properties": {prop_name: prop}}
+    try:
+        r = requests.patch(url, headers=HEADERS, json=payload, timeout=10)
+        if r.status_code >= 400:
+            return False, f"Notion {r.status_code}: {r.text[:160]}"
+        return True, ""
+    except Exception as e:
+        return False, str(e)
+
+
+# Map our snake_case field names → (Notion property name, type)
+PROD_FIELD_MAP = {
+    "project_title":     ("Project Title", "title"),
+    "production_date":   ("Production Date", "date"),
+    "shooting_days":     ("Shooting Days", "number"),
+    "location":          ("Location", "rich_text"),
+    "job_type":          ("Job Type", "select"),
+    "default_delivery":  ("Default Delivery", "select"),
+    "quote_type":        ("Quote Type", "select"),
+}
+
+
 # ── GitHub helpers ─────────────────────────────────────────────────────────────
 
 def _gh_headers():
@@ -203,6 +247,39 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"status": "ok" if ok else "error"}).encode())
             return
 
+        # ── Production field PATCH (editor changes a brief-grid field) ─────────
+        # Editor sends { field, field_type, value }. We map the field to its
+        # Notion property + type, then PATCH. Errors return 200 + ok:false so
+        # the operator sees the inline pill instead of a generic 400.
+        if action == "update_production_field" and page_id:
+            field = (data.get("field") or "").strip()
+            value = data.get("value")
+            field_type = data.get("field_type") or ""
+            mapping = PROD_FIELD_MAP.get(field)
+            if not mapping:
+                # Fallback: use snake_case → Title Case + the type hint sent
+                prop_name = " ".join(p.capitalize() for p in field.split("_"))
+                prop_type = field_type or "rich_text"
+            else:
+                prop_name, prop_type = mapping
+                if field_type:
+                    prop_type = field_type
+            ok, err = update_notion_property(page_id, prop_name, prop_type, value)
+            print(f"update_production_field {field}={value!r} → {prop_name} ({prop_type}): "
+                  + ("ok" if ok else f"failed: {err}"))
+            # Quote-type / default-delivery / job-type changes need a regen on
+            # the mac mini publisher to take effect — flag that to the client
+            # so it can show a "regenerating…" status.
+            regen_queued = ok and field in ("quote_type", "default_delivery", "job_type", "shooting_days")
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            body = {"ok": ok, "field": field, "value": value, "regen_queued": regen_queued}
+            if not ok: body["error"] = err
+            self.wfile.write(json.dumps(body).encode())
+            return
+
         # ── Approve: publish to client ─────────────────────────────────────────
         if action == "approved_for_sending" and page_id:
             filename = data.get("filename", "")
@@ -225,12 +302,23 @@ class handler(BaseHTTPRequestHandler):
         # ── Client acceptance / signature ──────────────────────────────────────
         if action == "accepted" and page_id:
             update_notion_status(page_id, "Signed")
-            print(f"Set page {page_id} to Signed.")
+            # Capture client IP from the standard Vercel/Cloudflare proxy header.
+            # x-forwarded-for is a comma-separated list; the original client IP
+            # is always the first entry.
+            xff = self.headers.get('x-forwarded-for', '') or self.headers.get('X-Forwarded-For', '')
+            client_ip = (xff.split(',')[0].strip() if xff else
+                         self.headers.get('x-real-ip', '') or
+                         self.client_address[0])
+            print(f"Set page {page_id} to Signed. (client IP: {client_ip})")
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "success", "message": "Quote accepted and Notion updated!"}).encode())
+            self.wfile.write(json.dumps({
+                "status": "success",
+                "message": "Quote accepted and Notion updated!",
+                "ip": client_ip,
+            }).encode())
             return
 
         self.send_response(400)

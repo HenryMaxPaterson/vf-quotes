@@ -1655,7 +1655,7 @@
   /* ── PRICE BREAKDOWN ─────────────────────────── */
   .price-breakdown {
     margin-top: 32px;
-    border-radius: 16px;
+    border-radius: 18px;
     border: 1.5px solid var(--grey-100);
     overflow: hidden;
     background: var(--card-bg);
@@ -1665,7 +1665,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 24px;
+    padding: 14px 28px;
     font-size: 14px;
     color: var(--grey-600);
     font-weight: 500;
@@ -1685,8 +1685,8 @@
   .breakdown-group-head {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 0;
+    gap: 14px;
+    padding: 16px 28px;
     cursor: pointer;
     user-select: none;
   }
@@ -1733,10 +1733,11 @@
     max-height: 2000px;
   }
   .breakdown-group-body .breakdown-row {
-    padding-left: 22px;
+    padding: 12px 28px 12px 50px;
     font-size: 13px;
     color: var(--vf-ink-3);
     border-top: 1px solid var(--vf-line);
+    border-bottom: 0;
   }
   .breakdown-group-body .breakdown-row:first-child { border-top: none; }
 
@@ -1749,7 +1750,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 24px;
+    padding: 22px 28px 26px;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -2488,7 +2489,35 @@
   #draft-autosave-indicator.saved  { color: #86efac; }
   #draft-autosave-indicator.error  { color: #fca5a5; }
 
-  /* ── Shortcuts cheatsheet panel ───────────────────────────────────────── */
+  /* Wrap autosave + ∆ Changes so the button can sit hidden until hover */
+  .draft-autosave-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 4px;
+  }
+  .draft-autosave-wrap #draft-changes-btn {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+    margin-left: 8px;
+  }
+  /* Show ∆ Changes on hover of the autosave region OR when the panel is open */
+  .draft-autosave-wrap:hover #draft-changes-btn,
+  .draft-autosave-wrap #draft-changes-btn.is-open,
+  body.has-changes-open .draft-autosave-wrap #draft-changes-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Drop the leading divider when ∆ Changes is in its new position */
+  .draft-autosave-wrap #draft-changes-btn::before { display: none; }
+
+  /* ⌘ shortcuts button: visually hidden but still in the DOM so the
+     existing ? keyboard handler keeps working. The panel still toggles
+     when the user presses ?. */
+  #draft-shortcuts-btn { display: none !important; }
+
+    /* ── Shortcuts cheatsheet panel ───────────────────────────────────────── */
   #draft-shortcuts-panel {
     background: rgba(15,23,42,0.97);
     color: #e5e7eb;
@@ -2985,7 +3014,9 @@
     white-space: nowrap;
     transition: color 200ms;
   }
-  /* Status chip — mirrors .nav .menu .menu-cta exactly */
+  /* Status chip — pixel-matches valley.film .nav.is-light .menu .menu-cta:
+     subtle tinted-blue at rest, full vf-blue on hover. Status-state classes
+     below override for meaningful states (Signed/Viewed/Revision/Draft). */
   .vf-nav-status {
     display: inline-flex;
     align-items: center;
@@ -2994,13 +3025,20 @@
     margin-left: 4px;
     border: 0;
     border-radius: 999px;
-    background: var(--vf-blue);
-    color: white;
+    background: rgba(74,124,255,0.12);
+    color: var(--vf-blue);
+    font-family: var(--font-sans);
     font-weight: 600;
     font-size: 13px;
     letter-spacing: -0.005em;
     white-space: nowrap;
+    cursor: pointer;
     transition: background 200ms ease, color 200ms ease;
+  }
+  .vf-nav-status:hover,
+  .vf-nav-status.open {
+    background: var(--vf-blue);
+    color: white;
   }
   .vf-nav-status.is-signed {
     background: rgba(16,185,129,1);
@@ -3278,8 +3316,7 @@
     .draft-mode-text { display: none; }
     .draft-banner-center { gap: 2px; flex: 0 0 auto; }
     .draft-banner-center #draft-heads-btn span:not(.dh-count),
-    .draft-banner-center #draft-changes-btn span:not(.dc-count-badge) { display: none; }
-    .draft-banner-center #draft-changes-btn::before { display: none; }
+
     .draft-banner-right { gap: 6px; }
     .draft-banner-right #draft-preview-btn::before { display: none; }
     .draft-banner-right #draft-preview-btn {
@@ -3346,7 +3383,7 @@
   /* ── #9 Status chip subtle dropdown affordance for clients ───────────── */
   /* On hover the chip lifts slightly so clients understand it's a state badge
      (interactive in editor only — clients can't click it). */
-  .vf-nav-status:hover { filter: brightness(1.06); }
+
 
   /* ── #10 Per-section subtotal — clearer hierarchy when collapsed ─────── */
   .line-items-table .li-section-header.is-collapsible.is-expanded .li-section-subtotal {
@@ -3405,7 +3442,41 @@
     .brief-item-internal { display: block !important; background: white !important; border: 1px solid #ccc !important; }
   }
 
-  /* ── PASSWORD GATE ────────────────────────────────────────────────────── */
+  /* ── SIGNED STATE: page collapses to confirmation + T&C + footer ─── */
+  body.is-signed .cta-section,
+  body.is-signed #pricing-section { display: none; }
+  /* Closing section stays mounted but the "thank you" beat is hidden;
+     T&C accordion stays in place and is force-opened by _showAccepted JS. */
+  body.is-signed .closing-section h2,
+  body.is-signed .closing-section > p,
+  body.is-signed .signature-wrap,
+  body.is-signed .sig-name {
+    display: none;
+  }
+  body.is-signed .closing-section {
+    padding-top: 24px;
+    padding-bottom: 56px;
+    text-align: left;
+  }
+  /* Once open + locked, drop the chevron + hover affordance to communicate
+     "this is final — not togglable". */
+  body.is-signed details.tnc-accordion > summary { cursor: default; }
+  body.is-signed details.tnc-accordion .tnc-chevron { display: none; }
+  body.is-signed #draft-add-discount-btn { display: none !important; }
+  body.is-signed #confirmed-summary {
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 0%, rgba(9,94,223,0.07) 0%, transparent 70%),
+      var(--vf-bg);
+    padding-top: 64px;
+    padding-bottom: 88px;
+  }
+  body.is-signed .accepted-badge {
+    background: rgba(16,185,129,0.10);
+    color: #047857;
+    border: 1px solid rgba(16,185,129,0.30);
+  }
+
+    /* ── PASSWORD GATE ────────────────────────────────────────────────────── */
   #vf-password-gate {
     position: fixed;
     inset: 0;
@@ -3562,14 +3633,15 @@
       <span class="draft-mode-text">Template Review</span>
     </div>
     <div class="draft-banner-center" id="draft-edit-hint">
-      <span id="draft-edit-hint-text">Click any highlighted block to edit</span>
       <button type="button" id="draft-heads-btn" title="Heads-up notes" aria-label="Heads-up notes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Heads up</span><span class="dh-count" id="draft-heads-count">0</span></button>
-      <button type="button" id="draft-changes-btn" title="See what's different from the original quote" aria-label="What changed">∆ Changes<span class="dc-count-badge" id="draft-changes-count" style="display:none;">0</span></button>
-      <button type="button" id="draft-shortcuts-btn" title="Keyboard shortcuts" aria-label="Keyboard shortcuts">⌘</button>
+      <button type="button" id="draft-shortcuts-btn" title="Keyboard shortcuts (press ?)" aria-label="Keyboard shortcuts">⌘</button>
     </div>
     <div class="draft-banner-right">
       <span id="draft-total-display"></span>
-      <span id="draft-autosave-indicator"></span>
+      <span class="draft-autosave-wrap">
+        <span id="draft-autosave-indicator"></span>
+        <button type="button" id="draft-changes-btn" title="See what's different from the original quote" aria-label="What changed">∆ Changes<span class="dc-count-badge" id="draft-changes-count" style="display:none;">0</span></button>
+      </span>
       <button id="draft-preview-btn" class="draft-save-btn" title="Preview what the client will see (hides all editor controls)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client</button>
       <button id="draft-revert-btn" class="draft-save-btn" title="Undo all edits and restore the original quote">↺ Revert</button>
       <button id="draft-approve-btn" class="draft-approve-btn">Approve &amp; Send →</button>
@@ -3684,7 +3756,7 @@
 <div class="white-section" id="pricing-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">02</span> · Production Services</div>
   <div class="section-heading">The <em>Quotation</em></div>
-  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name" data-no-edit>Role</th><th class="li-th li-th-rate" data-no-edit>Rate</th><th class="li-th li-th-unit" data-no-edit>Unit</th><th class="li-th li-th-days" data-no-edit>Qty</th><th class="li-th li-th-subtotal" data-no-edit>Subtotal</th><th class="li-th li-th-actions" data-no-edit></th></tr></thead><tbody id="line-items-body"><tr class="li-row" data-li-id="li_5f4825fb" data-rate="375.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>2nd Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£375</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£375</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_4018ee86" data-rate="275.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£275</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£275</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5a53cb1a" data-rate="475.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Camera Operator</td><td class="li-cell li-rate" data-editable data-single-line>£475</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£475</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5c590c98" data-rate="175.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Colour Grade</td><td class="li-cell li-rate" data-editable data-single-line>£175</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£175</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_35cb5215" data-rate="18.00" data-days="1.00" data-unit="charge"><td class="li-cell li-name" data-editable data-single-line>Congestion Charge</td><td class="li-cell li-rate" data-editable data-single-line>£18</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">charge</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge" selected>charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£18</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8a0cbc7e" data-rate="700.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director</td><td class="li-cell li-rate" data-editable data-single-line>£700</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£700</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_46f0696f" data-rate="575.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director of Photography</td><td class="li-cell li-rate" data-editable data-single-line>£575</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£575</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8806565f" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Gaffer</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_82d07f1e" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Hero Edit (2–5 min)</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bae0c7ca" data-rate="600.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Long-form Edit (10 min+)</td><td class="li-cell li-rate" data-editable data-single-line>£600</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£600</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_634a7256" data-rate="0.55" data-days="1.00" data-unit="mile"><td class="li-cell li-name" data-editable data-single-line>Mileage</td><td class="li-cell li-rate" data-editable data-single-line>£0.55</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">mile</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile" selected>mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£0.55</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_7260296e" data-rate="550.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Producer</td><td class="li-cell li-rate" data-editable data-single-line>£550</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£550</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5f46e40d" data-rate="200.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Production Assistant (PA)</td><td class="li-cell li-rate" data-editable data-single-line>£200</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£200</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_057aa497" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Social Cut (30–60s)</td><td class="li-cell li-rate" data-editable data-single-line>£300</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_00b2f5ff" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Sound Recordist</td><td class="li-cell li-rate" data-editable data-single-line>£400</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£400</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_f7bceba6" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Spark</td><td class="li-cell li-rate" data-editable data-single-line>£300</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_b3f1bae8" data-rate="125.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Stills Cull + Edit</td><td class="li-cell li-rate" data-editable data-single-line>£125</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£125</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_2e5e3796" data-rate="3.60" data-days="1.00" data-unit="journey"><td class="li-cell li-name" data-editable data-single-line>TfL Journey</td><td class="li-cell li-rate" data-editable data-single-line>£3.60</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">journey</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey" selected>journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£3.60</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_0c160aa2" data-rate="65.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Transcoding / Delivery</td><td class="li-cell li-rate" data-editable data-single-line>£65</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£65</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bfd39ac0" data-rate="95.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£95</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£95</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="4" class="li-foot-label" data-no-edit>Subtotal</td><td class="li-foot-amount" id="line-items-subtotal" data-no-edit>£6,132</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><details class="tnc-accordion" id="equipment-accordion" open><summary>Equipment Package <span class="tnc-chevron">+</span></summary><div class="tnc-body" style="padding-top:16px;"><div id="equipment-text-block" data-editable data-equip-has-content="0"><span class="equip-empty-placeholder">No equipment list attached. <span class="equip-empty-prompt">Click here to type one.</span></span></div><div class="equip-helper" style="display:none;font-size:11px;color:var(--grey-500);margin-top:8px;font-style:italic;">Type your equipment list here. One item per line, or paste from anywhere. Saves automatically and sticks across regenerations.</div></div></details><div class="price-section-label" style="margin-bottom:14px;">Delivery</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn  selected" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45</span></button><button class="pill-btn" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div><div class="price-section-label" style="margin-bottom:14px;">Post-Production</div><div class="toggle-cards toggle-cards-grid" style="margin-bottom:28px;"><div class="toggle-card" data-postprod-id="34f47fd0-3620-81d5-9e6c-f22f2b06fa2f" data-price="200" data-base-price="200"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Additional Social Cut</div><div class="toggle-card-desc" data-editable>Extra cut beyond what is included in the package (up to 90s).</div></div><div class="toggle-card-price" data-editable data-single-line>+£200</div></div><div class="toggle-card" data-postprod-id="34f47fd0-3620-8134-9b43-de629d459f95" data-price="75" data-base-price="75"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Subtitles / Captions</div><div class="toggle-card-desc" data-editable>Burnt-in or SRT subtitles per video.</div></div><div class="toggle-card-price" data-editable data-single-line>+£75</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" id="discounts-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
+  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name" data-no-edit>Role</th><th class="li-th li-th-rate" data-no-edit>Rate</th><th class="li-th li-th-unit" data-no-edit>Unit</th><th class="li-th li-th-days" data-no-edit>Qty</th><th class="li-th li-th-subtotal" data-no-edit>Subtotal</th><th class="li-th li-th-actions" data-no-edit></th></tr></thead><tbody id="line-items-body"><tr class="li-row" data-li-id="li_46f0696f" data-rate="575.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director of Photography</td><td class="li-cell li-rate" data-editable data-single-line>£575</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£575</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_4018ee86" data-rate="275.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£275</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£275</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_00b2f5ff" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Sound Recordist</td><td class="li-cell li-rate" data-editable data-single-line>£400</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£400</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_82d07f1e" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Hero Edit (2–5 min)</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5c590c98" data-rate="175.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Colour Grade</td><td class="li-cell li-rate" data-editable data-single-line>£175</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£175</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bfd39ac0" data-rate="95.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£95</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£95</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="4" class="li-foot-label" data-no-edit>Subtotal</td><td class="li-foot-amount" id="line-items-subtotal" data-no-edit>£1,970</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><details class="tnc-accordion" id="equipment-accordion" open><summary>Equipment Package <span class="tnc-chevron">+</span></summary><div class="tnc-body" style="padding-top:16px;"><div id="equipment-text-block" data-editable data-equip-has-content="0"><span class="equip-empty-placeholder">No equipment list attached. <span class="equip-empty-prompt">Click here to type one.</span></span></div><div class="equip-helper" style="display:none;font-size:11px;color:var(--grey-500);margin-top:8px;font-style:italic;">Type your equipment list here. One item per line, or paste from anywhere. Saves automatically and sticks across regenerations.</div></div></details><div class="price-section-label" style="margin-bottom:14px;">Delivery</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn  selected" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45</span></button><button class="pill-btn" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div><div class="price-section-label" style="margin-bottom:14px;">Post-Production</div><div class="toggle-cards toggle-cards-grid" style="margin-bottom:28px;"><div class="toggle-card" data-postprod-id="34f47fd0-3620-81d5-9e6c-f22f2b06fa2f" data-price="200" data-base-price="200"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Additional Social Cut</div><div class="toggle-card-desc" data-editable>Extra cut beyond what is included in the package (up to 90s).</div></div><div class="toggle-card-price" data-editable data-single-line>+£200</div></div><div class="toggle-card" data-postprod-id="34f47fd0-3620-8134-9b43-de629d459f95" data-price="75" data-base-price="75"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Subtitles / Captions</div><div class="toggle-card-desc" data-editable>Burnt-in or SRT subtitles per video.</div></div><div class="toggle-card-price" data-editable data-single-line>+£75</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" id="discounts-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
 
   
 
@@ -3845,7 +3917,7 @@
 <script>
   // ── Quote data & pricing ─────────────────────────
   const VF     = {"pageId": "template", "quoteRef": "VF-0000", "clientName": "Client Name", "clientCompany": "Company Ltd.", "clientEmail": "client@example.com", "projectTitle": "Project Title", "productionDate": "TBC", "productionDateISO": "", "total": "TBC", "basePrice": 0, "validUntil": "[date]", "generatedDate": "", "quoteType": "Itemized", "jobType": "Social Content", "defaultPkgId": "", "isDraft": true, "financialStatus": "Quotation Sent", "briefIssues": "", "briefQuestions": "", "qcNotes": "", "warnings": [], "quoteUrl": "https://quotes.valley.film/template", "quoteFilename": "template.html"};
-  const PRICING = {"basePrice": 0, "expenses": 0, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-81e2-b77d-c78d07516482", "name": "Colour Grade / Transcode", "price": 350, "price_core": 350, "price_primary": 350, "price_premium": 350, "desc": "Simple transcoding of footage & colour grade to get this edit ready", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "discounts": [{"id": "35847fd0-3620-81b7-a90d-c464b52709d6", "name": "Multi-day: 3\u20135 days", "type": "Percentage", "value": 10, "desc": "Standard multi-day discount for shoots of 3\u20135 days. Auto-suggested when shooting_days is in this range.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}, {"id": "35847fd0-3620-8129-8cd1-cf0165312c45", "name": "Multi-day: 6+ days", "type": "Percentage", "value": 20, "desc": "Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days \u2265 6.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}], "packages": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "hdd_purchase", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "Standard Delivery", "travel": null, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null, "suggestedDiscounts": [], "lineItems": [{"id": "li_5f4825fb", "role_id": "35247fd0-3620-8161-88d3-d67b5f4825fb", "name": "2nd Assistant Camera", "rate": 375.0, "days": 1, "unit": "day", "subtotal": 375.0}, {"id": "li_4018ee86", "role_id": "34f47fd0-3620-81b5-ae9f-e9334018ee86", "name": "Assistant Camera", "rate": 275.0, "days": 1, "unit": "day", "subtotal": 275.0}, {"id": "li_5a53cb1a", "role_id": "34f47fd0-3620-81f6-8508-c4f45a53cb1a", "name": "Camera Operator", "rate": 475.0, "days": 1, "unit": "day", "subtotal": 475.0}, {"id": "li_5c590c98", "role_id": "34f47fd0-3620-81bd-a585-c0e35c590c98", "name": "Colour Grade", "rate": 175.0, "days": 1, "unit": "day", "subtotal": 175.0}, {"id": "li_35cb5215", "role_id": "35247fd0-3620-8092-9cb5-e6a135cb5215", "name": "Congestion Charge", "rate": 18.0, "days": 1, "unit": "charge", "subtotal": 18.0}, {"id": "li_8a0cbc7e", "role_id": "35247fd0-3620-81f7-af92-e16d8a0cbc7e", "name": "Director", "rate": 700.0, "days": 1, "unit": "day", "subtotal": 700.0}, {"id": "li_46f0696f", "role_id": "34f47fd0-3620-81be-8870-f75746f0696f", "name": "Director of Photography", "rate": 575.0, "days": 1, "unit": "day", "subtotal": 575.0}, {"id": "li_8806565f", "role_id": "35247fd0-3620-815d-98a6-e42a8806565f", "name": "Gaffer", "rate": 450.0, "days": 1, "unit": "day", "subtotal": 450.0}, {"id": "li_82d07f1e", "role_id": "34f47fd0-3620-815a-8b70-fdd982d07f1e", "name": "Hero Edit (2\u20135 min)", "rate": 450.0, "days": 1, "unit": "day", "subtotal": 450.0}, {"id": "li_bae0c7ca", "role_id": "34f47fd0-3620-81f2-9370-c167bae0c7ca", "name": "Long-form Edit (10 min+)", "rate": 600.0, "days": 1, "unit": "day", "subtotal": 600.0}, {"id": "li_634a7256", "role_id": "34f47fd0-3620-8145-a058-e0ce634a7256", "name": "Mileage", "rate": 0.55, "days": 1, "unit": "mile", "subtotal": 0.55}, {"id": "li_7260296e", "role_id": "35247fd0-3620-8178-ae82-f5277260296e", "name": "Producer", "rate": 550.0, "days": 1, "unit": "day", "subtotal": 550.0}, {"id": "li_5f46e40d", "role_id": "35247fd0-3620-8151-9809-e9ff5f46e40d", "name": "Production Assistant (PA)", "rate": 200.0, "days": 1, "unit": "day", "subtotal": 200.0}, {"id": "li_057aa497", "role_id": "34f47fd0-3620-815d-93d3-efcd057aa497", "name": "Social Cut (30\u201360s)", "rate": 300.0, "days": 1, "unit": "day", "subtotal": 300.0}, {"id": "li_00b2f5ff", "role_id": "35247fd0-3620-81bc-879f-ff9900b2f5ff", "name": "Sound Recordist", "rate": 400.0, "days": 1, "unit": "day", "subtotal": 400.0}, {"id": "li_f7bceba6", "role_id": "35247fd0-3620-81e7-8028-fb60f7bceba6", "name": "Spark", "rate": 300.0, "days": 1, "unit": "day", "subtotal": 300.0}, {"id": "li_b3f1bae8", "role_id": "34f47fd0-3620-81a2-a7c4-fd40b3f1bae8", "name": "Stills Cull + Edit", "rate": 125.0, "days": 1, "unit": "day", "subtotal": 125.0}, {"id": "li_2e5e3796", "role_id": "34f47fd0-3620-81dd-911d-d1d92e5e3796", "name": "TfL Journey", "rate": 3.6, "days": 1, "unit": "journey", "subtotal": 3.6}, {"id": "li_0c160aa2", "role_id": "34f47fd0-3620-81b6-b5c8-d8640c160aa2", "name": "Transcoding / Delivery", "rate": 65.0, "days": 1, "unit": "day", "subtotal": 65.0}, {"id": "li_bfd39ac0", "role_id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0", "name": "Van Hire", "rate": 95.0, "days": 1, "unit": "day", "subtotal": 95.0}], "lineItemsSource": "rate_card_all", "rateCard": [{"id": "35247fd0-3620-8161-88d3-d67b5f4825fb", "name": "2nd Assistant Camera", "my_rate": 375, "apa_ceiling": 400, "apa_bracket": "Crew", "ot_per_hr": 56.25, "ooh_uplift": 0, "half_day_rate": 225.0, "travel_day_rate": 187.5}, {"id": "34f47fd0-3620-81b5-ae9f-e9334018ee86", "name": "Assistant Camera", "my_rate": 275, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 41.25, "ooh_uplift": 0, "half_day_rate": 165.0, "travel_day_rate": 137.5}, {"id": "34f47fd0-3620-81f6-8508-c4f45a53cb1a", "name": "Camera Operator", "my_rate": 475, "apa_ceiling": 650, "apa_bracket": "Crew", "ot_per_hr": 71.25, "ooh_uplift": 0, "half_day_rate": 285.0, "travel_day_rate": 237.5}, {"id": "34f47fd0-3620-81bd-a585-c0e35c590c98", "name": "Colour Grade", "my_rate": 175, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 26.25, "ooh_uplift": 0, "half_day_rate": 105.0, "travel_day_rate": 87.5}, {"id": "35247fd0-3620-8092-9cb5-e6a135cb5215", "name": "Congestion Charge", "my_rate": 18, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 2.7, "ooh_uplift": 0, "half_day_rate": 10.8, "travel_day_rate": 9.0}, {"id": "35247fd0-3620-81f7-af92-e16d8a0cbc7e", "name": "Director", "my_rate": 700, "apa_ceiling": 1200, "apa_bracket": "HoD", "ot_per_hr": 105.0, "ooh_uplift": 0, "half_day_rate": 420.0, "travel_day_rate": 350.0}, {"id": "34f47fd0-3620-81be-8870-f75746f0696f", "name": "Director of Photography", "my_rate": 575, "apa_ceiling": 750, "apa_bracket": "HoD", "ot_per_hr": 86.25, "ooh_uplift": 0, "half_day_rate": 345.0, "travel_day_rate": 287.5}, {"id": "35247fd0-3620-815d-98a6-e42a8806565f", "name": "Gaffer", "my_rate": 450, "apa_ceiling": 650, "apa_bracket": "HoD", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-815a-8b70-fdd982d07f1e", "name": "Hero Edit (2\u20135 min)", "my_rate": 450, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-81f2-9370-c167bae0c7ca", "name": "Long-form Edit (10 min+)", "my_rate": 600, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 90.0, "ooh_uplift": 0, "half_day_rate": 360.0, "travel_day_rate": 300.0}, {"id": "34f47fd0-3620-8145-a058-e0ce634a7256", "name": "Mileage", "my_rate": 0.55, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.08, "ooh_uplift": 0, "half_day_rate": 0.33, "travel_day_rate": 0.28}, {"id": "35247fd0-3620-8178-ae82-f5277260296e", "name": "Producer", "my_rate": 550, "apa_ceiling": 1000, "apa_bracket": "HoD", "ot_per_hr": 82.5, "ooh_uplift": 0, "half_day_rate": 330.0, "travel_day_rate": 275.0}, {"id": "35247fd0-3620-8151-9809-e9ff5f46e40d", "name": "Production Assistant (PA)", "my_rate": 200, "apa_ceiling": 220, "apa_bracket": "Trainee", "ot_per_hr": 30.0, "ooh_uplift": 0, "half_day_rate": 120.0, "travel_day_rate": 100.0}, {"id": "34f47fd0-3620-815d-93d3-efcd057aa497", "name": "Social Cut (30\u201360s)", "my_rate": 300, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "35247fd0-3620-81bc-879f-ff9900b2f5ff", "name": "Sound Recordist", "my_rate": 400, "apa_ceiling": 600, "apa_bracket": "HoD", "ot_per_hr": 60.0, "ooh_uplift": 0, "half_day_rate": 240.0, "travel_day_rate": 200.0}, {"id": "35247fd0-3620-81e7-8028-fb60f7bceba6", "name": "Spark", "my_rate": 300, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "34f47fd0-3620-81a2-a7c4-fd40b3f1bae8", "name": "Stills Cull + Edit", "my_rate": 125, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 18.75, "ooh_uplift": 0, "half_day_rate": 75.0, "travel_day_rate": 62.5}, {"id": "34f47fd0-3620-81dd-911d-d1d92e5e3796", "name": "TfL Journey", "my_rate": 3.6, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.54, "ooh_uplift": 0, "half_day_rate": 2.16, "travel_day_rate": 1.8}, {"id": "34f47fd0-3620-81b6-b5c8-d8640c160aa2", "name": "Transcoding / Delivery", "my_rate": 65, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 9.75, "ooh_uplift": 0, "half_day_rate": 39.0, "travel_day_rate": 32.5}, {"id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0", "name": "Van Hire", "my_rate": 95, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 14.25, "ooh_uplift": 0, "half_day_rate": 57.0, "travel_day_rate": 47.5}], "defaultDays": 1};
+  const PRICING = {"basePrice": 0, "expenses": 0, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by you. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-81e2-b77d-c78d07516482", "name": "Colour Grade / Transcode", "price": 350, "price_core": 350, "price_primary": 350, "price_premium": 350, "desc": "Simple transcoding of footage & colour grade to get this edit ready", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "discounts": [{"id": "35847fd0-3620-81b7-a90d-c464b52709d6", "name": "Multi-day: 3\u20135 days", "type": "Percentage", "value": 10, "desc": "Standard multi-day discount for shoots of 3\u20135 days. Auto-suggested when shooting_days is in this range.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}, {"id": "35847fd0-3620-8129-8cd1-cf0165312c45", "name": "Multi-day: 6+ days", "type": "Percentage", "value": 20, "desc": "Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days \u2265 6.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}], "packages": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "hdd_purchase", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "Standard Delivery", "travel": null, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null, "suggestedDiscounts": [], "lineItems": [{"id": "li_46f0696f","role_id": "34f47fd0-3620-81be-8870-f75746f0696f","name": "Director of Photography","rate": 575.0,"days": 1,"unit": "day","subtotal": 575.0},{"id": "li_4018ee86","role_id": "34f47fd0-3620-81b5-ae9f-e9334018ee86","name": "Assistant Camera","rate": 275.0,"days": 1,"unit": "day","subtotal": 275.0},{"id": "li_00b2f5ff","role_id": "35247fd0-3620-81bc-879f-ff9900b2f5ff","name": "Sound Recordist","rate": 400.0,"days": 1,"unit": "day","subtotal": 400.0},{"id": "li_82d07f1e","role_id": "34f47fd0-3620-815a-8b70-fdd982d07f1e","name": "Hero Edit (2\u20135 min)","rate": 450.0,"days": 1,"unit": "day","subtotal": 450.0},{"id": "li_5c590c98","role_id": "34f47fd0-3620-81bd-a585-c0e35c590c98","name": "Colour Grade","rate": 175.0,"days": 1,"unit": "day","subtotal": 175.0},{"id": "li_bfd39ac0","role_id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0","name": "Van Hire","rate": 95.0,"days": 1,"unit": "day","subtotal": 95.0}], "lineItemsSource": "rate_card_all", "rateCard": [{"id": "35247fd0-3620-8161-88d3-d67b5f4825fb", "name": "2nd Assistant Camera", "my_rate": 375, "apa_ceiling": 400, "apa_bracket": "Crew", "ot_per_hr": 56.25, "ooh_uplift": 0, "half_day_rate": 225.0, "travel_day_rate": 187.5}, {"id": "34f47fd0-3620-81b5-ae9f-e9334018ee86", "name": "Assistant Camera", "my_rate": 275, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 41.25, "ooh_uplift": 0, "half_day_rate": 165.0, "travel_day_rate": 137.5}, {"id": "34f47fd0-3620-81f6-8508-c4f45a53cb1a", "name": "Camera Operator", "my_rate": 475, "apa_ceiling": 650, "apa_bracket": "Crew", "ot_per_hr": 71.25, "ooh_uplift": 0, "half_day_rate": 285.0, "travel_day_rate": 237.5}, {"id": "34f47fd0-3620-81bd-a585-c0e35c590c98", "name": "Colour Grade", "my_rate": 175, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 26.25, "ooh_uplift": 0, "half_day_rate": 105.0, "travel_day_rate": 87.5}, {"id": "35247fd0-3620-8092-9cb5-e6a135cb5215", "name": "Congestion Charge", "my_rate": 18, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 2.7, "ooh_uplift": 0, "half_day_rate": 10.8, "travel_day_rate": 9.0}, {"id": "35247fd0-3620-81f7-af92-e16d8a0cbc7e", "name": "Director", "my_rate": 700, "apa_ceiling": 1200, "apa_bracket": "HoD", "ot_per_hr": 105.0, "ooh_uplift": 0, "half_day_rate": 420.0, "travel_day_rate": 350.0}, {"id": "34f47fd0-3620-81be-8870-f75746f0696f", "name": "Director of Photography", "my_rate": 575, "apa_ceiling": 750, "apa_bracket": "HoD", "ot_per_hr": 86.25, "ooh_uplift": 0, "half_day_rate": 345.0, "travel_day_rate": 287.5}, {"id": "35247fd0-3620-815d-98a6-e42a8806565f", "name": "Gaffer", "my_rate": 450, "apa_ceiling": 650, "apa_bracket": "HoD", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-815a-8b70-fdd982d07f1e", "name": "Hero Edit (2\u20135 min)", "my_rate": 450, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-81f2-9370-c167bae0c7ca", "name": "Long-form Edit (10 min+)", "my_rate": 600, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 90.0, "ooh_uplift": 0, "half_day_rate": 360.0, "travel_day_rate": 300.0}, {"id": "34f47fd0-3620-8145-a058-e0ce634a7256", "name": "Mileage", "my_rate": 0.55, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.08, "ooh_uplift": 0, "half_day_rate": 0.33, "travel_day_rate": 0.28}, {"id": "35247fd0-3620-8178-ae82-f5277260296e", "name": "Producer", "my_rate": 550, "apa_ceiling": 1000, "apa_bracket": "HoD", "ot_per_hr": 82.5, "ooh_uplift": 0, "half_day_rate": 330.0, "travel_day_rate": 275.0}, {"id": "35247fd0-3620-8151-9809-e9ff5f46e40d", "name": "Production Assistant (PA)", "my_rate": 200, "apa_ceiling": 220, "apa_bracket": "Trainee", "ot_per_hr": 30.0, "ooh_uplift": 0, "half_day_rate": 120.0, "travel_day_rate": 100.0}, {"id": "34f47fd0-3620-815d-93d3-efcd057aa497", "name": "Social Cut (30\u201360s)", "my_rate": 300, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "35247fd0-3620-81bc-879f-ff9900b2f5ff", "name": "Sound Recordist", "my_rate": 400, "apa_ceiling": 600, "apa_bracket": "HoD", "ot_per_hr": 60.0, "ooh_uplift": 0, "half_day_rate": 240.0, "travel_day_rate": 200.0}, {"id": "35247fd0-3620-81e7-8028-fb60f7bceba6", "name": "Spark", "my_rate": 300, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "34f47fd0-3620-81a2-a7c4-fd40b3f1bae8", "name": "Stills Cull + Edit", "my_rate": 125, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 18.75, "ooh_uplift": 0, "half_day_rate": 75.0, "travel_day_rate": 62.5}, {"id": "34f47fd0-3620-81dd-911d-d1d92e5e3796", "name": "TfL Journey", "my_rate": 3.6, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.54, "ooh_uplift": 0, "half_day_rate": 2.16, "travel_day_rate": 1.8}, {"id": "34f47fd0-3620-81b6-b5c8-d8640c160aa2", "name": "Transcoding / Delivery", "my_rate": 65, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 9.75, "ooh_uplift": 0, "half_day_rate": 39.0, "travel_day_rate": 32.5}, {"id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0", "name": "Van Hire", "my_rate": 95, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 14.25, "ooh_uplift": 0, "half_day_rate": 57.0, "travel_day_rate": 47.5}], "defaultDays": 1};
   // Initial Editor State as saved on the Notion Production page. Used by
   // draft-mode features that pre-fill from prior saves (e.g. brief Q&A inputs).
   window._editor_state_initial = {};
@@ -3928,6 +4000,27 @@
     setTimeout(() => input.focus(), 80);
   })();
 
+  // ── IP + location capture (used for the signed PDF audit stamp) ──────
+  // Fires a no-key ipapi.co request once on demand. 1000/day free tier is
+  // plenty for sign events. Results cached in-memory; on failure we return
+  // an empty object so the PDF stamp gracefully omits the line.
+  let _vf_geo_cache = null;
+  async function _captureClientGeo() {
+    if (_vf_geo_cache) return _vf_geo_cache;
+    try {
+      const r = await fetch('https://ipapi.co/json/', { method: 'GET' });
+      if (!r.ok) return (_vf_geo_cache = {});
+      const j = await r.json();
+      _vf_geo_cache = {
+        ip:       j.ip || '',
+        city:     j.city || '',
+        region:   j.region || '',
+        country:  j.country_name || j.country || '',
+      };
+      return _vf_geo_cache;
+    } catch (_) { return (_vf_geo_cache = {}); }
+  }
+
   // ── Generic confirm modal helper (Promise-based) ────────────────────────
   // Used for irreversible actions like "Send to client". Returns true/false.
   function _vfConfirm(opts) {
@@ -4002,7 +4095,10 @@
     _applyStatusChip(VF.financialStatus || 'Quotation Sent');
   })();
 
-  // ── Empty-state cleanup for client view: hide section labels when their
+  // ── Warm-up IP/geo lookup so it's cached by the time the client signs ─
+  if (typeof _captureClientGeo === 'function') { _captureClientGeo(); }
+
+    // ── Empty-state cleanup for client view: hide section labels when their
   // content list is empty (operator-only situation but possible if deliverables
   // are intentionally left blank).
   (function _hideEmptySections() {
@@ -4332,19 +4428,29 @@
     return Math.max(0, t);
   }
 
+  // Categorise a breakdown row (addon, surcharge, travel) into one of
+  // 'crew' / 'post' / 'expenses' based on its name. Production (line items)
+  // and discounts are handled separately at the call-site.
+  function _catFromName(name) {
+    const n = (name || '').toLowerCase();
+    if (/\b(edit|cut|grade|colour|color|stills|transcod|caption|subtitle|sound design|mix|master|vfx|motion|animation|titles|revision)\b/.test(n)) return 'post';
+    if (/\b(crew|operator|assistant|director|gaffer|spark|sound recordist|producer|stylist|wardrobe|makeup|grip|swing)\b/.test(n)) return 'crew';
+    return 'expenses';
+  }
   function _renderBreakdown() {
     const container = document.getElementById('breakdown-rows');
     if (!container) return;
     const rows = [];
     // Helper: push an addon row, plus a sibling discount row when the
     // operator's applied a per-addon discount (so the breakdown stays honest).
-    const _pushAddonRows = (a) => {
+    const _pushAddonRows = (a, defaultCat) => {
+      const cat = defaultCat || _catFromName(a.name);
       // Quantity > 1 multiplies both the price and any discount; suffixed in
       // the label as "x N" so the operator and client can see the maths.
       const qty       = (_pstate.addonQty && _pstate.addonQty[a.id]) || 1;
       const unitPrice = _addonPriceForCurrentTier(a);
       const lineLabel = qty > 1 ? `${a.name} × ${qty}` : a.name;
-      rows.push({label: lineLabel, amt: unitPrice * qty, cls: '', cat: 'addons'});
+      rows.push({label: lineLabel, amt: unitPrice * qty, cls: '', cat});
       const unitDisc = _addonDiscountAmount(a);
       const discAmt  = unitDisc * qty;
       if (unitDisc > 0) {
@@ -4353,12 +4459,12 @@
         const lbl = isPct
           ? `  ↳ ${a.name} discount (${disc.value}%)`
           : `  ↳ ${a.name} discount`;
-        rows.push({label: lbl, amt: discAmt, cls: 'discount-row addon-discount-row', cat: 'addons'});
+        rows.push({label: lbl, amt: discAmt, cls: 'discount-row addon-discount-row', cat});
       }
     };
     if (VF.quoteType === 'Package Based') {
       const pkg = (PRICING.packages || []).find(x => x.id === _pstate.package);
-      if (pkg) rows.push({label: pkg.name, amt: pkg.price, cls: 'base-row', cat: 'base'});
+      if (pkg) rows.push({label: pkg.name, amt: pkg.price, cls: 'base-row', cat: 'production'});
       for (const id of _pstate.addons) {
         const a = PRICING.addons.find(x => x.id === id);
         if (a) _pushAddonRows(a);
@@ -4378,31 +4484,31 @@
               label: `${li.name} (${dayLabel} @ £${Math.round(li.rate || 0).toLocaleString('en-GB')})`,
               amt:   sub,
               cls:   '',
-              cat:   'items',
+              cat:   'production',
             });
           }
         }
       } else if (PRICING.basePrice) {
         // No line items configured — fall back to a single Production Fee row
-        rows.push({label:'Production Fee', amt:PRICING.basePrice, cls:'base-row', cat:'base'});
+        rows.push({label:'Production Fee', amt:PRICING.basePrice, cls:'base-row', cat:'production'});
       }
       const d = (PRICING.delivery || []).find(x => x.id === _pstate.delivery);
-      if (d) rows.push({label:d.name, amt:d.price, cls:'', cat:'addons'});
+      if (d) rows.push({label:d.name, amt:d.price, cls:'', cat:'expenses'});
       if (_pstate.postProd) {
         const p = (PRICING.postProduction || []).find(x => x.id === _pstate.postProd);
-        if (p) rows.push({label:p.name, amt:p.price, cls:'', cat:'addons'});
+        if (p) rows.push({label:p.name, amt:p.price, cls:'', cat:'post'});
       }
       for (const id of _pstate.addons) {
         const a = (PRICING.addons || []).find(x => x.id === id);
         if (a) _pushAddonRows(a);
       }
-      if (PRICING.expenses) rows.push({label:'Expenses', amt:PRICING.expenses, cls:'fixed-row', cat:'surcharges'});
-      if (PRICING.storage > 0) rows.push({label:'Storage & Backups', amt:PRICING.storage, cls:'fixed-row', cat:'surcharges'});
+      if (PRICING.expenses) rows.push({label:'Expenses', amt:PRICING.expenses, cls:'fixed-row', cat:'expenses'});
+      if (PRICING.storage > 0) rows.push({label:'Storage & Backups', amt:PRICING.storage, cls:'fixed-row', cat:'expenses'});
     }
     // Stepper rows
     const rush = _rushTiers[_pstate.rushTier];
     if (rush && rush.price > 0) {
-      rows.push({label: rush.sublabel, amt: rush.price, cls: '', cat: 'surcharges'});
+      rows.push({label: rush.sublabel, amt: rush.price, cls: '', cat: 'expenses'});
     }
     if (_pstate.extraRevisions > 0) {
       const base = VF.quoteType === 'Package Based'
@@ -4411,16 +4517,16 @@
       const revAmt = Math.round(base * (Math.pow(1.2, _pstate.extraRevisions) - 1));
       const n = _pstate.extraRevisions;
       const revLabel = n === 1 ? 'Additional Revision Round' : `Additional Revision Rounds (×${n})`;
-      rows.push({label: revLabel, amt: revAmt, cls: '', cat: 'surcharges'});
+      rows.push({label: revLabel, amt: revAmt, cls: '', cat: 'post'});
     }
     // Travel section
     if (PRICING.travel) {
       const tr = PRICING.travel;
       /* travel rows belong to surcharges group */
-      rows.push({label: `Van Hire (${tr.shooting_days} day${tr.shooting_days !== 1 ? 's' : ''})`, amt: tr.van_cost, cls: 'fixed-row', cat: 'surcharges'});
-      rows.push({label: `Mileage (${tr.round_trip_miles} miles @ 45p)`, amt: tr.mile_cost, cls: 'fixed-row', cat: 'surcharges'});
-      rows.push({label: 'Parking', amt: 'Billed @ cost', cls: 'fixed-row', cat: 'surcharges'});
-      if (tr.cc_cost > 0) rows.push({label: 'Congestion Charge', amt: tr.cc_cost, cls: 'fixed-row', cat: 'surcharges'});
+      rows.push({label: `Van Hire (${tr.shooting_days} day${tr.shooting_days !== 1 ? 's' : ''})`, amt: tr.van_cost, cls: 'fixed-row', cat: 'expenses'});
+      rows.push({label: `Mileage (${tr.round_trip_miles} miles @ 45p)`, amt: tr.mile_cost, cls: 'fixed-row', cat: 'expenses'});
+      rows.push({label: 'Parking', amt: 'Billed @ cost', cls: 'fixed-row', cat: 'expenses'});
+      if (tr.cc_cost > 0) rows.push({label: 'Congestion Charge', amt: tr.cc_cost, cls: 'fixed-row', cat: 'expenses'});
     }
     // Multi-day discount line (automatic, not togglable)
     if (PRICING.multiday) {
@@ -4438,7 +4544,7 @@
     }
     // Buyout / usage rights (fixed positive line)
     if (PRICING.buyout) {
-      rows.push({label: 'Usage Rights Licence', amt: PRICING.buyout, cls: 'fixed-row buyout-row', cat: 'surcharges'});
+      rows.push({label: 'Usage Rights Licence', amt: PRICING.buyout, cls: 'fixed-row buyout-row', cat: 'expenses'});
     }
     // Client-applied discounts — chained against post-multiplier total
     let _afterMults = _computeBaseTotal();
@@ -4490,18 +4596,18 @@
     };
 
     // Group rows by category. Order is fixed; empty groups skipped.
-    const _groupOrder = ['base', 'items', 'addons', 'surcharges', 'discounts'];
+    const _groupOrder = ['production', 'crew', 'post', 'expenses', 'discounts'];
     const _groupNames = {
-      base:       'Package',
-      items:      'Crew & Production',
-      addons:     'Add-ons & Delivery',
-      surcharges: 'Surcharges & Travel',
+      production: 'Production',
+      crew:       'Crew',
+      post:       'Post-Production',
+      expenses:   'Expenses',
       discounts:  'Discounts',
     };
     const _groups = {};
     for (const r of rows) {
       if ((r.cls || '').includes('section-header')) continue;
-      const cat = r.cat || 'addons';
+      const cat = r.cat || 'expenses';
       (_groups[cat] = _groups[cat] || []).push(r);
     }
 
@@ -5007,6 +5113,10 @@
     const timestamp = now.toISOString();
     const dateStr = now.toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
 
+    // Capture IP + city/country for the signed PDF stamp. Awaiting at top of
+    // accept ensures both the snapshot and the PDF have the geo data.
+    const _signerGeo = await _captureClientGeo();
+
     const btn = document.getElementById('accept-btn');
     btn.textContent = 'Submitting…';
     btn.disabled = true;
@@ -5036,10 +5146,15 @@
       rushDate:      rushTierSnap ? (rushTierSnap.date || '') : '',
       rushPrice:     rushTierSnap ? rushTierSnap.price : 0,
       travel:        PRICING.travel || null,
+      signerIp:      _signerGeo.ip || '',
+      signerCity:    _signerGeo.city || '',
+      signerRegion:  _signerGeo.region || '',
+      signerCountry: _signerGeo.country || '',
+      signerTime:    now.toTimeString().slice(0,5) + ' ' + (now.toTimeString().match(/\(([^)]+)\)$/)?.[1] || ''),
     };
     localStorage.setItem(_storeKey, JSON.stringify(snapshot));
     _showAccepted(snapshot);
-    _generatePDF(name, sigDataUrl, dateStr, finalTotal);
+    _generatePDF(name, sigDataUrl, dateStr, finalTotal, snapshot);
     // Scroll to confirmed summary
     setTimeout(() => document.getElementById('confirmed-summary')?.scrollIntoView({behavior:'smooth', block:'start'}), 300);
 
@@ -5095,12 +5210,12 @@
   document.getElementById('download-pdf-btn').addEventListener('click', () => {
     const raw = localStorage.getItem(_storeKey);
     const s = raw ? JSON.parse(raw) : {};
-    _generatePDF(s.name || VF.clientName, null, s.date || '', s.total || VF.total);
+    _generatePDF(s.name || VF.clientName, null, s.date || '', s.total || VF.total, s);
   });
   document.getElementById('download-conf-btn')?.addEventListener('click', () => {
     const raw = localStorage.getItem(_storeKey);
     const s = raw ? JSON.parse(raw) : {};
-    _generatePDF(s.name || VF.clientName, null, s.date || '', s.total || VF.total);
+    _generatePDF(s.name || VF.clientName, null, s.date || '', s.total || VF.total, s);
   });
 
   // ── Draft / Template Review mode ─────────────────────────────────────────
@@ -6409,20 +6524,25 @@
     // Notion property via the webhook on blur. For text fields we use the
     // contenteditable text as-is. For number/date we swap in a real
     // <input> on focus so the operator gets the right keyboard / picker.
-    function _saveProdField(field, value) {
+    function _saveProdField(field, value, field_type) {
       const url = 'https://vf-quotes.vercel.app/api/webhook';
       return fetch(url, {
         method:  'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          action:  'update_production_field',
-          page_id: VF.pageId,
-          field:   field,
-          value:   value,
+          action:     'update_production_field',
+          page_id:    VF.pageId,
+          field:      field,
+          value:      value,
+          field_type: field_type || 'rich_text',
         }),
       }).then(r => {
+        // Webhook now returns 200 with ok:false instead of 400 — handle both shapes
         if (!r.ok) return r.text().then(t => { throw new Error('HTTP ' + r.status + ': ' + t.slice(0, 120)); });
-        return r.json();
+        return r.json().then(j => {
+          if (j && j.ok === false) throw new Error(j.error || 'Notion patch failed');
+          return j;
+        });
       });
     }
     function _flashProdFieldStatus(el, ok, msg) {
@@ -6492,7 +6612,7 @@
             el.appendChild(document.createTextNode(newVal));
             if (sublabel) el.appendChild(sublabel);
             try {
-              const result = await _saveProdField(field, newVal);
+              const result = await _saveProdField(field, newVal, editType);
               el.dataset.prodValue = newVal;
               _flashProdFieldStatus(el, true);
               if (result && result.regen_queued) {
@@ -6559,7 +6679,7 @@
                 : newVal));
             if (sublabel) el.appendChild(sublabel);
             try {
-              const result = await _saveProdField(field, newVal);
+              const result = await _saveProdField(field, newVal, editType);
               el.dataset.prodValue = newVal;
               _flashProdFieldStatus(el, true);
               // If the field affects pricing, the webhook auto-queued a
@@ -6589,7 +6709,7 @@
           newText = newText.trim();
           if (!newText || newText === initial) return;
           try {
-            await _saveProdField(field, newText);
+            await _saveProdField(field, newText, editType);
             el.dataset.prodValue = newText;
             _flashProdFieldStatus(el, true);
           } catch (err) {
@@ -7916,6 +8036,20 @@
     document.getElementById('accepted-name-display').textContent = name;
     document.getElementById('accepted-date-display').textContent = dateStr;
 
+    // Page enters signed state — hides remaining editable affordances,
+    // flips status chip to green "Signed", and lets the confirmation
+    // summary become the visual anchor below the hero.
+    document.body.classList.add('is-signed');
+    try { _applyStatusChip('Signed'); } catch (_) {}
+    // Lock the T&C open so the signed agreement is fully readable
+    document.querySelectorAll('details.tnc-accordion').forEach(d => { d.open = true; });
+    // Show "Signed by X on Y" in the hero sub instead of the original
+    // "Prepared for Client Name, Company Ltd." line.
+    const heroSub = document.querySelector('.hero-sub strong');
+    if (heroSub) {
+      heroSub.textContent = 'Signed by ' + name + ' on ' + dateStr;
+    }
+
     // ── Hide interactive pricing, show confirmed summary ─
     const pricingSec = document.getElementById('pricing-section');
     const confSec    = document.getElementById('confirmed-summary');
@@ -7980,7 +8114,8 @@
   }
 
   // ── PDF generation ─────────────────────────────────────────────────────────
-  function _generatePDF(signerName, sigDataUrl, dateStr, totalStr) {
+  function _generatePDF(signerName, sigDataUrl, dateStr, totalStr, snapshot) {
+    snapshot = snapshot || {};
     if (typeof window.jspdf === 'undefined') { alert('PDF library not loaded. Please try again.'); return; }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
@@ -7992,7 +8127,9 @@
     function addFooter() {
       doc.setDrawColor(...light); doc.setLineWidth(0.3); doc.line(M, H-14, W-M, H-14);
       doc.setFontSize(7); doc.setTextColor(...grey); doc.setFont(undefined,'normal');
-      doc.text('Valley Films · valley.film · max@valley.film', M, H-8);
+      // Just the brand name on the left, clickable to valley.film
+      const brand = 'Valley Films';
+      doc.textWithLink(brand, M, H-8, { url: 'https://valley.film' });
       doc.text(VF.quoteRef + '  ·  Page ' + page, W-M, H-8, {align:'right'});
     }
     function newPage() { addFooter(); doc.addPage(); page++; y = M; }
@@ -8019,23 +8156,39 @@
       doc.text(lines, M, y); y += lines.length * 4.5 + 3;
     }
 
-    // Header band
-    doc.setFillColor(...dark); doc.rect(0, 0, W, 48, 'F');
+    // ── Header: matches valley.film nav style ─────────────────────────────
+    // Light bar, brand mark on left (clickable), VF-XXXX pill on right.
+    // Hairline rule at the bottom sets the same "nav border" feel.
+    const HEADER_H = 28;
+    // Logo (clickable to valley.film)
     const logoEl = document.getElementById('vf-logo-blue');
     if (logoEl && logoEl.complete && logoEl.src.startsWith('data:')) {
       try {
-        const lh = logoEl.naturalHeight > 0 ? 28*(logoEl.naturalHeight/logoEl.naturalWidth) : 9;
-        doc.addImage(logoEl.src, 'PNG', M, 14, 28, lh);
+        const aspect = logoEl.naturalHeight > 0 ? (logoEl.naturalHeight / logoEl.naturalWidth) : 0.32;
+        const logoW = 22, logoH = logoW * aspect;
+        doc.addImage(logoEl.src, 'PNG', M, (HEADER_H - logoH) / 2, logoW, logoH);
+        // Invisible link rect over the logo
+        doc.link(M, (HEADER_H - logoH) / 2, logoW, logoH, { url: 'https://valley.film' });
       } catch(e) {}
     }
-    doc.setFontSize(6.5); doc.setTextColor(180,180,200); doc.setFont(undefined,'normal');
-    doc.text('QUOTE REFERENCE', W-M, 16, {align:'right'});
-    doc.setFontSize(11); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-    doc.text(VF.quoteRef, W-M, 23, {align:'right'});
-    doc.setFontSize(6.5); doc.setTextColor(180,180,200); doc.setFont(undefined,'normal');
-    doc.text('ACCEPTED ' + (dateStr || ''), W-M, 30, {align:'right'});
+    // "Valley Films" text next to the mark (also clickable)
+    doc.setFontSize(10); doc.setTextColor(...dark); doc.setFont(undefined,'bold');
+    doc.textWithLink('Valley Films', M + 26, HEADER_H / 2 + 1.2, { url: 'https://valley.film' });
+    // VF-XXXX pill on the right — subtle tinted-blue chip matching valley.film .menu-cta
+    const pillText = VF.quoteRef || 'VF-0000';
+    doc.setFontSize(8.5); doc.setFont(undefined,'bold');
+    const pillTextW = doc.getTextWidth(pillText);
+    const pillW = pillTextW + 10, pillH = 7;
+    const pillX = W - M - pillW, pillY = (HEADER_H - pillH) / 2;
+    doc.setFillColor(232, 240, 254); // soft blue, rgba(74,124,255,0.12) baked in on white
+    doc.roundedRect(pillX, pillY, pillW, pillH, 3.5, 3.5, 'F');
+    doc.setTextColor(9, 94, 223); // vf-blue
+    doc.text(pillText, pillX + pillW / 2, pillY + pillH / 2 + 1.4, { align: 'center' });
+    // Hairline rule (matches the website nav border-bottom)
+    doc.setDrawColor(225, 228, 233); doc.setLineWidth(0.25);
+    doc.line(0, HEADER_H, W, HEADER_H);
 
-    y = 60;
+    y = HEADER_H + 14;
     doc.setFontSize(20); doc.setTextColor(...dark); doc.setFont(undefined,'bold');
     doc.text('Accepted Quotation', M, y); y += 7;
     doc.setFontSize(9); doc.setTextColor(...grey); doc.setFont(undefined,'normal');
@@ -8061,15 +8214,70 @@
     y += 2; rule();
 
     sectionLabel('Acceptance & Signature');
-    checkPage(44);
+    checkPage(64);
+
+    // ── Drawn signature (left side, fixed-width) ───────────────────────
+    const sigX = M, sigW = 80, sigH = 26;
     if (sigDataUrl) {
-      try { doc.addImage(sigDataUrl, 'PNG', M, y, 68, 22); y += 24; } catch(e) { y += 4; }
+      try { doc.addImage(sigDataUrl, 'PNG', sigX, y, sigW, sigH); } catch(e) {}
     }
-    doc.setDrawColor(...light); doc.line(M, y, M+80, y); y += 5;
+    // Baseline + signer details under it
+    doc.setDrawColor(...light); doc.line(sigX, y + sigH + 1, sigX + sigW, y + sigH + 1);
     doc.setFontSize(9); doc.setTextColor(...dark); doc.setFont(undefined,'bold');
-    doc.text(signerName || '', M, y); y += 5;
+    doc.text(signerName || '', sigX, y + sigH + 6);
     doc.setFontSize(7.5); doc.setTextColor(...grey); doc.setFont(undefined,'normal');
-    doc.text(dateStr || '', M, y); y += 4;
+    doc.text(dateStr || '', sigX, y + sigH + 10);
+
+    // ── Verification stamp (right side) — mimics DocuSign/HelloSign ────
+    // A rounded card with a blue check-circle, "DIGITALLY SIGNED · Verified"
+    // header, and a mono details block (signer, date/time, quote ref + hash).
+    const stmpX = M + sigW + 12;
+    const stmpW = CW - sigW - 12;
+    const stmpH = sigH + 22;
+    // Card fill + border
+    doc.setFillColor(244, 248, 255);
+    doc.setDrawColor(9, 94, 223); doc.setLineWidth(0.4);
+    doc.roundedRect(stmpX, y, stmpW, stmpH, 3, 3, 'FD');
+    // Blue circle with white tick
+    const ccX = stmpX + 9, ccY = y + 9, ccR = 4.5;
+    doc.setFillColor(9, 94, 223); doc.circle(ccX, ccY, ccR, 'F');
+    doc.setDrawColor(255, 255, 255); doc.setLineWidth(0.7);
+    doc.line(ccX - 1.8, ccY + 0.1, ccX - 0.4, ccY + 1.5);
+    doc.line(ccX - 0.4, ccY + 1.5, ccX + 2.2, ccY - 1.6);
+    // Header — "DIGITALLY SIGNED · VERIFIED"
+    doc.setFontSize(7); doc.setTextColor(9, 94, 223); doc.setFont(undefined,'bold');
+    doc.text('DIGITALLY SIGNED · VERIFIED', stmpX + 17, y + 7);
+    // Details block
+    doc.setFontSize(7.2); doc.setTextColor(...dark); doc.setFont(undefined,'normal');
+    let dy = y + 12;
+    function _stampRow(lbl, val) {
+      doc.setFont(undefined,'normal');
+      doc.text(lbl, stmpX + 17, dy);
+      doc.setFont(undefined,'bold');
+      doc.text(String(val), stmpX + 17 + doc.getTextWidth(lbl), dy);
+      dy += 3.8;
+    }
+    const whenStr = (dateStr || '—') + (snapshot.signerTime ? ' · ' + snapshot.signerTime : ' · ' + new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}));
+    _stampRow('Signer:    ', signerName || '—');
+    _stampRow('When:      ', whenStr);
+    _stampRow('Document:  ', VF.quoteRef + ' · ' + (VF.projectTitle || 'Quote'));
+    // Location + IP — only render if we captured them
+    const locParts = [snapshot.signerCity, snapshot.signerRegion, snapshot.signerCountry].filter(Boolean);
+    if (locParts.length) _stampRow('Location:  ', locParts.join(', '));
+    if (snapshot.signerIp) _stampRow('IP address:', snapshot.signerIp);
+    // Unique signature ID derived from signer + date — deterministic so the
+    // same signed PDF always shows the same hash (no entropy / time-of-print).
+    function _sigHash(s) {
+      let h = 5381 >>> 0;
+      for (let i = 0; i < s.length; i++) h = (((h * 33) + s.charCodeAt(i)) >>> 0);
+      return h.toString(16).toUpperCase().padStart(8, '0');
+    }
+    const sigId = 'VF-' + _sigHash((signerName || '') + (dateStr || '') + (VF.quoteRef || '')) + '-' + _sigHash(VF.pageId || '').slice(0, 4);
+    doc.setFont('courier','normal'); doc.setFontSize(6.5); doc.setTextColor(...grey);
+    doc.text('Signature ID: ' + sigId, stmpX + 17, dy);
+
+    y += stmpH + 4;
+    doc.setFont(undefined,'normal');
     bodyText('By signing, the client confirms they have read and agree to all terms & conditions set out below.');
     y += 2; rule();
 
@@ -8096,8 +8304,41 @@
 
     addFooter();
     const fname = VF.quoteRef + '_' + (VF.projectTitle || 'Quote').replace(/[^a-zA-Z0-9]/g,'_') + '_Accepted.pdf';
+    if (window._vfPdfPreviewMode) {
+      // Preview mode: return blob URL instead of triggering download
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      window._vfLastPdfUrl = url;
+      return url;
+    }
     doc.save(fname);
   }
+  // Expose a helper that generates a sample PDF + opens it in an iframe overlay
+  // so the operator can preview the design from the editor.
+  window._previewPDF = function() {
+    window._vfPdfPreviewMode = true;
+    const sampleName = VF.clientName || 'Sample Client';
+    const sampleDate = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+    const total = (typeof _computeTotal === 'function' && _computeTotal() !== null) ? _fmtGBP(_computeTotal()) : VF.total;
+    // Mock geo so the preview shows what the populated audit stamp looks like
+    const sampleSnap = {
+      signerIp: '203.0.113.42', signerCity: 'London', signerRegion: 'England', signerCountry: 'United Kingdom',
+      signerTime: new Date().toTimeString().slice(0, 5) + ' BST',
+    };
+    const url = _generatePDF(sampleName, null, sampleDate, total, sampleSnap);
+    window._vfPdfPreviewMode = false;
+    // Open in a centred overlay with iframe
+    let overlay = document.getElementById('vf-pdf-preview-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'vf-pdf-preview-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(7,8,12,0.6);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:24px;';
+      overlay.innerHTML = '<div style="position:relative;width:min(800px,100%);height:90vh;background:white;border-radius:12px;overflow:hidden;box-shadow:0 24px 72px rgba(0,0,0,0.4);"><iframe id="vf-pdf-frame" style="width:100%;height:100%;border:0;"></iframe><button type="button" onclick="document.getElementById(\'vf-pdf-preview-overlay\').remove()" style="position:absolute;top:12px;right:12px;background:white;border:1px solid rgba(10,15,26,0.14);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:18px;line-height:1;">×</button></div>';
+      document.body.appendChild(overlay);
+    }
+    document.getElementById('vf-pdf-frame').src = url;
+    return url;
+  };
 </script>
 <!-- Tracking Pixel for Notion 'Viewed' Status -->
 <img src="https://vf-quotes.vercel.app/api/webhook?action=viewed&page_id=template" width="1" height="1" style="display:none;" alt="" />
