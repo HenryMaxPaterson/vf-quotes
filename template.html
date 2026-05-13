@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quote Template — Valley Films</title>
+<!-- Favicons (hosted on the main site so all quote pages share the brand mark) -->
+<link rel="icon" type="image/x-icon" href="https://valley.film/assets/favicon.ico">
+<link rel="icon" type="image/png" href="https://valley.film/assets/favicon-mark-blue.png" media="(prefers-color-scheme: light)">
+<link rel="icon" type="image/png" href="https://valley.film/assets/favicon-mark-white.png" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/png" sizes="32x32" href="https://valley.film/assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://valley.film/assets/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://valley.film/assets/apple-touch-icon.png">
 <style>
   /* ── Valley Films type system ────────────────────────────────────────────
      Acumin Pro is the brand sans, served from the marketing site (CORS open).
@@ -96,9 +103,12 @@
     --card-bg:    var(--vf-surface);
     --grey-100:   var(--vf-line);
     --grey-200:   var(--vf-line-strong);
+    --grey-300:   var(--vf-line-strong);
     --grey-400:   var(--vf-ink-4);
     --grey-500:   var(--vf-ink-3);
     --grey-600:   var(--vf-ink-3);
+    --grey-700:   var(--vf-ink-2);
+    --grey-800:   var(--vf-ink-2);
     --grey-900:   var(--vf-ink);
     --green:      #1F9D55;
     --green-dark: #167C42;
@@ -122,14 +132,14 @@
   /* ── HERO ─────────────────────────────── */
   .hero {
     position: relative;
-    min-height: 78vh;
+    min-height: 56vh;
     background: var(--vf-bg);
     background-size: cover; background-position: center;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 96px 64px 56px;
+    padding: 72px 64px 40px;
     color: var(--vf-ink);
   }
 
@@ -151,7 +161,6 @@
   }
 
   /* Wave cutout at bottom of hero */
-  .hero-wave { display: none; }
 
   .hero-content { position: relative; z-index: 1; padding-bottom: 40px; }
 
@@ -160,11 +169,11 @@
        letterspacing, balanced line-wrap. The em → italic blue-400 pattern
        is reserved for emphasis spans inside the title (e.g. "Quotation"). */
     font-family: var(--font-sans);
-    font-size: clamp(52px, 9vw, 96px);
+    font-size: clamp(44px, 6vw, 72px);
     font-weight: 700;
     letter-spacing: -0.04em;
-    line-height: 0.96;
-    margin-bottom: 18px;
+    line-height: 0.98;
+    margin-bottom: 14px;
     color: var(--vf-ink);
     text-wrap: balance;
   }
@@ -217,17 +226,6 @@
     color: var(--vf-ink-3);
     margin-bottom: 16px;
   }
-
-  .hero-desc {
-    font-size: 14px;
-    color: rgba(255,255,255,0.42);
-    font-weight: 400;
-    line-height: 1.7;
-    margin-top: 14px;
-    max-width: 560px;
-    letter-spacing: 0.1px;
-  }
-
   /* ── SHARED LIGHT SECTIONS ────────────── */
   .light-section {
     background: var(--body-bg);
@@ -254,18 +252,18 @@
   }
 
   .section-heading {
-    /* Display-weight section heads: matches website .section-head .left h2
-       exactly — clamp(40px, 5.2vw, 80px), tight tracking, italic blue em. */
+    /* Quieter section heads — quote document is dense, not marketing.
+       Brand italic blue em accent retained for the emphasis word. */
     font-family: var(--font-sans);
-    font-size: clamp(40px, 5.2vw, 80px);
+    font-size: clamp(28px, 3.6vw, 44px);
     font-weight: 700;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.025em;
     color: var(--vf-ink);
-    margin-top: 12px;
-    margin-bottom: 56px;
-    line-height: 1.0;
+    margin-top: 8px;
+    margin-bottom: 36px;
+    line-height: 1.05;
     text-wrap: balance;
-    max-width: 800px;
+    max-width: 720px;
   }
   .section-heading em {
     font-style: italic;
@@ -467,13 +465,12 @@
   }
 
   .tag-deadline {
-    background: rgba(26,86,255,0.07);
+    background: rgba(9,94,223,0.07);
     color: var(--blue);
-    border: 1.5px solid rgba(26,86,255,0.2);
+    border: 1.5px solid rgba(9,94,223,0.2);
   }
 
   /* ── SECTION DIVIDER ─────────────────── */
-  .wave-divider { display: none; }
 
   /* ── PACKAGES ─────────────────────────── */
   .pkg-grid {
@@ -577,9 +574,9 @@
 
   .pkg-saving {
     display: inline-block;
-    background: rgba(26,86,255,0.08);
+    background: rgba(9,94,223,0.08);
     color: var(--blue);
-    border: 1.5px solid rgba(26,86,255,0.18);
+    border: 1.5px solid rgba(9,94,223,0.18);
     border-radius: 100px;
     font-size: 10px;
     font-weight: 700;
@@ -743,6 +740,33 @@
   .line-items-table .li-empty td { padding: 24px 16px; }
   body.draft-mode .line-items-table .li-empty .li-empty-prompt { display: inline !important; }
   body.draft-mode .line-items-table .li-empty .li-empty-readonly { display: none; }
+
+  /* Section header rows — split the table into Crew / Post / Expenses groups */
+  .line-items-table .li-section-header td {
+    padding: 22px 0 8px 0;
+    border-bottom: 1px solid rgba(10,15,26,0.08);
+    background: transparent;
+  }
+  .line-items-table tbody tr.li-section-header:first-child td {
+    padding-top: 4px;
+  }
+  .line-items-table .li-section-name {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--vf-ink-3);
+  }
+  .line-items-table .li-section-subtotal {
+    float: right;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--vf-ink-4);
+  }
   /* Draft-mode: show + Add line item button below the table */
   body.draft-mode #line-items-add-btn { display: inline-block !important; }
   /* Draft-mode: × button per row sits in li-actions cell */
@@ -761,7 +785,7 @@
   .line-items-table .li-row-remove:hover { opacity: 1; }
   body.draft-mode .line-items-table .li-row-remove { display: inline-block; }
   /* Mobile: hide the days column to save horizontal space (still computed) */
-  @media (max-width: 600px) {
+  @media (max-width: 760px) {
     .line-items-table .li-th-unit, .line-items-table .li-unit,
     .line-items-table .li-th-days, .line-items-table .li-days { display: none; }
   }
@@ -818,43 +842,64 @@
     text-transform: none;
   }
 
-  /* ── TOTALS ───────────────────────────── */
+  /* ── TOTALS — the single most important UI on the page ───────────────── */
   .totals-list {
-    max-width: 520px;
+    max-width: 560px;
     margin: 0 auto;
-    background: var(--card-bg);
-    border-radius: 16px;
-    border: 1px solid var(--grey-100);
+    background: var(--vf-surface);
+    border-radius: 20px;
+    border: 1px solid var(--vf-line);
     overflow: hidden;
+    box-shadow: 0 12px 36px rgba(10,15,26,0.06), 0 2px 6px rgba(10,15,26,0.03);
   }
 
   .totals-row {
     display: flex;
     justify-content: space-between;
-    padding: 18px 28px;
+    align-items: baseline;
+    padding: 16px 28px;
     font-size: 14px;
-    color: var(--grey-600);
-    border-bottom: 1px solid var(--grey-100);
+    color: var(--vf-ink-3);
+    border-bottom: 1px solid var(--vf-line);
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
   }
+  .totals-row span:first-child { letter-spacing: -0.005em; }
 
   .totals-row.grand {
-    font-size: 24px;
-    font-weight: 900;
-    color: var(--grey-900);
-    letter-spacing: -0.5px;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--vf-ink);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     border-bottom: none;
-    padding: 24px 28px;
+    padding: 24px 28px 28px;
+    background: linear-gradient(to bottom, var(--vf-bg-tint, rgba(9,94,223,0.03)) 0%, transparent 100%);
+  }
+  .totals-row.grand span:first-child {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: var(--vf-ink-3);
+    text-transform: uppercase;
+  }
+  .totals-row.grand span:last-child {
+    font-family: var(--font-sans);
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--vf-blue);
+    letter-spacing: -0.025em;
+    text-transform: none;
   }
 
-  .totals-row.grand span:last-child { color: var(--blue); }
-
-  /* ── CLOSING — dark thank-you band with brand glow ───────────────────── */
+  /* ── CLOSING — light thank-you band, sits between pricing and the CTA ─── */
   .closing-section {
-    background: var(--vf-night);
-    color: white;
+    background: var(--vf-bg);
+    color: var(--vf-ink);
     text-align: center;
-    padding: 120px 64px 96px;
+    padding: 88px 64px 72px;
     position: relative;
     overflow: hidden;
   }
@@ -863,11 +908,10 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 70% 55% at 50% 100%,
-      rgba(9,94,223,0.32) 0%,
-      rgba(5,46,110,0.18) 35%,
+    background: radial-gradient(ellipse 60% 45% at 50% 100%,
+      rgba(9,94,223,0.06) 0%,
       transparent 70%);
-    z-index: 0;
+    pointer-events: none;
   }
 
   .closing-section > * { position: relative; z-index: 1; }
@@ -878,7 +922,7 @@
     letter-spacing: -0.03em;
     line-height: 1.0;
     margin-bottom: 24px;
-    color: white;
+    color: var(--vf-ink);
     text-wrap: balance;
   }
   .closing-section h2 em {
@@ -1044,7 +1088,7 @@
   body.draft-mode #equipment-text-block:hover,
   body.draft-mode #equipment-text-block.editing {
     border-color: var(--grey-300);
-    background: rgba(26, 86, 255, 0.04);
+    background: rgba(9,94,223, 0.04);
   }
   .equip-empty-placeholder { color: var(--grey-500); }
   .equip-empty-prompt {
@@ -1097,20 +1141,19 @@
   .tnc-divider { border: none; border-top: 1px solid var(--grey-100); margin: 28px 0 0; }
 
   /* ── MOBILE (<= 600px) ───────────────── */
-  @media (max-width: 600px) {
+  @media (max-width: 760px) {
     .hero { padding: 36px 20px 44px; min-height: 340px; }
   .hero-title { font-size: 44px; letter-spacing: -2px; }
     .hero-sub { font-size: 13px; }
 
     .light-section, .white-section { padding: 44px 20px; }
-    .section-heading { font-size: 32px; letter-spacing: -0.8px; margin-top: 12px; margin-bottom: 32px; line-height: 1.05; }
+    .section-heading { font-size: 26px; letter-spacing: -0.6px; margin-top: 8px; margin-bottom: 24px; line-height: 1.1; }
 
     .brief-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
 
     .pkg-grid { grid-template-columns: 1fr; gap: 20px; }
     .pkg-card { padding: 24px 20px; }
 
-    .light-section, .white-section { padding: 72px 24px; }
     .closing-section { padding: 72px 24px 56px; }
     .closing-section h2 { font-size: 34px; letter-spacing: -0.8px; line-height: 1.05; }
 
@@ -1126,6 +1169,19 @@
     .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
   }
 
+  /* ── MOBILE (<= 480px) — phone-only tighter padding ──────────────────── */
+  @media (max-width: 480px) {
+    .hero { padding: 28px 16px 36px; }
+    .hero-title { font-size: 36px; letter-spacing: -1.5px; }
+    .light-section, .white-section { padding: 36px 16px; }
+    .closing-section { padding: 56px 16px 44px; }
+    .cta-section { padding: 44px 16px; }
+    .section-heading { font-size: 26px; margin-bottom: 24px; }
+    .brief-grid { grid-template-columns: 1fr; gap: 10px; }
+    .mega-footer { padding: 40px 0 20px; }
+    .footer-inner { padding: 0 20px; }
+  }
+
   /* ── FOOTER (matches valley.film mega-footer) ── */
   .mega-footer {
     padding: 80px 0 32px;
@@ -1137,6 +1193,10 @@
     max-width: 1120px;
     margin: 0 auto;
     padding: 0 64px;
+  }
+  @media (max-width: 960px) {
+    .footer-inner { padding: 0 32px; }
+    .footer-cols { grid-template-columns: 1fr 1fr; gap: 36px; }
   }
 
   .footer-cols {
@@ -1302,9 +1362,9 @@
 
   .accepted-badge {
     display: inline-block;
-    background: rgba(26,86,255,0.07);
+    background: rgba(9,94,223,0.07);
     color: var(--blue);
-    border: 1.5px solid rgba(26,86,255,0.18);
+    border: 1.5px solid rgba(9,94,223,0.18);
     padding: 8px 22px;
     border-radius: 100px;
     font-size: 11px;
@@ -1323,8 +1383,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 20px 24px;
-    background: rgba(26,86,255,0.04);
-    border: 1.5px solid rgba(26,86,255,0.15);
+    background: rgba(9,94,223,0.04);
+    border: 1.5px solid rgba(9,94,223,0.15);
     border-radius: 14px;
     margin-bottom: 28px;
     transition: transform 0.18s ease, box-shadow 0.18s ease;
@@ -1332,7 +1392,7 @@
 
   .price-base-row:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(26,86,255,0.1);
+    box-shadow: 0 6px 20px rgba(9,94,223,0.1);
   }
 
   .price-row-label {
@@ -1494,8 +1554,8 @@
   .quote-notes-block {
     margin-top: 32px;
     padding: 18px 22px;
-    background: rgba(26,86,255,0.04);
-    border: 1.5px solid rgba(26,86,255,0.12);
+    background: rgba(9,94,223,0.04);
+    border: 1.5px solid rgba(9,94,223,0.12);
     border-radius: 12px;
   }
 
@@ -1674,7 +1734,7 @@
     text-transform: none;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 760px) {
     .pill-group { gap: 6px; }
     .pill-btn { font-size: 12px; padding: 9px 14px; }
     .toggle-cards-grid { grid-template-columns: 1fr; }
@@ -1689,12 +1749,12 @@
   }
 
   .stepper-btn {
-    width: 26px;
-    height: 26px;
-    border-radius: 7px;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
     border: 1.5px solid var(--grey-200);
     background: var(--card-bg);
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1;
     cursor: pointer;
     color: var(--grey-600);
@@ -1710,7 +1770,7 @@
   .stepper-btn:hover:not(:disabled) {
     border-color: var(--blue);
     color: var(--blue);
-    background: rgba(26,86,255,0.05);
+    background: rgba(9,94,223,0.05);
   }
 
   .stepper-btn:disabled {
@@ -1839,6 +1899,39 @@
     color: rgba(255,255,255,0.3);
     text-align: center;
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  /* Right-side group: subtle dividers separate info cluster from action cluster */
+  .draft-banner-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .draft-banner-right #draft-preview-btn {
+    margin-left: 8px;
+    border-left: 1px solid rgba(255,255,255,0.10);
+    padding-left: 16px;
+    border-radius: 0;
+    background: transparent !important;
+  }
+  .draft-banner-right #draft-revert-btn { margin-right: 4px; }
+  .draft-banner-right #draft-approve-btn {
+    margin-left: 6px;
+  }
+  /* Subtle separator between Heads up / Changes / Shortcuts buttons */
+  .draft-banner-center #draft-changes-btn {
+    border-left: 1px solid rgba(255,255,255,0.10);
+    padding-left: 12px;
+    margin-left: 4px;
+    border-radius: 0;
+    background: transparent !important;
+  }
+  .draft-banner-center #draft-shortcuts-btn {
+    margin-left: 2px;
   }
 
   .draft-approve-btn {
@@ -2217,7 +2310,7 @@
   #vf-modal-box select:focus {
     outline: none;
     border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(26,86,255,0.12);
+    box-shadow: 0 0 0 3px rgba(9,94,223,0.12);
   }
   #vf-modal-box textarea { resize: vertical; min-height: 60px; }
   #vf-modal-box .vf-help {
@@ -2582,14 +2675,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     border: 1px solid var(--grey-300);
     background: #fff;
     color: var(--grey-700);
-    border-radius: 4px;
-    font-size: 14px;
+    border-radius: 6px;
+    font-size: 16px;
     line-height: 1;
     font-weight: 600;
     cursor: pointer;
@@ -2655,7 +2748,7 @@
   body.draft-mode .pkg-add-card:hover {
     border-color: var(--blue) !important;
     color: var(--blue) !important;
-    background: rgba(26,86,255,0.03) !important;
+    background: rgba(9,94,223,0.03) !important;
   }
 
   /* ── EDITABLE BLOCKS (draft mode only) ───────── */
@@ -2667,12 +2760,12 @@
   }
 
   body.draft-mode [data-editable]:hover {
-    box-shadow: 0 0 0 2px rgba(26,86,255,0.22);
+    box-shadow: 0 0 0 2px rgba(9,94,223,0.22);
   }
 
   body.draft-mode [data-editable].editing {
     box-shadow: 0 0 0 2px var(--blue);
-    background: rgba(26,86,255,0.04);
+    background: rgba(9,94,223,0.04);
     outline: none;
   }
 
@@ -2702,7 +2795,7 @@
   }
   .hero-corner-bl { bottom: 64px; left: 64px; border-left: 1.5px solid var(--vf-ink); border-bottom: 1.5px solid var(--vf-ink); }
   .hero-corner-br { bottom: 64px; right: 64px; border-right: 1.5px solid var(--vf-ink); border-bottom: 1.5px solid var(--vf-ink); }
-  @media (max-width: 600px) {
+  @media (max-width: 760px) {
     .hero-corner-bl { left: 20px; bottom: 40px; }
     .hero-corner-br { right: 20px; bottom: 40px; }
   }
@@ -2943,24 +3036,152 @@
     font-weight: 700;
   }
 
-  /* ── HERO SECOND BLOB ───────────────────────────────────────────────────── */
-  .hero-blob-2 {
-    position: absolute;
-    width: 600px; height: 600px;
-    border-radius: 50%;
-    filter: blur(90px);
-    opacity: 0.07;
-    right: -120px; top: -60px;
-    background: radial-gradient(circle,
-      var(--vf-blue-500) 0%,
-      var(--vf-blue-900) 60%,
-      transparent 80%);
-    pointer-events: none;
-    z-index: 0;
+  /* ── PASSWORD GATE ────────────────────────────────────────────────────── */
+  #vf-password-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(247,248,250,0.96);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  body.vf-pw-locked { overflow: hidden; }
+  body.vf-pw-locked > *:not(#vf-password-gate):not(script):not(style) {
+    visibility: hidden !important;
+  }
+  .vf-pw-card {
+    background: white;
+    border: 1px solid rgba(10,15,26,0.10);
+    border-radius: 20px;
+    padding: 40px 36px 32px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 24px 72px rgba(10,15,26,0.10), 0 4px 12px rgba(10,15,26,0.04);
+    text-align: center;
+  }
+  .vf-pw-logo {
+    height: 26px;
+    width: auto;
+    margin: 0 auto 26px;
+    display: block;
+    opacity: 0.92;
+  }
+  .vf-pw-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--vf-ink);
+    margin-bottom: 6px;
+  }
+  .vf-pw-sub {
+    font-size: 13px;
+    color: var(--vf-ink-3);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .vf-pw-input {
+    width: 100%;
+    font: inherit;
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-align: center;
+    padding: 14px 16px;
+    border: 1.5px solid rgba(10,15,26,0.14);
+    border-radius: 12px;
+    background: rgba(10,15,26,0.02);
+    color: var(--vf-ink);
+    outline: none;
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+  .vf-pw-input:focus {
+    border-color: var(--vf-blue);
+    box-shadow: 0 0 0 4px rgba(9,94,223,0.15);
+    background: white;
+  }
+  .vf-pw-input.shake {
+    animation: vfPwShake 350ms ease;
+    border-color: #DC2626;
+  }
+  @keyframes vfPwShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+  .vf-pw-error {
+    min-height: 18px;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #DC2626;
+  }
+  .vf-pw-remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 6px;
+    margin-bottom: 22px;
+    font-size: 12px;
+    color: var(--vf-ink-3);
+    cursor: pointer;
+    user-select: none;
+  }
+  .vf-pw-remember input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--vf-blue);
+    cursor: pointer;
+  }
+  .vf-pw-submit {
+    width: 100%;
+    background: var(--vf-blue);
+    color: white;
+    border: 0;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition: background 150ms, transform 150ms, box-shadow 150ms;
+  }
+  .vf-pw-submit:hover {
+    background: var(--vf-blue-500);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(9,94,223,0.25);
+  }
+  .vf-pw-foot {
+    margin-top: 18px;
+    font-size: 11px;
+    color: var(--vf-ink-4);
+    line-height: 1.55;
   }
 </style>
 </head>
 <body>
+<!-- ── PASSWORD GATE: shown until correct MMDD of generation date entered ── -->
+<div id="vf-password-gate" style="display:none;">
+  <div class="vf-pw-card">
+    <img src="https://valley.film/assets/logo-black.png" class="vf-pw-logo" alt="Valley Films" onerror="this.style.display='none'">
+    <div class="vf-pw-title">Private quote</div>
+    <div class="vf-pw-sub">Enter the 4-digit access code you were given.</div>
+    <input type="password" id="vf-pw-input" class="vf-pw-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="4" placeholder="0000" aria-label="Access code">
+    <div class="vf-pw-error" id="vf-pw-error" role="alert"></div>
+    <label class="vf-pw-remember">
+      <input type="checkbox" id="vf-pw-remember" checked>
+      <span>Remember on this device</span>
+    </label>
+    <button type="button" class="vf-pw-submit" id="vf-pw-submit">Continue</button>
+    <div class="vf-pw-foot">If you don't have the code, please contact Valley Films.</div>
+  </div>
+</div>
 
 <!-- ── DRAFT BANNER (hidden until JS enables draft mode) ── -->
 <div id="draft-banner">
@@ -2982,7 +3203,6 @@
       <span id="draft-autosave-indicator"></span>
       <button id="draft-preview-btn" class="draft-save-btn" title="Preview what the client will see (hides all editor controls)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client</button>
       <button id="draft-revert-btn" class="draft-save-btn" title="Undo all edits and restore the original quote">↺ Revert</button>
-      <button id="draft-save-btn" class="draft-save-btn">Save Draft</button>
       <button id="draft-approve-btn" class="draft-approve-btn">Approve &amp; Send →</button>
     </div>
   </div>
@@ -3023,7 +3243,6 @@
 
 <!-- ── HERO ───────────────────────────────────────── -->
 <div class="hero">
-  <div class="hero-blob-2"></div>
   <div class="hero-corner hero-corner-bl"></div>
   <div class="hero-corner hero-corner-br"></div>
   <div class="hero-content">
@@ -3076,8 +3295,8 @@
   <span id="deliv-list"><span class="tag" data-deliv-id="dl_3140cf"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec>3840 × 2160</span></span><span class="tag" data-deliv-id="dl_c98803"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec>1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
   <div style="margin-top:24px;">
     <div class="brief-grid" style="margin-bottom:0;">
-      <div class="brief-item"><div class="brief-item-label">1st Draft Deadline</div><div class="brief-item-value"><div class="stepper-row" style="align-items:flex-start;gap:6px;"><button class="stepper-btn" id="deadline-faster" aria-label="Faster delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div style="flex:1;min-width:0;"><span id="deadline-label" data-editable data-single-line style="font-size:15px;font-weight:600;color:var(--grey-900);">TBC</span><div id="deadline-sublabel" style="font-size:10px;color:var(--grey-400);font-weight:500;margin-top:3px;letter-spacing:0.3px;">2 Week Delivery</div></div><button class="stepper-btn" id="deadline-slower" disabled aria-label="Slower delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div>
-      <div class="brief-item"><div class="brief-item-label">Revisions Included</div><div class="brief-item-value"><div class="stepper-row" style="align-items:flex-start;gap:6px;"><button class="stepper-btn" id="rev-minus" disabled aria-label="Fewer revisions" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div style="flex:1;min-width:0;"><span id="rev-count-label" data-editable data-single-line style="font-size:15px;font-weight:600;color:var(--grey-900);">2 Rounds</span><div id="rev-sublabel" style="font-size:10px;color:var(--grey-400);font-weight:500;margin-top:3px;letter-spacing:0.3px;">+0 Revisions</div></div><button class="stepper-btn" id="rev-plus" aria-label="More revisions" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div>
+      <div class="brief-item"><div class="brief-item-label">1st Draft Deadline</div><div class="brief-item-value"><div class="stepper-row" style="align-items:flex-start;gap:6px;"><button class="stepper-btn" id="deadline-faster" aria-label="Faster delivery"><svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div style="flex:1;min-width:0;"><span id="deadline-label" data-editable data-single-line style="font-size:15px;font-weight:600;color:var(--grey-900);">TBC</span><div id="deadline-sublabel" style="font-size:10px;color:var(--grey-400);font-weight:500;margin-top:3px;letter-spacing:0.3px;">2 Week Delivery</div></div><button class="stepper-btn" id="deadline-slower" disabled aria-label="Slower delivery"><svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div>
+      <div class="brief-item"><div class="brief-item-label">Revisions Included</div><div class="brief-item-value"><div class="stepper-row" style="align-items:flex-start;gap:6px;"><button class="stepper-btn" id="rev-minus" disabled aria-label="Fewer revisions"><svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div style="flex:1;min-width:0;"><span id="rev-count-label" data-editable data-single-line style="font-size:15px;font-weight:600;color:var(--grey-900);">2 Rounds</span><div id="rev-sublabel" style="font-size:10px;color:var(--grey-400);font-weight:500;margin-top:3px;letter-spacing:0.3px;">+0 Revisions</div></div><button class="stepper-btn" id="rev-plus" aria-label="More revisions"><svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div>
       <div class="brief-item"><div class="brief-item-label">Revision Turnaround</div><div class="brief-item-value">3 Working Days</div></div>
     </div>
   </div></div><button type="button" id="deliv-section-restore" class="section-restore-btn" style="display:none;">+ Restore deliverables section</button>
@@ -3088,7 +3307,7 @@
 <div class="white-section" id="pricing-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">02</span> · Production Services</div>
   <div class="section-heading">The <em>Quotation</em></div>
-  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name">Role</th><th class="li-th li-th-rate">Rate</th><th class="li-th li-th-unit">Unit</th><th class="li-th li-th-days">Qty</th><th class="li-th li-th-subtotal">Subtotal</th><th class="li-th li-th-actions"></th></tr></thead><tbody id="line-items-body"><tr class="li-row" data-li-id="li_5f4825fb" data-rate="375.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>2nd Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£375</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£375</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_4018ee86" data-rate="275.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£275</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£275</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5a53cb1a" data-rate="475.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Camera Operator</td><td class="li-cell li-rate" data-editable data-single-line>£475</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£475</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5c590c98" data-rate="175.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Colour Grade</td><td class="li-cell li-rate" data-editable data-single-line>£175</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£175</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_35cb5215" data-rate="18.00" data-days="1.00" data-unit="charge"><td class="li-cell li-name" data-editable data-single-line>Congestion Charge</td><td class="li-cell li-rate" data-editable data-single-line>£18</td><td class="li-cell li-unit"><span class="li-unit-display">charge</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge" selected>charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£18</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8a0cbc7e" data-rate="700.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director</td><td class="li-cell li-rate" data-editable data-single-line>£700</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£700</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_46f0696f" data-rate="575.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director of Photography</td><td class="li-cell li-rate" data-editable data-single-line>£575</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£575</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8806565f" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Gaffer</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_82d07f1e" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Hero Edit (2–5 min)</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bae0c7ca" data-rate="600.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Long-form Edit (10 min+)</td><td class="li-cell li-rate" data-editable data-single-line>£600</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£600</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_634a7256" data-rate="0.55" data-days="1.00" data-unit="mile"><td class="li-cell li-name" data-editable data-single-line>Mileage</td><td class="li-cell li-rate" data-editable data-single-line>£1</td><td class="li-cell li-unit"><span class="li-unit-display">mile</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile" selected>mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£1</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_7260296e" data-rate="550.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Producer</td><td class="li-cell li-rate" data-editable data-single-line>£550</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£550</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5f46e40d" data-rate="200.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Production Assistant (PA)</td><td class="li-cell li-rate" data-editable data-single-line>£200</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£200</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_057aa497" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Social Cut (30–60s)</td><td class="li-cell li-rate" data-editable data-single-line>£300</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_00b2f5ff" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Sound Recordist</td><td class="li-cell li-rate" data-editable data-single-line>£400</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£400</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_f7bceba6" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Spark</td><td class="li-cell li-rate" data-editable data-single-line>£300</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_b3f1bae8" data-rate="125.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Stills Cull + Edit</td><td class="li-cell li-rate" data-editable data-single-line>£125</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£125</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_2e5e3796" data-rate="3.60" data-days="1.00" data-unit="journey"><td class="li-cell li-name" data-editable data-single-line>TfL Journey</td><td class="li-cell li-rate" data-editable data-single-line>£4</td><td class="li-cell li-unit"><span class="li-unit-display">journey</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey" selected>journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£4</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_0c160aa2" data-rate="65.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Transcoding / Delivery</td><td class="li-cell li-rate" data-editable data-single-line>£65</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£65</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bfd39ac0" data-rate="95.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£95</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£95</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="4" class="li-foot-label">Subtotal</td><td class="li-foot-amount" id="line-items-subtotal">£6,132</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><details class="tnc-accordion" id="equipment-accordion" open><summary>Equipment Package <span class="tnc-chevron">+</span></summary><div class="tnc-body" style="padding-top:16px;"><div id="equipment-text-block" data-editable data-equip-has-content="0"><span class="equip-empty-placeholder">No equipment list attached. <span class="equip-empty-prompt">Click here to type one.</span></span></div><div class="equip-helper" style="display:none;font-size:11px;color:var(--grey-500);margin-top:8px;font-style:italic;">Type your equipment list here. One item per line, or paste from anywhere. Saves automatically and sticks across regenerations.</div></div></details><div class="price-section-label" style="margin-bottom:14px;">Delivery</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn  selected" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45</span></button><button class="pill-btn" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div><div class="price-section-label" style="margin-bottom:14px;">Post-Production</div><div class="toggle-cards toggle-cards-grid" style="margin-bottom:28px;"><div class="toggle-card" data-postprod-id="34f47fd0-3620-81d5-9e6c-f22f2b06fa2f" data-price="200" data-base-price="200"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Additional Social Cut</div><div class="toggle-card-desc" data-editable>Extra cut beyond what is included in the package (up to 90s).</div></div><div class="toggle-card-price" data-editable data-single-line>+£200</div></div><div class="toggle-card" data-postprod-id="34f47fd0-3620-8134-9b43-de629d459f95" data-price="75" data-base-price="75"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Subtitles / Captions</div><div class="toggle-card-desc" data-editable>Burnt-in or SRT subtitles per video.</div></div><div class="toggle-card-price" data-editable data-single-line>+£75</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" id="discounts-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
+  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name">Role</th><th class="li-th li-th-rate">Rate</th><th class="li-th li-th-unit">Unit</th><th class="li-th li-th-days">Qty</th><th class="li-th li-th-subtotal">Subtotal</th><th class="li-th li-th-actions"></th></tr></thead><tbody id="line-items-body"><tr class="li-row" data-li-id="li_5f4825fb" data-rate="375.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>2nd Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£375</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£375</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_4018ee86" data-rate="275.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£275</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£275</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5a53cb1a" data-rate="475.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Camera Operator</td><td class="li-cell li-rate" data-editable data-single-line>£475</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£475</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5c590c98" data-rate="175.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Colour Grade</td><td class="li-cell li-rate" data-editable data-single-line>£175</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£175</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_35cb5215" data-rate="18.00" data-days="1.00" data-unit="charge"><td class="li-cell li-name" data-editable data-single-line>Congestion Charge</td><td class="li-cell li-rate" data-editable data-single-line>£18</td><td class="li-cell li-unit"><span class="li-unit-display">charge</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge" selected>charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£18</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8a0cbc7e" data-rate="700.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director</td><td class="li-cell li-rate" data-editable data-single-line>£700</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£700</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_46f0696f" data-rate="575.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director of Photography</td><td class="li-cell li-rate" data-editable data-single-line>£575</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£575</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8806565f" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Gaffer</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_82d07f1e" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Hero Edit (2–5 min)</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bae0c7ca" data-rate="600.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Long-form Edit (10 min+)</td><td class="li-cell li-rate" data-editable data-single-line>£600</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£600</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_634a7256" data-rate="0.55" data-days="1.00" data-unit="mile"><td class="li-cell li-name" data-editable data-single-line>Mileage</td><td class="li-cell li-rate" data-editable data-single-line>£0.55</td><td class="li-cell li-unit"><span class="li-unit-display">mile</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile" selected>mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£0.55</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_7260296e" data-rate="550.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Producer</td><td class="li-cell li-rate" data-editable data-single-line>£550</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£550</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5f46e40d" data-rate="200.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Production Assistant (PA)</td><td class="li-cell li-rate" data-editable data-single-line>£200</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£200</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_057aa497" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Social Cut (30–60s)</td><td class="li-cell li-rate" data-editable data-single-line>£300</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_00b2f5ff" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Sound Recordist</td><td class="li-cell li-rate" data-editable data-single-line>£400</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£400</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_f7bceba6" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Spark</td><td class="li-cell li-rate" data-editable data-single-line>£300</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_b3f1bae8" data-rate="125.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Stills Cull + Edit</td><td class="li-cell li-rate" data-editable data-single-line>£125</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£125</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_2e5e3796" data-rate="3.60" data-days="1.00" data-unit="journey"><td class="li-cell li-name" data-editable data-single-line>TfL Journey</td><td class="li-cell li-rate" data-editable data-single-line>£3.60</td><td class="li-cell li-unit"><span class="li-unit-display">journey</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey" selected>journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£3.60</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_0c160aa2" data-rate="65.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Transcoding / Delivery</td><td class="li-cell li-rate" data-editable data-single-line>£65</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£65</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bfd39ac0" data-rate="95.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£95</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£95</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="4" class="li-foot-label">Subtotal</td><td class="li-foot-amount" id="line-items-subtotal">£6,132</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><details class="tnc-accordion" id="equipment-accordion" open><summary>Equipment Package <span class="tnc-chevron">+</span></summary><div class="tnc-body" style="padding-top:16px;"><div id="equipment-text-block" data-editable data-equip-has-content="0"><span class="equip-empty-placeholder">No equipment list attached. <span class="equip-empty-prompt">Click here to type one.</span></span></div><div class="equip-helper" style="display:none;font-size:11px;color:var(--grey-500);margin-top:8px;font-style:italic;">Type your equipment list here. One item per line, or paste from anywhere. Saves automatically and sticks across regenerations.</div></div></details><div class="price-section-label" style="margin-bottom:14px;">Delivery</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn  selected" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45</span></button><button class="pill-btn" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div><div class="price-section-label" style="margin-bottom:14px;">Post-Production</div><div class="toggle-cards toggle-cards-grid" style="margin-bottom:28px;"><div class="toggle-card" data-postprod-id="34f47fd0-3620-81d5-9e6c-f22f2b06fa2f" data-price="200" data-base-price="200"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Additional Social Cut</div><div class="toggle-card-desc" data-editable>Extra cut beyond what is included in the package (up to 90s).</div></div><div class="toggle-card-price" data-editable data-single-line>+£200</div></div><div class="toggle-card" data-postprod-id="34f47fd0-3620-8134-9b43-de629d459f95" data-price="75" data-base-price="75"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Subtitles / Captions</div><div class="toggle-card-desc" data-editable>Burnt-in or SRT subtitles per video.</div></div><div class="toggle-card-price" data-editable data-single-line>+£75</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" id="discounts-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
 
   
 
@@ -3105,8 +3324,8 @@
 <!-- ── CONFIRMATION SUMMARY (shown after signing) ── -->
 <div id="confirmed-summary" class="white-section" style="display:none;">
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">
-    <div style="width:44px;height:44px;border-radius:50%;background:rgba(26,86,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(26,86,255,1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <div style="width:44px;height:44px;border-radius:50%;background:rgba(9,94,223,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(9,94,223,1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <div>
       <div class="section-eyebrow" style="margin-bottom:0;">Booking Confirmed</div>
@@ -3254,6 +3473,84 @@
   // draft-mode features that pre-fill from prior saves (e.g. brief Q&A inputs).
   window._editor_state_initial = {};
 
+  // ── Password gate ──────────────────────────────────────────────────────
+  // The expected code is the MMDD of the quote's generation date.
+  // Operator generates a quote on 13-May → code is "0513".
+  // - Runs before any other init so locked content never flashes.
+  // - "Remember on this device" persists per-quote in localStorage.
+  // - Skipped when generatedDate is empty (template / preview).
+  (function _initPasswordGate() {
+    function _extractMMDD(s) {
+      if (!s || typeof s !== 'string') return '';
+      // ISO YYYY-MM-DD (also matches YYYY-MM-DDTHH:MM:SS)
+      let m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+      if (m) return m[2] + m[3];
+      // "13 May 2025" / "13 May, 2025"
+      const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+      m = s.match(/^(\d{1,2})\s+([A-Za-z]+)/);
+      if (m) {
+        const idx = months.indexOf(m[2].toLowerCase());
+        if (idx >= 0) return String(idx + 1).padStart(2, '0') + String(parseInt(m[1])).padStart(2, '0');
+      }
+      // DD/MM/YYYY (UK convention)
+      m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-]\d{4}$/);
+      if (m) return String(parseInt(m[2])).padStart(2, '0') + String(parseInt(m[1])).padStart(2, '0');
+      // Fallback: native Date parsing
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        return String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+      }
+      return '';
+    }
+
+    const expected = _extractMMDD(VF.generatedDate || '');
+    const gate = document.getElementById('vf-password-gate');
+    if (!gate) return;
+    if (!expected) return; // template / no date → skip gate entirely
+
+    const key = 'vf_pw_' + (VF.pageId || VF.quoteRef || 'unknown');
+    try {
+      if (localStorage.getItem(key) === expected) return; // already unlocked on this device
+    } catch (_) {}
+
+    document.body.classList.add('vf-pw-locked');
+    gate.style.display = 'flex';
+
+    const input    = document.getElementById('vf-pw-input');
+    const err      = document.getElementById('vf-pw-error');
+    const remember = document.getElementById('vf-pw-remember');
+    const submit   = document.getElementById('vf-pw-submit');
+
+    function unlock() {
+      const val = (input.value || '').trim();
+      if (val === expected) {
+        if (remember && remember.checked) {
+          try { localStorage.setItem(key, expected); } catch (_) {}
+        }
+        document.body.classList.remove('vf-pw-locked');
+        gate.style.display = 'none';
+      } else {
+        err.textContent = 'Incorrect code. Please try again.';
+        input.classList.add('shake');
+        input.value = '';
+        setTimeout(() => input.classList.remove('shake'), 400);
+        input.focus();
+      }
+    }
+
+    submit.addEventListener('click', unlock);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') unlock();
+      else err.textContent = '';
+    });
+    // Numeric-only filter on input
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0, 4);
+    });
+    // Defer focus so the gate has rendered and won't fight other autofocus
+    setTimeout(() => input.focus(), 80);
+  })();
+
   // ── Populate client nav pill ──────────────────────────────────────────
   const _STATUS_OPTIONS = [
     { value: 'Draft',              label: 'Draft',              color: '#6B7280' },
@@ -3290,6 +3587,27 @@
     const refEl = document.getElementById('vf-nav-quote-ref');
     if (refEl && VF.quoteRef) refEl.textContent = VF.quoteRef;
     _applyStatusChip(VF.financialStatus || 'Quotation Sent');
+  })();
+
+  // ── Empty-state cleanup for client view: hide section labels when their
+  // content list is empty (operator-only situation but possible if deliverables
+  // are intentionally left blank).
+  (function _hideEmptySections() {
+    // Skip in editor mode — operator still needs to see empty sections to add to them
+    const isEditor = VF.isDraft && new URLSearchParams(window.location.search).get('view') !== 'client';
+    if (isEditor) return;
+    // Deliverables: hide if no .tag children inside #deliv-list
+    const dl = document.getElementById('deliv-list');
+    if (dl && !dl.querySelector('.tag')) {
+      const sec = document.getElementById('deliverables-section');
+      if (sec) sec.style.display = 'none';
+    }
+    // Equipment: hide the whole accordion if data-equip-has-content="0"
+    const eq = document.getElementById('equipment-text-block');
+    if (eq && eq.getAttribute('data-equip-has-content') === '0') {
+      const acc = document.getElementById('equipment-accordion');
+      if (acc) acc.style.display = 'none';
+    }
   })();
 
   // ── Draft-mode status selector ────────────────────────────────────────
@@ -3388,7 +3706,13 @@
   };
 
   function _fmtGBP(n) {
-    return '£' + n.toLocaleString('en-GB', {minimumFractionDigits:0, maximumFractionDigits:0});
+    if (!Number.isFinite(n)) n = 0;
+    // Show 2 dp when value has a meaningful fractional part (e.g. £0.55, £3.60),
+    // else integer with thousands separator (£575, £6,132).
+    if (Math.abs(n - Math.round(n)) > 0.005) {
+      return '£' + n.toFixed(2);
+    }
+    return '£' + Math.round(n).toLocaleString('en-GB');
   }
 
   // ── Rush tier data — with dynamically computed dates ─────────────────────
@@ -3404,6 +3728,14 @@
                .replace(/24hours?/i, '24 Hours')
                .trim() + ' Delivery';
   }
+  // Category names for the secondary line — buckets by daysOut.
+  // daysOut == null is the default (2-week) tier → 'Standard Delivery'.
+  function _rushCategory(daysOut) {
+    if (daysOut == null || daysOut >= 14) return 'Standard Delivery';
+    if (daysOut >= 7)  return 'Fast Delivery';
+    if (daysOut >= 3)  return 'Priority Delivery';
+    return 'Instant Delivery';
+  }
   const _prodISO = VF.productionDateISO || '';
   // Build tier objects: [slower addons] + [2-week default] + [faster/rush addons]
   // Index increases toward faster delivery; default rushTier = _slowerAddons.length (2-week position)
@@ -3411,18 +3743,21 @@
     ..._slowerAddons.map(a => ({
       date:     _prodISO ? _fmtDateFromISO(_prodISO, a.daysOut) : '',
       sublabel: _rushSublabel(a.name),
+      category: _rushCategory(a.daysOut),
       price:    a.price,
       id:       a.id,
     })),
     {
-      date:     _prodISO ? _fmtDateFromISO(_prodISO, 14) : (PRICING.defaultDeadline || ''),
+      date:     _prodISO ? _fmtDateFromISO(_prodISO, 14) : '',
       sublabel: '2 Week Delivery',
+      category: 'Standard Delivery',
       price:    0,
       id:       null,
     },
     ..._fasterAddons.map(a => ({
       date:     _prodISO ? _fmtDateFromISO(_prodISO, a.daysOut) : '',
       sublabel: _rushSublabel(a.name),
+      category: _rushCategory(a.daysOut),
       price:    a.price,
       id:       a.id,
     })),
@@ -4087,10 +4422,15 @@
     const sublabelEl = document.getElementById('deadline-sublabel');
     const fasterBtn  = document.getElementById('deadline-faster');
     const slowerBtn  = document.getElementById('deadline-slower');
+    // Primary line: the duration ("2 Week Delivery" / "1 Week Delivery" / etc.)
+    // Secondary line: the category ("Standard / Fast / Priority / Instant Delivery"),
+    // with the calendar date appended when a production date is set.
     if (labelEl && !labelEl.dataset.userEdited) {
-      labelEl.textContent = tier.date || tier.sublabel;
+      labelEl.textContent = tier.sublabel;
     }
-    if (sublabelEl) sublabelEl.textContent = tier.sublabel;
+    if (sublabelEl) {
+      sublabelEl.textContent = tier.date ? (tier.category + ' · ' + tier.date) : tier.category;
+    }
     // Faster (−) disabled when already at most urgent; Slower (+) disabled at default
     if (fasterBtn) fasterBtn.disabled = _pstate.rushTier >= _rushTiers.length - 1;
     if (slowerBtn) slowerBtn.disabled = _pstate.rushTier <= 0;
@@ -4102,7 +4442,7 @@
     if (this.contentEditable === 'true' || this.classList.contains('editing')) return;
     // Has the text diverged from what the stepper would have written?
     const tier = _rushTiers[_pstate.rushTier];
-    const stepperWouldShow = tier ? (tier.date || tier.sublabel) : '';
+    const stepperWouldShow = tier ? tier.sublabel : '';
     if (this.textContent.trim() !== stepperWouldShow.trim()) {
       this.dataset.userEdited = '1';
     }
@@ -4224,6 +4564,7 @@
       extraRevisions: _pstate.extraRevisions,
       totalRevisions: _defaultRevisions + _pstate.extraRevisions,
       rushSublabel:  rushTierSnap ? rushTierSnap.sublabel : '2 Week Delivery',
+      rushCategory:  rushTierSnap ? rushTierSnap.category : 'Standard Delivery',
       rushDate:      rushTierSnap ? (rushTierSnap.date || '') : '',
       rushPrice:     rushTierSnap ? rushTierSnap.price : 0,
       travel:        PRICING.travel || null,
@@ -5399,7 +5740,6 @@
       const panel = document.getElementById('draft-shortcuts-panel');
       if (!panel) return;
       panel.innerHTML =
-        '<span class="ds-row"><kbd>⌘</kbd>+<kbd>S</kbd> Save Draft</span>' +
         '<span class="ds-row"><kbd>⌘</kbd>+<kbd>Enter</kbd> Approve &amp; Send</span>' +
         '<span class="ds-row"><kbd>⌘</kbd>+<kbd>P</kbd> View as client</span>' +
         '<span class="ds-row"><kbd>⌘</kbd>+<kbd>K</kbd> Re-extract brief</span>' +
@@ -5462,11 +5802,6 @@
       }
       // ── Cmd/Ctrl-prefixed actions ────────────────────────────────────────
       const mod = (e.metaKey || e.ctrlKey);
-      if (mod && e.key === 's') {
-        e.preventDefault();
-        document.getElementById('draft-save-btn')?.click();
-        return;
-      }
       if (mod && e.key === 'Enter') {
         e.preventDefault();
         document.getElementById('draft-approve-btn')?.click();
@@ -6355,11 +6690,11 @@
         const li = _pstate.lineItems.find(x => x.id === row.dataset.liId);
         if (!li) return;
         const cell = row.querySelector('.li-subtotal');
-        if (cell) cell.textContent = '£' + _liSubtotal(li).toLocaleString('en-GB');
+        if (cell) cell.textContent = _fmtGBP(_liSubtotal(li));
       }
       function _renderLiFooter() {
         const el = document.getElementById('line-items-subtotal');
-        if (el) el.textContent = '£' + _liGrandSubtotal().toLocaleString('en-GB');
+        if (el) el.textContent = _fmtGBP(_liGrandSubtotal());
       }
 
       // Wire each existing row: blur-sync editable cells, × remove button.
@@ -6375,16 +6710,18 @@
         if (nameEl) nameEl.addEventListener('blur', () => {
           const t = (nameEl.textContent || '').trim();
           if (t) li.name = t;
+          _groupLineItemsByCategory();
         });
         if (rateEl) rateEl.addEventListener('blur', () => {
           const digits = (rateEl.textContent || '').replace(/[^0-9.]/g, '');
           const n = parseFloat(digits);
           if (Number.isFinite(n) && n >= 0) {
             li.rate = n;
-            rateEl.textContent = '£' + Math.round(n).toLocaleString('en-GB');
+            rateEl.textContent = _fmtGBP(n);
             row.dataset.rate = n.toFixed(2);
             _renderLiSubtotalCell(row);
             _renderLiFooter();
+            _groupLineItemsByCategory();
             _updateTotal();
           }
         });
@@ -6397,6 +6734,7 @@
             row.dataset.days = n.toFixed(2);
             _renderLiSubtotalCell(row);
             _renderLiFooter();
+            _groupLineItemsByCategory();
             _updateTotal();
           }
         });
@@ -6405,6 +6743,7 @@
           li.unit = u;
           row.dataset.unit = u;
           if (unitDispEl) unitDispEl.textContent = u;
+          _groupLineItemsByCategory();
         });
         // × remove button (visible in draft mode)
         const actionsCell = row.querySelector('.li-actions');
@@ -6420,13 +6759,85 @@
             _pstate.lineItems = _pstate.lineItems.filter(x => x.id !== id);
             row.remove();
             _renderLiFooter();
+            _groupLineItemsByCategory();
             _updateTotal();
           });
           x.addEventListener('mousedown', (e) => { e.stopPropagation(); });
           actionsCell.appendChild(x);
         }
       }
+      // ── Auto-categorize line items into Crew / Post / Expenses ─────────
+      // Categories are inferred from rate-card bracket, unit, and name keywords.
+      // Re-runs on add/remove/edit so groupings stay correct as the operator
+      // adjusts the quote.
+      const _LI_CATEGORIES = [
+        { key: 'crew', label: 'Crew & Production' },
+        { key: 'post', label: 'Post-Production' },
+        { key: 'expenses', label: 'Expenses' },
+      ];
+      function _categorizeLi(row) {
+        const id = row.dataset.liId;
+        const li = _pstate.lineItems.find(x => x.id === id) || {};
+        const name = ((li.name || row.querySelector('.li-name')?.textContent || '')).toLowerCase();
+        const unit = (li.unit || row.dataset.unit || 'day').toLowerCase();
+        const rc = (PRICING.rateCard || []).find(r => r.id === li.role_id);
+        const bracket = (rc && rc.apa_bracket) || '';
+
+        // Post-production keywords (checked first — some post roles have empty bracket)
+        if (/\b(edit|cut|grade|colour|color|stills|transcod|sound design|mix|master|vfx|motion graphic|animation|titles|caption|subtitle)\b/.test(name)) {
+          return 'post';
+        }
+        // Expense indicators by unit OR name
+        if (['mile', 'journey', 'charge'].indexOf(unit) >= 0) return 'expenses';
+        if (/(mileage|congestion|hire|rental|van|tfl|parking|fuel|equipment|catering|travel|accommodation|expense|insurance|courier|delivery)/.test(name)) {
+          return 'expenses';
+        }
+        // Explicit crew brackets from the rate card
+        if (bracket === 'Crew' || bracket === 'HoD' || bracket === 'Trainee') return 'crew';
+        // Default for day/hour/week units → crew
+        if (['day','hour','week'].indexOf(unit) >= 0) return 'crew';
+        return 'expenses';
+      }
+      function _liRowSubtotal(row) {
+        const rate = parseFloat(row.dataset.rate || '0') || 0;
+        const days = parseFloat(row.dataset.days || '0') || 0;
+        return Math.round(rate * days);
+      }
+      function _groupLineItemsByCategory() {
+        const tbody = document.getElementById('line-items-body');
+        if (!tbody) return;
+        // Remove any existing section headers
+        tbody.querySelectorAll('tr.li-section-header').forEach(h => h.remove());
+        // Bucket the rows
+        const rows = Array.from(tbody.querySelectorAll('tr.li-row'));
+        if (!rows.length) return;
+        const buckets = { crew: [], post: [], expenses: [] };
+        rows.forEach(r => {
+          const cat = _categorizeLi(r);
+          (buckets[cat] || buckets.expenses).push(r);
+        });
+        // Re-insert in canonical order with section headers
+        const frag = document.createDocumentFragment();
+        _LI_CATEGORIES.forEach(({ key, label }) => {
+          const bucket = buckets[key];
+          if (!bucket || !bucket.length) return;
+          const subtotal = bucket.reduce((sum, r) => sum + _liRowSubtotal(r), 0);
+          const header = document.createElement('tr');
+          header.className = 'li-section-header';
+          header.dataset.liSection = key;
+          header.innerHTML =
+            '<td colspan="6">' +
+              '<span class="li-section-name">' + label + '</span>' +
+              '<span class="li-section-subtotal">£' + subtotal.toLocaleString('en-GB') + '</span>' +
+            '</td>';
+          frag.appendChild(header);
+          bucket.forEach(r => frag.appendChild(r));
+        });
+        tbody.appendChild(frag);
+      }
+      // Initial grouping after rows are wired
       document.querySelectorAll('#line-items-body .li-row').forEach(_wireLiRow);
+      _groupLineItemsByCategory();
 
       // "+ Add line item" — open a Rate Card picker
       async function _openLineItemPicker() {
@@ -6513,6 +6924,7 @@
         row.querySelectorAll('[data-editable]').forEach(_attachEditable);
         _wireLiRow(row);
         _renderLiFooter();
+        _groupLineItemsByCategory();
         _updateTotal();
         // If they picked Custom, immediately focus the name cell so they can type
         if (newLi.custom) {
@@ -6970,9 +7382,10 @@
       });
     }
 
-    // Delivery timeline
-    const deadlineLabel = snap.rushDate || snap.rushSublabel || '2 Week Delivery';
-    const deadlineSub   = snap.rushDate ? snap.rushSublabel : null;
+    // Delivery timeline — primary is duration, secondary is category (+ date if set)
+    const deadlineLabel = snap.rushSublabel || '2 Week Delivery';
+    const _cat = snap.rushCategory || 'Standard Delivery';
+    const deadlineSub   = snap.rushDate ? (_cat + ' · ' + snap.rushDate) : _cat;
     _row('1st Draft', deadlineLabel, deadlineSub);
 
     // Revisions
