@@ -441,6 +441,11 @@
     transition: opacity 120ms ease;
     z-index: 10;
   }
+  /* In editor, the tooltip is always visible so operator can click + edit it */
+  body.draft-mode:not(.client-preview) .tag:hover .tag-spec,
+  body.draft-mode:not(.client-preview) .tag-spec.editing {
+    pointer-events: auto;
+  }
   .tag-spec::after {
     content: '';
     position: absolute;
@@ -747,6 +752,33 @@
     border-bottom: 1px solid rgba(10,15,26,0.08);
     background: transparent;
   }
+  .line-items-table .li-section-header.is-collapsible td {
+    cursor: pointer;
+    user-select: none;
+  }
+  .line-items-table .li-section-header.is-collapsible td:hover .li-section-name {
+    color: var(--vf-ink);
+  }
+  .line-items-table .li-section-chevron {
+    transition: transform 200ms ease;
+    margin-right: 6px;
+    vertical-align: 0;
+    opacity: 0.6;
+  }
+  .line-items-table .li-section-header.is-expanded .li-section-chevron {
+    transform: rotate(180deg);
+  }
+  .line-items-table .li-section-count {
+    margin-left: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    color: var(--vf-ink-4);
+    opacity: 0.85;
+  }
+  .line-items-table .li-row-hidden { display: none; }
   .line-items-table tbody tr.li-section-header:first-child td {
     padding-top: 4px;
   }
@@ -3008,6 +3040,8 @@
     border-color: var(--vf-ink);
     box-shadow: 0 2px 8px rgba(10,15,26,0.18);
   }
+  /* Price is shown in totals breakdown, not on the pill — keep pills clean */
+  .pill-btn[data-delivery-id] .pill-price { display: none; }
   .pill-price {
     font-size: 10px;
     font-weight: 500;
@@ -3233,8 +3267,8 @@
     <span class="vf-nav-ref" id="vf-nav-quote-ref"></span>
     <div class="vf-status-dropdown-wrap">
       <span class="vf-nav-status" id="vf-nav-status" role="button" aria-haspopup="listbox" aria-expanded="false">
-        <span class="vf-nav-status-dot"></span>
-        <span id="vf-nav-status-text"></span>
+        <span class="vf-nav-status-dot" data-no-edit></span>
+        <span id="vf-nav-status-text" data-no-edit contenteditable="false"></span>
         <svg class="vf-nav-status-caret" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -3286,16 +3320,12 @@
           <div class="brief-item-value" data-prod-field="job_type" data-prod-type="select" data-prod-value="Social Content" data-prod-options="[&quot;Commercial&quot;, &quot;Brand Videos&quot;, &quot;Social Content&quot;, &quot;Live Events&quot;, &quot;Event&quot;, &quot;Interviews & Case Studies&quot;]">Social Content</div>
         </div>
         <div class="brief-item brief-item-internal">
-          <div class="brief-item-label">Default Delivery</div>
-          <div class="brief-item-value" data-prod-field="default_delivery" data-prod-type="select" data-prod-value="Hard Drive Purchase" data-prod-options="[&quot;Raw Footage On-Site&quot;, &quot;Hard Drive Purchase&quot;, &quot;Dropbox Delivery&quot;]">Hard Drive Purchase</div>
-        </div>
-        <div class="brief-item brief-item-internal">
           <div class="brief-item-label">Quote Type</div>
           <div class="brief-item-value" data-prod-field="quote_type" data-prod-type="select" data-prod-value="Itemized" data-prod-options="[&quot;Package Based&quot;, &quot;Itemized&quot;]">Itemized</div>
         </div>
   </div>
   <div id="deliverables-section"><div class="sub-label deliverables-header">Deliverables<button type="button" id="deliv-section-remove" class="section-remove-btn" data-no-edit title="Remove the entire deliverables section from this quote" contenteditable="false">×</button></div>
-  <span id="deliv-list"><span class="tag" data-deliv-id="dl_3140cf"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec>3840 × 2160</span></span><span class="tag" data-deliv-id="dl_c98803"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec>1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
+  <span id="deliv-list"><span class="tag" data-deliv-id="dl_3140cf"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec data-editable data-single-line>3840 × 2160</span></span><span class="tag" data-deliv-id="dl_c98803"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec data-editable data-single-line>1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
   <div style="margin-top:24px;">
     <div class="brief-grid" style="margin-bottom:0;">
       <div class="brief-item"><div class="brief-item-label">1st Draft Deadline</div><div class="brief-item-value"><div class="stepper-row" style="align-items:flex-start;gap:6px;"><button class="stepper-btn" id="deadline-faster" aria-label="Faster delivery"><svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div style="flex:1;min-width:0;"><span id="deadline-label" data-editable data-single-line style="font-size:15px;font-weight:600;color:var(--grey-900);">TBC</span><div id="deadline-sublabel" style="font-size:10px;color:var(--grey-400);font-weight:500;margin-top:3px;letter-spacing:0.3px;">2 Week Delivery</div></div><button class="stepper-btn" id="deadline-slower" disabled aria-label="Slower delivery"><svg width="16" height="16" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div>
@@ -5416,12 +5446,13 @@
     {
       const _previewBtn = document.getElementById('draft-preview-btn');
       _previewBtn?.addEventListener('click', () => {
-        // Open the same page in a new tab with ?view=client — the page detects
-        // that param at init and skips draft mode entirely so the operator sees
-        // the exact client experience (no banner, no editor controls).
-        const url = new URL(window.location.href);
-        url.searchParams.set('view', 'client');
-        window.open(url.toString(), '_blank', 'noopener');
+        // Toggle client-preview class on the SAME tab — preserves in-memory _pstate
+        // (addon selections etc.) so the total stays accurate. The banner stays
+        // visible so they can flip back; only the editor controls hide.
+        const isOn = document.body.classList.toggle('client-preview');
+        _previewBtn.classList.toggle('is-active', isOn);
+        // Recompute the total in case anything CSS-driven affected the layout
+        try { _updateTotal(); } catch (_) {}
       });
     }
 
@@ -6115,7 +6146,7 @@
     });
 
     // ── Auto-discover additional editable text (make everything editable) ──
-    const _excludeSel = '#draft-banner, #draft-banner *, #draft-add-discount-btn, #breakdown-rows, #breakdown-rows *, #quote-total, button, a, input, canvas, [data-no-edit], [data-no-edit] *, .mega-footer, .mega-footer *, .cta-section, .cta-section *, .closing-section h2, .closing-section > p';
+    const _excludeSel = '#draft-banner, #draft-banner *, #draft-add-discount-btn, #breakdown-rows, #breakdown-rows *, #quote-total, button, a, input, canvas, [data-no-edit], [data-no-edit] *, .mega-footer, .mega-footer *, .cta-section, .cta-section *, .closing-section h2, .closing-section > p, .hero-title, .hero-title *, .section-heading, .section-heading *, .vf-client-nav, .vf-client-nav *';
     document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, li, strong, em, td, th, dt, dd').forEach(el => {
       if (el.matches(_excludeSel) || el.closest(_excludeSel)) return;
       if (!el.textContent.trim()) return;
@@ -6397,7 +6428,7 @@
       pill.style.verticalAlign = 'top';
       pill.innerHTML =
         '<span data-deliv-title>New deliverable</span>' +
-        '<span class="tag-spec" data-deliv-spec>spec</span>';
+        '<span class="tag-spec" data-deliv-spec data-editable data-single-line>spec</span>';
       _delivList.appendChild(pill);
       _wireDelivPill(pill);
       const titleEl = pill.querySelector('[data-deliv-title]');
@@ -6806,12 +6837,21 @@
         const days = parseFloat(row.dataset.days || '0') || 0;
         return Math.round(rate * days);
       }
+      // Track which sections the user has expanded (persists during the session)
+      const _liExpanded = (function() {
+        try {
+          const raw = sessionStorage.getItem('vf_li_expanded_' + (VF.pageId || 'tpl'));
+          return raw ? JSON.parse(raw) : {};
+        } catch (_) { return {}; }
+      })();
+      function _saveLiExpanded() {
+        try { sessionStorage.setItem('vf_li_expanded_' + (VF.pageId || 'tpl'), JSON.stringify(_liExpanded)); } catch (_) {}
+      }
       function _groupLineItemsByCategory() {
         const tbody = document.getElementById('line-items-body');
         if (!tbody) return;
-        // Remove any existing section headers
+        // Remove existing section headers
         tbody.querySelectorAll('tr.li-section-header').forEach(h => h.remove());
-        // Bucket the rows
         const rows = Array.from(tbody.querySelectorAll('tr.li-row'));
         if (!rows.length) return;
         const buckets = { crew: [], post: [], expenses: [] };
@@ -6819,22 +6859,41 @@
           const cat = _categorizeLi(r);
           (buckets[cat] || buckets.expenses).push(r);
         });
-        // Re-insert in canonical order with section headers
         const frag = document.createDocumentFragment();
         _LI_CATEGORIES.forEach(({ key, label }) => {
           const bucket = buckets[key];
           if (!bucket || !bucket.length) return;
           const subtotal = bucket.reduce((sum, r) => sum + _liRowSubtotal(r), 0);
+          const collapsible = bucket.length >= 4;
+          const expanded = !collapsible || (_liExpanded[key] === true);
           const header = document.createElement('tr');
-          header.className = 'li-section-header';
+          header.className = 'li-section-header' + (collapsible ? ' is-collapsible' : '') + (expanded ? ' is-expanded' : '');
           header.dataset.liSection = key;
+          const chevron = collapsible
+            ? '<svg class="li-section-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            : '';
+          const count = collapsible
+            ? '<span class="li-section-count">' + bucket.length + ' items</span>'
+            : '';
           header.innerHTML =
             '<td colspan="6">' +
-              '<span class="li-section-name">' + label + '</span>' +
+              '<span class="li-section-name">' + chevron + label + count + '</span>' +
               '<span class="li-section-subtotal">£' + subtotal.toLocaleString('en-GB') + '</span>' +
             '</td>';
+          if (collapsible) {
+            header.addEventListener('click', (e) => {
+              if (e.target.closest('button')) return;
+              _liExpanded[key] = !(_liExpanded[key] === true);
+              _saveLiExpanded();
+              _groupLineItemsByCategory();
+            });
+          }
           frag.appendChild(header);
-          bucket.forEach(r => frag.appendChild(r));
+          bucket.forEach(r => {
+            if (collapsible && !expanded) r.classList.add('li-row-hidden');
+            else r.classList.remove('li-row-hidden');
+            frag.appendChild(r);
+          });
         });
         tbody.appendChild(frag);
       }
