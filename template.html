@@ -804,18 +804,30 @@
   /* Draft-mode: × button per row sits in li-actions cell */
   .line-items-table .li-row-remove {
     display: none;
-    border: none;
-    background: transparent;
-    color: #ef4444;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid rgba(10,15,26,0.10);
+    border-radius: 50%;
+    background: rgba(10,15,26,0.02);
+    color: var(--vf-ink-4);
     cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-    padding: 4px 8px;
-    opacity: 0.6;
+    font-family: inherit;
     user-select: none;
+    -webkit-user-select: none;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
-  .line-items-table .li-row-remove:hover { opacity: 1; }
-  body.draft-mode .line-items-table .li-row-remove { display: inline-block; }
+  .line-items-table .li-row-remove:hover {
+    background: rgba(239,68,68,0.10);
+    color: #ef4444;
+    border-color: rgba(239,68,68,0.30);
+    transform: scale(1.06);
+  }
+  .line-items-table .li-row-remove:active { transform: scale(0.96); }
+  .line-items-table .li-row-remove svg { display: block; }
+  body.draft-mode .line-items-table .li-row-remove { display: inline-flex; }
   /* Mobile: hide the days column to save horizontal space (still computed) */
   @media (max-width: 760px) {
     .line-items-table .li-th-unit, .line-items-table .li-unit,
@@ -2022,48 +2034,70 @@
   .draft-save-btn:disabled { opacity: 0.5; cursor: default; }
 
   /* ── DRAFT MODE: row remove (×) and add buttons ─────────── */
+  /* Card overlay × — sits absolute-positioned on addon/package cards */
   .draft-remove-btn {
     display: none;
     position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 20px;
-    height: 20px;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
     padding: 0;
-    border: none;
+    border: 1px solid rgba(10,15,26,0.10);
     border-radius: 50%;
-    background: rgba(239,68,68,0.12);
-    color: #ef4444;
-    font-size: 14px;
-    line-height: 18px;
-    text-align: center;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--vf-ink-3);
     cursor: pointer;
     font-family: inherit;
+    user-select: none;
+    -webkit-user-select: none;
     z-index: 5;
-    transition: background 0.15s, transform 0.15s;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
-  .draft-remove-btn:hover { background: rgba(239,68,68,0.85); color: white; transform: scale(1.1); }
-  body.draft-mode .draft-remove-btn { display: block; }
+  .draft-remove-btn:hover {
+    background: rgba(239,68,68,0.95);
+    color: white;
+    border-color: rgba(239,68,68,1);
+    transform: scale(1.06);
+  }
+  .draft-remove-btn:active { transform: scale(0.96); }
+  .draft-remove-btn svg { display: block; }
+  body.draft-mode .draft-remove-btn { display: inline-flex; }
 
   /* Inline (small) remove button used inside list items */
   .draft-remove-btn-inline {
     display: none;
-    margin-left: 6px;
-    border: none;
-    background: transparent;
-    color: #ef4444;
-    font-size: 14px;
-    line-height: 1;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-left: 8px;
+    padding: 0;
+    border: 1px solid rgba(10,15,26,0.10);
+    border-radius: 50%;
+    background: rgba(10,15,26,0.02);
+    color: var(--vf-ink-4);
     cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.15s;
+    font-family: inherit;
     vertical-align: middle;
     /* Keep the × out of contenteditable selections so it can't be backspaced. */
     user-select: none;
     -webkit-user-select: none;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
-  .draft-remove-btn-inline:hover { opacity: 1; }
-  body.draft-mode .draft-remove-btn-inline { display: inline-block; }
+  .draft-remove-btn-inline:hover {
+    background: rgba(239,68,68,0.10);
+    color: #ef4444;
+    border-color: rgba(239,68,68,0.30);
+    transform: scale(1.08);
+  }
+  .draft-remove-btn-inline:active { transform: scale(0.95); }
+  .draft-remove-btn-inline svg { display: block; }
+  body.draft-mode .draft-remove-btn-inline { display: inline-flex; }
 
   .draft-add-row-btn {
     display: none;
@@ -2601,25 +2635,36 @@
   .discount-add-card:hover { border-color: var(--green) !important; color: var(--green); }
 
   /* Section-level remove × (e.g. on "Deliverables" header) — visible only
-     in draft mode. The button is small + muted so it doesn't compete with
-     the section label, but red-on-hover so the destructive action reads. */
+     in draft mode. Muted at rest, warm red on hover. Same icon system as
+     the other remove buttons so the editor reads as one toolset. */
   .section-remove-btn {
     display: none;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
     margin-left: 10px;
-    border: none;
-    background: transparent;
-    color: var(--grey-400);
-    font-size: 16px;
-    line-height: 1;
+    padding: 0;
+    border: 1px solid rgba(10,15,26,0.10);
+    border-radius: 50%;
+    background: rgba(10,15,26,0.02);
+    color: var(--vf-ink-4);
     cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 3px;
-    user-select: none;
+    font-family: inherit;
     vertical-align: middle;
-    transition: color 0.15s, background 0.15s;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
-  body.draft-mode .section-remove-btn { display: inline-block; }
-  .section-remove-btn:hover { color: #ef4444; background: #fee2e2; }
+  body.draft-mode .section-remove-btn { display: inline-flex; }
+  .section-remove-btn:hover {
+    background: rgba(239,68,68,0.10);
+    color: #ef4444;
+    border-color: rgba(239,68,68,0.30);
+    transform: scale(1.06);
+  }
+  .section-remove-btn:active { transform: scale(0.96); }
+  .section-remove-btn svg { display: block; }
   /* "+ Restore deliverables section" button — appears (draft mode only)
      after the operator hides the section. */
   .section-restore-btn {
@@ -3324,7 +3369,7 @@
           <div class="brief-item-value" data-prod-field="quote_type" data-prod-type="select" data-prod-value="Itemized" data-prod-options="[&quot;Package Based&quot;, &quot;Itemized&quot;]">Itemized</div>
         </div>
   </div>
-  <div id="deliverables-section"><div class="sub-label deliverables-header">Deliverables<button type="button" id="deliv-section-remove" class="section-remove-btn" data-no-edit title="Remove the entire deliverables section from this quote" contenteditable="false">×</button></div>
+  <div id="deliverables-section"><div class="sub-label deliverables-header">Deliverables<button type="button" id="deliv-section-remove" class="section-remove-btn" data-no-edit title="Remove the entire deliverables section from this quote" contenteditable="false"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>
   <span id="deliv-list"><span class="tag" data-deliv-id="dl_3140cf"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec data-editable data-single-line>3840 × 2160</span></span><span class="tag" data-deliv-id="dl_c98803"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec data-editable data-single-line>1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
   <div style="margin-top:24px;">
     <div class="brief-grid" style="margin-bottom:0;">
@@ -4059,7 +4104,7 @@
     const _renderRow = (r) => {
       if ((r.cls || '').includes('discount-row')) {
         const removeBtn = r.cdId
-          ? ` <button type="button" class="draft-remove-btn-inline" data-cd-id="${r.cdId}" title="Remove discount">×</button>`
+          ? ` <button type="button" class="draft-remove-btn-inline" data-cd-id="${r.cdId}" title="Remove discount"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>`
           : '';
         return `<div class="breakdown-row ${r.cls}"><span>${r.label}${removeBtn}</span><span>-${_fmtGBP(r.amt)}</span></div>`;
       }
@@ -6188,7 +6233,7 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'draft-remove-btn-inline';
-      btn.innerHTML = '×';
+      btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
       btn.title = 'Remove this line';
       btn.setAttribute('contenteditable', 'false');
       btn.addEventListener('click', (e) => {
@@ -6255,7 +6300,7 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'draft-remove-btn';
-      btn.innerHTML = '×';
+      btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
       btn.title = 'Remove this ' + kind;
       btn.setAttribute('contenteditable', 'false');
       btn.addEventListener('click', (e) => {
@@ -6372,7 +6417,7 @@
       const x = document.createElement('button');
       x.type = 'button';
       x.className = 'draft-remove-btn-inline';
-      x.innerHTML = '×';
+      x.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
       x.title = 'Remove this deliverable';
       x.style.marginLeft = '4px';
       // Mark the button as non-editable so it can't be part of a contenteditable
@@ -6546,7 +6591,7 @@
       const x = document.createElement('button');
       x.type = 'button';
       x.className = 'draft-remove-btn';
-      x.innerHTML = '×';
+      x.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
       x.title = 'Remove this package';
       x.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -6785,7 +6830,7 @@
           const x = document.createElement('button');
           x.type = 'button';
           x.className = 'li-row-remove';
-          x.innerHTML = '×';
+          x.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
           x.title = 'Remove this line item';
           x.setAttribute('contenteditable', 'false');
           x.addEventListener('click', (e) => {
@@ -7047,7 +7092,7 @@
       const rmBtn = document.createElement('button');
       rmBtn.type = 'button';
       rmBtn.className = 'draft-remove-btn';
-      rmBtn.innerHTML = '×';
+      rmBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
       rmBtn.title = 'Remove this add-on';
       rmBtn.addEventListener('click', (e) => {
         e.stopPropagation();
