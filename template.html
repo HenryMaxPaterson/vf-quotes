@@ -2773,42 +2773,13 @@
   /* When the deliverables section is hidden in the live editor, also hide
      the "+ Restore" button while previewing as client. */
   body.client-preview #deliv-section-restore { display: none !important; }
-  /* Visual cue on the preview button when active. Doubled-up selector
-     (id + .is-active) gives it sufficient specificity to win over any
-     other rule that targets the button, and !important on the colour
-     keeps it safe from future selector additions. */
-  body.client-preview #draft-preview-btn,
-  #draft-preview-btn.is-active {
-    background: var(--vf-blue) !important;
-    color: white !important;
-    border-color: var(--vf-blue) !important;
-    box-shadow: 0 2px 10px rgba(9,94,223,0.32);
-  }
-  body.client-preview #draft-preview-btn:hover,
-  #draft-preview-btn.is-active:hover {
-    background: var(--vf-blue-500) !important;
-    border-color: var(--vf-blue-500) !important;
-  }
-  /* "Previewing as client" pill badge floats top-center of the banner when active */
-  body.client-preview #draft-banner::after {
-    content: 'PREVIEWING AS CLIENT';
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--vf-blue);
+  /* Visual cue on the preview button (subtle — clicking opens a new tab) */
+  body.client-preview #draft-preview-btn {
+    background: rgba(255,255,255,0.18);
     color: white;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    padding: 5px 14px;
-    border-radius: 999px;
-    box-shadow: 0 4px 14px rgba(9,94,223,0.30);
-    pointer-events: none;
-    z-index: 1000;
+    border-color: rgba(255,255,255,0.45);
   }
-  body.client-preview #draft-banner { position: relative; }
+
   .addon-add-plus  { font-size: 28px; line-height: 1; font-weight: 300; }
   .addon-add-label { font-size: 12px; font-weight: 500; }
 
@@ -4020,7 +3991,7 @@
     if (cls) statEl.classList.add(cls);
     const opt = _STATUS_OPTIONS.find(o => o.value === status);
     // Clients see "To Sign" for "Quotation Sent"; editors see the real status name
-    const _editorMode = VF.isDraft && new URLSearchParams(window.location.search).get('view') !== 'client' && !document.body.classList.contains('client-preview');
+    const _editorMode = VF.isDraft && new URLSearchParams(window.location.search).get('view') !== 'client';
     const _label = (status === 'Quotation Sent' && !_editorMode) ? 'To Sign' : (opt ? opt.label : status);
     txtEl.textContent = _label;
   }
@@ -4151,6 +4122,34 @@
                       ? (PRICING.lineItems || []).map(li => ({ ...li }))
                       : [],
   };
+
+  // ── Restore preview state when opened from "View as client" ──────────────
+  // The editor tab serialises _pstate to localStorage and opens this URL with
+  // ?view=client. We read that snapshot before any totals or DOM updates run,
+  // so the client preview shows the operator's exact in-progress selections.
+  (function _restorePreviewState() {
+    if (new URLSearchParams(window.location.search).get('view') !== 'client') return;
+    const key = 'vf_preview_state_' + (VF.pageId || 'tpl');
+    let snap = null;
+    try { snap = JSON.parse(localStorage.getItem(key) || 'null'); } catch (_) {}
+    if (!snap) return;
+    // 5-minute TTL: discard stale snapshots so a client opening the URL hours
+    // later never sees a leftover operator-in-progress state.
+    if (!snap.savedAt || (Date.now() - snap.savedAt) > 5 * 60 * 1000) return;
+    if (snap.package        !== undefined) _pstate.package        = snap.package;
+    if (snap.delivery       !== undefined) _pstate.delivery       = snap.delivery;
+    if (snap.postProd       !== undefined) _pstate.postProd       = snap.postProd;
+    if (snap.addons)                       _pstate.addons         = new Set(snap.addons);
+    if (snap.discounts)                    _pstate.discounts      = new Set(snap.discounts);
+    if (snap.customDiscounts)              _pstate.customDiscounts = snap.customDiscounts;
+    if (snap.addonQty)                     _pstate.addonQty       = snap.addonQty;
+    if (snap.addonDiscounts)               _pstate.addonDiscounts = snap.addonDiscounts;
+    if (snap.customAddons)                 _pstate.customAddons   = snap.customAddons;
+    if (snap.extraRevisions !== undefined) _pstate.extraRevisions = snap.extraRevisions;
+    if (snap.rushTier       !== undefined) _pstate.rushTier       = snap.rushTier;
+    if (Array.isArray(snap.lineItems))     _pstate.lineItems      = snap.lineItems;
+    window._vf_preview_restored = true;
+  })();
 
   function _fmtGBP(n) {
     if (!Number.isFinite(n)) n = 0;
@@ -4903,6 +4902,28 @@
     if (_pstate.rushTier > 0) { _pstate.rushTier--; _updateDeadlineStepper(); }
   });
   _updateDeadlineStepper();
+
+  // In client view with restored preview state, project _pstate onto the DOM
+  // so the visible "selected" rings + checkmarks match what the operator chose.
+  if (window._vf_preview_restored) {
+    try {
+      document.querySelectorAll('.pill-btn[data-delivery-id]').forEach(b => {
+        b.classList.toggle('selected', b.dataset.deliveryId === _pstate.delivery);
+      });
+      document.querySelectorAll('.toggle-card[data-postprod-id]').forEach(c => {
+        c.classList.toggle('selected', c.dataset.postprodId === _pstate.postProd);
+      });
+      document.querySelectorAll('.toggle-card[data-addon-id]').forEach(c => {
+        c.classList.toggle('selected', _pstate.addons.has(c.dataset.addonId));
+      });
+      document.querySelectorAll('.toggle-card[data-discount-id]').forEach(c => {
+        c.classList.toggle('selected', _pstate.discounts.has(c.dataset.discountId));
+      });
+      document.querySelectorAll('.pkg-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.pkgId === _pstate.package);
+      });
+    } catch (_) {}
+  }
 
   _updateTotal();
   // ── Quote data ────────────────────────────────────
@@ -5859,21 +5880,33 @@
     // leave draft mode. Toggling back is a single click.
     {
       const _previewBtn = document.getElementById('draft-preview-btn');
-      // Cache the original button HTML so we can restore it on toggle-off.
-      const _previewBtnOriginalHTML = _previewBtn ? _previewBtn.innerHTML : '';
-      const _previewBtnActiveHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M3 3l18 18"/><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828"/><path d="M16.681 16.673A8.717 8.717 0 0 1 12 18c-7 0-11-6-11-6a18.5 18.5 0 0 1 3.708-4.297M6.34 6.34A18.95 18.95 0 0 1 12 6c7 0 11 6 11 6a18.83 18.83 0 0 1-1.66 2.347"/></svg>Exit preview';
       _previewBtn?.addEventListener('click', () => {
-        // Toggle client-preview class on the SAME tab — preserves in-memory _pstate
-        // (addon selections etc.) so the total stays accurate. The banner stays
-        // visible so they can flip back; only the editor controls hide.
-        const isOn = document.body.classList.toggle('client-preview');
-        _previewBtn.classList.toggle('is-active', isOn);
-        _previewBtn.innerHTML = isOn ? _previewBtnActiveHTML : _previewBtnOriginalHTML;
-        // Refresh status chip label (shows "To Sign" in client preview, "Quotation Sent" in editor)
-        try { _applyStatusChip(VF.financialStatus || 'Quotation Sent'); } catch (_) {}
-        // Force a recompute so anything CSS-driven (visibility of editor totals
-        // vs. baseline) is in sync. Defensive — _updateTotal exists in scope.
-        try { _updateTotal(); } catch (_) {}
+        // Open a new tab with ?view=client. To preserve the operator's current
+        // selections (addons, postprod, delivery, custom discounts, rush tier,
+        // revisions, line items), we serialise _pstate to localStorage first.
+        // The new tab reads it on init and applies it before computing the
+        // total. TTL: 5 minutes, then it's considered stale and ignored.
+        const snapshot = {
+          package:         _pstate.package,
+          delivery:        _pstate.delivery,
+          postProd:        _pstate.postProd,
+          addons:          Array.from(_pstate.addons || []),
+          discounts:       Array.from(_pstate.discounts || []),
+          customDiscounts: _pstate.customDiscounts || [],
+          addonQty:        _pstate.addonQty || {},
+          addonDiscounts:  _pstate.addonDiscounts || {},
+          customAddons:    _pstate.customAddons || [],
+          extraRevisions:  _pstate.extraRevisions || 0,
+          rushTier:        _pstate.rushTier,
+          lineItems:       _pstate.lineItems || [],
+          savedAt:         Date.now(),
+        };
+        const key = 'vf_preview_state_' + (VF.pageId || 'tpl');
+        try { localStorage.setItem(key, JSON.stringify(snapshot)); } catch (_) {}
+        const url = new URL(window.location.href);
+        url.searchParams.set('view', 'client');
+        // Use noopener for safety; the new tab is read-only of the snapshot.
+        window.open(url.toString(), '_blank', 'noopener');
       });
     }
 
