@@ -263,12 +263,14 @@
   /* ── SHARED LIGHT SECTIONS ────────────── */
   .light-section {
     background: var(--body-bg);
-    padding: 72px 64px;
+    padding: 120px 64px;
   }
 
   .white-section {
     background: var(--card-bg);
-    padding: 72px 64px;
+    padding: 120px 64px;
+    position: relative;
+    overflow: hidden;
   }
 
   .section-eyebrow {
@@ -284,16 +286,18 @@
   }
 
   .section-heading {
-    /* Display-weight section heads: Acumin bold, tight tracking, balanced
-       wrap, italic blue-400 for em emphasis (matches website .section-head h2). */
+    /* Display-weight section heads: matches website .section-head .left h2
+       exactly — clamp(40px, 5.2vw, 80px), tight tracking, italic blue em. */
     font-family: var(--font-sans);
-    font-size: clamp(32px, 4.4vw, 56px);
+    font-size: clamp(40px, 5.2vw, 80px);
     font-weight: 700;
     letter-spacing: -0.03em;
     color: var(--vf-ink);
-    margin-bottom: 40px;
-    line-height: 1.02;
+    margin-top: 16px;
+    margin-bottom: 48px;
+    line-height: 1.0;
     text-wrap: balance;
+    max-width: 800px;
   }
   .section-heading em {
     font-style: italic;
@@ -301,29 +305,48 @@
     color: var(--vf-blue);
   }
 
+  /* Soft blue blob on the pricing section — keeps continuity with hero */
+  .white-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 60% at 95% 15%,
+        rgba(9,94,223,0.07) 0%,
+        transparent 70%),
+      radial-gradient(ellipse 45% 55% at 5% 100%,
+        rgba(9,94,223,0.05) 0%,
+        transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .white-section > * { position: relative; z-index: 1; }
+
   /* ── BRIEF ────────────────────────────── */
   .brief-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 32px;
+    gap: 0;
+    border-top: 1px solid var(--vf-line);
+    margin-bottom: 40px;
   }
 
   .brief-item {
-    /* Floating card pattern from the website — hairline border, soft radius,
-       layered shadow on hover. */
-    background: var(--vf-surface);
-    border-radius: var(--r-md);
-    padding: 22px 24px;
-    border: 1px solid var(--vf-line);
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--dur-base) var(--ease-out),
-                box-shadow var(--dur-base) var(--ease-out);
+    /* Facts list — hairline dividers, no card chrome, mono labels.
+       Mirrors the website's about-page meta-row pattern. */
+    background: transparent;
+    border-radius: 0;
+    padding: 24px 28px 24px 0;
+    border: none;
+    border-bottom: 1px solid var(--vf-line);
+    box-shadow: none;
+    transition: none;
   }
 
   .brief-item:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
+    transform: none;
+    box-shadow: none;
+    background: transparent;
   }
 
   /* Internal-only brief items (Job Type / Default Delivery / Quote Type) —
@@ -371,11 +394,11 @@
   }
 
   .brief-item-value {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: var(--vf-ink);
-    line-height: 1.3;
-    letter-spacing: -0.005em;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
   }
 
   .sub-label {
@@ -560,74 +583,108 @@
     font-weight: 700;
   }
 
-  /* ── Itemized mode: line-items table ─────────────────────────────────── */
+  /* ── Line items list — hairline dividers, mono amounts, no card box ──── */
   .line-items-table {
     width: 100%;
     border-collapse: collapse;
-    background: var(--card-bg);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    background: transparent;
+    border-radius: 0;
+    overflow: visible;
+    box-shadow: none;
   }
   .line-items-table .li-th {
     text-align: left;
-    padding: 16px 18px;
-    background: #f8fafc;
-    color: var(--grey-700);
-    font-size: 11px;
-    font-weight: 700;
+    padding: 0 16px 14px 0;
+    background: transparent;
+    color: var(--vf-ink-3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
-    border-bottom: 2px solid var(--grey-200);
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid var(--vf-line);
   }
   .line-items-table .li-th-rate,
   .line-items-table .li-th-days,
-  .line-items-table .li-th-subtotal { text-align: right; }
+  .line-items-table .li-th-subtotal { text-align: right; padding-right: 0; padding-left: 16px; }
   .line-items-table .li-th-actions { width: 44px; }
   .line-items-table .li-cell {
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--grey-100);
+    padding: 18px 16px 18px 0;
+    border-bottom: 1px solid var(--vf-line);
     font-size: 15px;
-    color: var(--grey-900);
+    color: var(--vf-ink);
     vertical-align: middle;
     line-height: 1.4;
+    background: transparent;
   }
-  /* Zebra-stripe alternate rows for legibility on long lists */
-  .line-items-table .li-row:nth-child(even) .li-cell {
-    background: #fafbfc;
-  }
-  .line-items-table .li-row:hover .li-cell { background: #f1f5f9; }
+  /* No zebra, no row-hover bg — keep it clean like a printed quote */
+  .line-items-table .li-row:hover .li-cell { background: transparent; }
   .line-items-table .li-row:last-child .li-cell { border-bottom: none; }
-  .line-items-table .li-name { font-weight: 600; }
+  .line-items-table .li-name {
+    font-weight: 600;
+    color: var(--vf-ink);
+    letter-spacing: -0.005em;
+  }
   .line-items-table .li-rate,
   .line-items-table .li-days,
   .line-items-table .li-subtotal {
     text-align: right;
     font-variant-numeric: tabular-nums;
+    padding-left: 16px;
+    padding-right: 0;
   }
-  .line-items-table .li-rate { color: var(--grey-600); }
+  .line-items-table .li-rate {
+    color: var(--vf-ink-3);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
   .line-items-table .li-qty-num {
     font-weight: 600;
-    color: var(--grey-900);
+    color: var(--vf-ink);
     min-width: 1.5em;
     display: inline-block;
   }
   .line-items-table .li-qty-unit {
     font-size: 12px;
-    color: var(--grey-500);
+    color: var(--vf-ink-4);
     text-transform: lowercase;
-    margin-left: 2px;
+    margin-left: 4px;
   }
-  .line-items-table .li-subtotal { font-weight: 700; color: var(--blue); font-size: 15px; }
+  .line-items-table .li-subtotal {
+    font-weight: 600;
+    color: var(--vf-ink);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+  }
   .line-items-table .li-foot td {
-    padding: 18px 18px;
-    background: #f1f5f9;
-    font-weight: 700;
-    font-size: 16px;
-    border-top: 2px solid var(--grey-200);
+    padding: 22px 16px 22px 0;
+    background: transparent;
+    font-weight: 600;
+    font-size: 15px;
+    border-top: 2px solid var(--vf-ink);
+    border-bottom: none;
   }
-  .line-items-table .li-foot-label { text-align: right; color: var(--grey-700); }
-  .line-items-table .li-foot-amount { text-align: right; color: var(--blue); }
+  .line-items-table .li-foot-label {
+    text-align: right;
+    color: var(--vf-ink-3);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding-left: 16px;
+  }
+  .line-items-table .li-foot-amount {
+    text-align: right;
+    color: var(--vf-ink);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding-left: 16px;
+  }
   /* Empty-state row */
   .line-items-table .li-empty td { padding: 24px 16px; }
   body.draft-mode .line-items-table .li-empty .li-empty-prompt { display: inline !important; }
@@ -816,12 +873,18 @@
   }
 
   .cta-section h3 {
-    font-size: clamp(36px, 6vw, 56px);
-    font-weight: 900;
-    color: var(--grey-900);
-    letter-spacing: -2px;
-    margin-bottom: 36px;
-    line-height: 1;
+    font-size: clamp(40px, 5.2vw, 64px);
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.03em;
+    margin-bottom: 28px;
+    line-height: 1.0;
+    text-wrap: balance;
+  }
+  .cta-section h3 em {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--vf-blue-400);
   }
 
   .accept-btn {
@@ -976,18 +1039,19 @@
     .hero-sub { font-size: 13px; }
 
     .light-section, .white-section { padding: 44px 20px; }
-    .section-heading { font-size: 26px; letter-spacing: -0.8px; margin-bottom: 24px; }
+    .section-heading { font-size: 32px; letter-spacing: -0.8px; margin-top: 12px; margin-bottom: 32px; line-height: 1.05; }
 
     .brief-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
 
     .pkg-grid { grid-template-columns: 1fr; gap: 20px; }
     .pkg-card { padding: 24px 20px; }
 
+    .light-section, .white-section { padding: 72px 24px; }
     .closing-section { padding: 60px 20px 52px; }
     .closing-section h2 { font-size: 30px; letter-spacing: -1px; }
 
     .cta-section { padding: 52px 20px; }
-    .cta-section h3 { font-size: 34px; letter-spacing: -1.2px; }
+    .cta-section h3 { font-size: 36px; letter-spacing: -1px; line-height: 1.05; }
     .accept-btn { padding: 16px 36px; }
 
     details.tnc-accordion summary { padding: 18px 20px; }
@@ -2702,7 +2766,7 @@
 <!-- ── BRIEF ──────────────────────────────────────── -->
 <div class="light-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">01</span> · The Brief</div>
-  <div class="section-heading">Project Details</div>
+  <div class="section-heading">Project <em>Details</em></div>
   <p style="font-size:14px;color:var(--grey-600);line-height:1.75;margin-bottom:28px;max-width:640px;" data-editable>We're thrilled to present this quotation for the Soccer Aid social content project, and we're excited to help Frame the Game B.V. capture the spirit of authentic sports memorabilia. We believe this production will deliver compelling visuals to engage your audience and enhance your brand's presence.</p>
   <div class="brief-grid">
     
@@ -2750,7 +2814,7 @@
 <!-- ── PRODUCTION SERVICES ────────────────────── -->
 <div class="white-section" id="pricing-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">02</span> · Production Services</div>
-  <div class="section-heading">Quotation</div>
+  <div class="section-heading">The <em>Quotation</em></div>
   <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name">Role</th><th class="li-th li-th-rate">Rate</th><th class="li-th li-th-days">Qty</th><th class="li-th li-th-subtotal">Subtotal</th><th class="li-th li-th-actions"></th></tr></thead><tbody id="line-items-body"><tr class="li-row" data-li-id="li_5f4825fb" data-rate="375.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>2nd Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£375/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£375</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_4018ee86" data-rate="275.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£275/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£275</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5a53cb1a" data-rate="475.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Camera Operator</td><td class="li-cell li-rate" data-editable data-single-line>£475/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£475</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5c590c98" data-rate="175.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Colour Grade</td><td class="li-cell li-rate" data-editable data-single-line>£175/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£175</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_35cb5215" data-rate="18.00" data-days="1.00" data-unit="charge"><td class="li-cell li-name" data-editable data-single-line>Congestion Charge</td><td class="li-cell li-rate" data-editable data-single-line>£18/charge</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">charge</span></td><td class="li-cell li-subtotal">£18</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8a0cbc7e" data-rate="700.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director</td><td class="li-cell li-rate" data-editable data-single-line>£700/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£700</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_46f0696f" data-rate="575.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director of Photography</td><td class="li-cell li-rate" data-editable data-single-line>£575/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£575</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8806565f" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Gaffer</td><td class="li-cell li-rate" data-editable data-single-line>£450/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_82d07f1e" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Hero Edit (2–5 min)</td><td class="li-cell li-rate" data-editable data-single-line>£450/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bae0c7ca" data-rate="600.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Long-form Edit (10 min+)</td><td class="li-cell li-rate" data-editable data-single-line>£600/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£600</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_634a7256" data-rate="0.55" data-days="1.00" data-unit="mile"><td class="li-cell li-name" data-editable data-single-line>Mileage</td><td class="li-cell li-rate" data-editable data-single-line>£1/mile</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">mile</span></td><td class="li-cell li-subtotal">£1</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_7260296e" data-rate="550.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Producer</td><td class="li-cell li-rate" data-editable data-single-line>£550/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£550</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5f46e40d" data-rate="200.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Production Assistant (PA)</td><td class="li-cell li-rate" data-editable data-single-line>£200/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£200</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_057aa497" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Social Cut (30–60s)</td><td class="li-cell li-rate" data-editable data-single-line>£300/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_00b2f5ff" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Sound Recordist</td><td class="li-cell li-rate" data-editable data-single-line>£400/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£400</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_f7bceba6" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Spark</td><td class="li-cell li-rate" data-editable data-single-line>£300/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_b3f1bae8" data-rate="125.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Stills Cull + Edit</td><td class="li-cell li-rate" data-editable data-single-line>£125/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£125</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_2e5e3796" data-rate="3.60" data-days="1.00" data-unit="journey"><td class="li-cell li-name" data-editable data-single-line>TfL Journey</td><td class="li-cell li-rate" data-editable data-single-line>£4/journey</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">journey</span></td><td class="li-cell li-subtotal">£4</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_0c160aa2" data-rate="65.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Transcoding / Delivery</td><td class="li-cell li-rate" data-editable data-single-line>£65/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£65</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bfd39ac0" data-rate="95.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£95/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£95</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="3" class="li-foot-label">Subtotal</td><td class="li-foot-amount" id="line-items-subtotal">£6,132</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><details class="tnc-accordion" id="equipment-accordion" open><summary>Equipment Package <span class="tnc-chevron">+</span></summary><div class="tnc-body" style="padding-top:16px;"><div id="equipment-text-block" data-editable data-equip-has-content="0"><span class="equip-empty-placeholder">No equipment list attached. <span class="equip-empty-prompt">Click here to type one.</span></span></div><div class="equip-helper" style="display:none;font-size:11px;color:var(--grey-500);margin-top:8px;font-style:italic;">Type your equipment list here. One item per line, or paste from anywhere. Saves automatically and sticks across regenerations.</div></div></details><div class="price-section-label" style="margin-bottom:14px;">Delivery</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn  selected" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45</span></button><button class="pill-btn" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div><div class="price-section-label" style="margin-bottom:14px;">Post-Production</div><div class="toggle-cards toggle-cards-grid" style="margin-bottom:28px;"><div class="toggle-card" data-postprod-id="34f47fd0-3620-81d5-9e6c-f22f2b06fa2f" data-price="200" data-base-price="200"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Additional Social Cut</div><div class="toggle-card-desc" data-editable>Extra cut beyond what is included in the package (up to 90s).</div></div><div class="toggle-card-price" data-editable data-single-line>+£200</div></div><div class="toggle-card" data-postprod-id="34f47fd0-3620-8134-9b43-de629d459f95" data-price="75" data-base-price="75"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Subtitles / Captions</div><div class="toggle-card-desc" data-editable>Burnt-in or SRT subtitles per video.</div></div><div class="toggle-card-price" data-editable data-single-line>+£75</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
 
   
@@ -2842,13 +2906,13 @@
 <!-- ── ACCEPT & SIGN ─────────────────────────────── -->
 <div class="cta-section" id="accept-section">
   <div id="cta-initial">
-    <h3>Let's get started</h3>
+    <h3>Let's <em>get started</em></h3>
     <p style="font-size:15px;color:var(--grey-400);margin:0 0 32px;">Ready to confirm your booking? Click below to review and sign.</p>
     <button type="button" id="show-sig-btn" class="accept-btn">Accept Quote</button>
     <p style="font-size:12px;color:var(--grey-400);margin-top:16px;">This quotation is valid until 18 May 2026</p>
   </div>
   <div id="sign-form" class="sign-form-wrap" style="display:none;">
-    <h3>Sign to Confirm</h3>
+    <h3>Sign to <em>confirm</em></h3>
     <p style="font-size:15px;color:var(--grey-400);margin:0 0 32px;">Please provide your name and signature to accept the terms above.</p>
     <label class="sign-label" for="signer-name">Full Name</label>
     <input type="text" id="signer-name" class="sign-name-input" value="Hugo De Boo" autocomplete="name">
