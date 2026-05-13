@@ -1828,39 +1828,55 @@
   body.draft-mode .pkg-card,
   body.draft-mode .toggle-card { position: relative; }
 
-  /* ── Warnings strip (collapsible) ────────────────────────────────────── */
+  /* ── Heads-up popover ─────────────────────────────────────────────────
+     Floating dark dropdown anchored under the heads-up button in the
+     draft banner. Replaces the old always-visible yellow strip. */
   #draft-warnings {
-    background: #fef9c3;
-    border-top: 1px solid #facc15;
-    color: #713f12;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 24px;
+    z-index: 10000;
+    width: 520px;
+    max-width: calc(100vw - 48px);
+    max-height: 60vh;
+    overflow-y: auto;
+    background: rgba(15, 18, 26, 0.96);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.85);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55),
+                0 6px 16px rgba(0,0,0,0.30);
     font-size: 13px;
-    padding: 0;
+    padding: 4px 0;
     line-height: 1.5;
   }
-  /* Collapsible header — click to toggle the body */
-  .dw-panel { border-bottom: 1px solid rgba(0,0,0,0.05); }
+  /* Collapsible panel inside the popover */
+  .dw-panel { border-bottom: 1px solid rgba(255,255,255,0.06); }
   .dw-panel:last-child { border-bottom: none; }
   .dw-panel-head {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 24px;
+    gap: 10px;
+    padding: 10px 16px;
     cursor: pointer;
     user-select: none;
     font-weight: 600;
     font-size: 12px;
-    color: #713f12;
+    color: rgba(255,255,255,0.88);
     background: transparent;
     border: none;
     width: 100%;
     text-align: left;
+    font-family: inherit;
   }
-  .dw-panel-head:hover { background: rgba(0,0,0,0.03); }
+  .dw-panel-head:hover { background: rgba(255,255,255,0.04); }
   .dw-panel-chevron {
     display: inline-block;
     width: 10px;
     transition: transform 0.15s ease;
-    color: #713f12;
+    color: rgba(255,255,255,0.55);
     font-size: 10px;
   }
   .dw-panel.collapsed .dw-panel-chevron { transform: rotate(-90deg); }
@@ -1868,22 +1884,22 @@
   .dw-panel-count {
     margin-left: auto;
     padding: 1px 7px;
-    background: rgba(0,0,0,0.08);
-    color: #713f12;
+    background: rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.80);
     border-radius: 10px;
     font-size: 10px;
     font-weight: 600;
   }
-  .dw-panel-body { padding: 0 24px 12px 44px; }
+  .dw-panel-body { padding: 4px 16px 14px 38px; }
 
-  /* Flat bullet list — each item gets a small coloured dot before the text */
+  /* Flat bullet list — coloured dot prefix */
   .dw-items { list-style: none; margin: 0; padding: 0; }
   .dw-items li {
     position: relative;
-    padding: 4px 0 4px 16px;
+    padding: 5px 0 5px 16px;
     font-size: 13px;
-    line-height: 1.5;
-    color: #5a3a0e;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.78);
   }
   .dw-items li::before {
     content: '';
@@ -1900,13 +1916,13 @@
   .dw-items li.dw-i-qc::before       { background: #eab308; }
   .dw-items li.dw-i-warning::before  { background: #f97316; }
 
-  /* Suggested-discounts panel — green tinted, same collapse pattern */
-  .dw-panel-suggestions { background: rgba(16, 185, 129, 0.06); }
-  .dw-panel-suggestions .dw-panel-head { color: #065f46; }
-  .dw-panel-suggestions .dw-panel-chevron { color: #065f46; }
+  /* Suggested-discounts panel — green-tinted on dark surface */
+  .dw-panel-suggestions { background: rgba(16, 185, 129, 0.05); }
+  .dw-panel-suggestions .dw-panel-head { color: #6ee7b7; }
+  .dw-panel-suggestions .dw-panel-chevron { color: #6ee7b7; }
   .dw-panel-suggestions .dw-panel-count {
-    background: rgba(16, 185, 129, 0.15);
-    color: #065f46;
+    background: rgba(16, 185, 129, 0.18);
+    color: #6ee7b7;
   }
   .sugg-list { display: flex; flex-direction: column; gap: 4px; }
   .sugg-row {
@@ -2222,6 +2238,42 @@
     font-family: inherit;
   }
   #draft-changes-btn:hover { background: rgba(255,255,255,0.18); }
+
+  /* Heads-up button — opens the warnings popover */
+  #draft-heads-btn {
+    background: rgba(245,158,11,0.14);
+    color: #fcd34d;
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 4px;
+    padding: 1px 8px;
+    margin-left: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 16px;
+    font-family: inherit;
+    display: none;
+    align-items: center;
+    gap: 4px;
+  }
+  #draft-heads-btn:hover {
+    background: rgba(245,158,11,0.22);
+    color: #fde68a;
+  }
+  #draft-heads-btn.is-open {
+    background: rgba(245,158,11,0.28);
+    color: #fde68a;
+  }
+  #draft-heads-btn .dh-count {
+    display: inline-block;
+    background: rgba(245,158,11,0.45);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 0 5px;
+    border-radius: 8px;
+    min-width: 16px;
+    text-align: center;
+  }
   #draft-changes-btn .dc-count-badge {
     display: inline-block;
     margin-left: 4px;
@@ -2679,6 +2731,7 @@
     </div>
     <div class="draft-banner-center" id="draft-edit-hint">
       <span id="draft-edit-hint-text">Click any highlighted block to edit</span>
+      <button type="button" id="draft-heads-btn" title="Heads-up notes" aria-label="Heads-up notes"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Heads up</span><span class="dh-count" id="draft-heads-count">0</span></button>
       <button type="button" id="draft-changes-btn" title="See what's different from the original quote" aria-label="What changed">∆ Changes<span class="dc-count-badge" id="draft-changes-count" style="display:none;">0</span></button>
       <button type="button" id="draft-shortcuts-btn" title="Keyboard shortcuts" aria-label="Keyboard shortcuts">⌘</button>
     </div>
@@ -2725,10 +2778,6 @@
   <div class="hero-blob-2"></div>
   <div class="hero-corner hero-corner-bl"></div>
   <div class="hero-corner hero-corner-br"></div>
-  <div class="hero-top">
-    <span></span>
-
-  </div>
   <div class="hero-content">
     <div class="hero-eyebrow" data-editable data-single-line><span class="eyebrow-idx">VF-000</span> · Template Project</div>
     <div class="hero-title"><em>Client</em> Quotation</div>
@@ -3895,10 +3944,10 @@
           if (!strip) return;
           const wrap = document.createElement('div');
           wrap.className = 'dw-panel dw-panel-error';
-          wrap.style.cssText = 'background:#fee2e2;border-left:3px solid #dc2626;'
-                              + 'padding:10px 14px;margin:6px 0;border-radius:4px;'
-                              + 'font-size:12px;color:#7f1d1d;display:flex;'
-                              + 'gap:10px;align-items:start;';
+          wrap.style.cssText = 'background:rgba(220,38,38,0.10);border-left:3px solid #ef4444;'
+                              + 'padding:10px 14px;margin:6px 12px;border-radius:6px;'
+                              + 'font-size:12px;color:#fca5a5;display:flex;'
+                              + 'gap:10px;align-items:start;'
           wrap.innerHTML =
             '<span style="font-size:14px;line-height:1;flex-shrink:0;">⚠</span>'
           + '<span><strong>Autosave is not configured for this Production page.</strong>'
@@ -4621,6 +4670,59 @@
         url.searchParams.set('view', 'client');
         window.open(url.toString(), '_blank', 'noopener');
       });
+    }
+
+    // ── Heads-up button (popover) ───────────────────────────────────────
+    // Replaces the old always-visible yellow strip. The same #draft-warnings
+    // node is reused, but it now floats as a dropdown anchored to the button.
+    {
+      const _headsBtn = document.getElementById('draft-heads-btn');
+      const _headsBox = document.getElementById('draft-warnings');
+      const _headsCnt = document.getElementById('draft-heads-count');
+
+      function _setHeadsOpen(open) {
+        if (!_headsBox || !_headsBtn) return;
+        _headsBox.style.display = open ? 'block' : 'none';
+        _headsBtn.classList.toggle('is-open', open);
+      }
+      function _updateHeadsBadge() {
+        if (!_headsBtn || !_headsBox) return;
+        let total = 0;
+        total += _headsBox.querySelectorAll('.dw-items li').length;
+        total += _headsBox.querySelectorAll('.sugg-row').length;
+        total += _headsBox.querySelectorAll('.brief-q-row').length;
+        total += _headsBox.querySelectorAll('.dw-panel-error').length;
+        if (_headsCnt) _headsCnt.textContent = total;
+        _headsBtn.style.display = total > 0 ? 'inline-flex' : 'none';
+        // If count drops to 0 while open, close it
+        if (total === 0) _setHeadsOpen(false);
+      }
+      // Click toggle
+      _headsBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = _headsBox && _headsBox.style.display === 'block';
+        _setHeadsOpen(!isOpen);
+      });
+      // Outside-click closes
+      document.addEventListener('click', (e) => {
+        if (!_headsBox) return;
+        if (_headsBox.style.display !== 'block') return;
+        if (_headsBox.contains(e.target) || _headsBtn?.contains(e.target)) return;
+        _setHeadsOpen(false);
+      });
+      // Escape closes
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && _headsBox && _headsBox.style.display === 'block') {
+          _setHeadsOpen(false);
+        }
+      });
+      // Watch the warnings box for content changes (covers all writers:
+      // _renderWarnings, suggestions panel, preflight errors, brief Q&A)
+      if (_headsBox) {
+        const _obs = new MutationObserver(_updateHeadsBadge);
+        _obs.observe(_headsBox, { childList: true, subtree: true });
+        _updateHeadsBadge();
+      }
     }
 
     // ── Revert to Original button ────────────────────────────────────────
