@@ -32,6 +32,27 @@ def update_notion_status(page_id, status_name):
         return False
 
 
+def update_notion_editor_state(page_id, state):
+    """Persist the operator's editor_state JSON to a Notion rich_text
+    property called 'Editor State'. Splits into ≤1900-char chunks since
+    Notion limits each rich_text element to 2000 chars; up to ~95 elements
+    total fit comfortably under the 100-block array limit."""
+    url = f"https://api.notion.com/v1/pages/{page_id}"
+    state_json = json.dumps(state, separators=(',', ':'))
+    chunks = [state_json[i:i+1900] for i in range(0, len(state_json), 1900)] or [""]
+    if len(chunks) > 95:
+        raise RuntimeError(f"editor_state too large ({len(state_json)} chars, {len(chunks)} chunks)")
+    payload = {
+        "properties": {
+            "Editor State": {
+                "rich_text": [{"text": {"content": c}} for c in chunks]
+            }
+        }
+    }
+    response = requests.patch(url, headers=HEADERS, json=payload)
+    response.raise_for_status()
+
+
 # ── GitHub helpers ─────────────────────────────────────────────────────────────
 
 def _gh_headers():
@@ -113,23 +134,53 @@ class handler(BaseHTTPRequestHandler):
         action  = data.get("action")
         page_id = data.get("page_id")
 
-        # ── Save draft edits to GitHub ─────────────────────────────────────────
+        # ── Save draft edits ──────────────────────────────────────────────────
+        # Two payload shapes are accepted:
+        #   A. {filename, html}       → server-rendered HTML, written to GitHub
+        #                               (used by the mac-mini regenerator)
+        #   B. {page_id, editor_state} → operator's in-flight edit state,
+        #                               best-effort persisted to Notion.
+        #                               The browser also mirrors this to
+        #                               localStorage, so the payload is safe
+        #                               even if the Notion write rejects.
         if action == "save_draft":
-            filename = data.get("filename", "")
-            html     = data.get("html", "")
+            filename     = data.get("filename", "")
+            html         = data.get("html", "")
+            editor_state = data.get("editor_state")
             ok = False
-            if filename and html and GITHUB_TOKEN:
-                try:
+            warning   = None
+            error_msg = None
+            try:
+                if filename and html and GITHUB_TOKEN:
                     github_write_file(filename, html)
                     ok = True
                     print(f"Draft saved to GitHub: {filename}")
-                except Exception as e:
-                    print(f"GitHub save failed: {e}")
+                elif editor_state is not None and page_id:
+                    # Acknowledge receipt — localStorage is the canonical store
+                    # for in-flight edits. Best-effort sync to Notion below;
+                    # if it fails (e.g. property missing), we still return 200.
+                    ok = True
+                    if NOTION_API_KEY:
+                        try:
+                            update_notion_editor_state(page_id, editor_state)
+                            print(f"Editor state synced to Notion: {page_id}")
+                        except Exception as e:
+                            warning = f"editor_state not persisted to Notion: {e}"
+                            print(f"Notion editor_state sync failed (soft): {e}")
+                else:
+                    error_msg = "missing payload (need filename+html or page_id+editor_state)"
+            except Exception as e:
+                error_msg = str(e)
+                print(f"save_draft failed: {e}")
+
             self.send_response(200 if ok else 500)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "saved" if ok else "error"}).encode())
+            body = {"status": "saved" if ok else "error"}
+            if warning:   body["warning"] = warning
+            if error_msg: body["reason"]  = error_msg
+            self.wfile.write(json.dumps(body).encode())
             return
 
         # ── Approve: publish to client ─────────────────────────────────────────
