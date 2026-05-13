@@ -2004,6 +2004,22 @@
     background: rgba(255,255,255,0.10);
   }
   .draft-banner-right #draft-revert-btn { margin-right: 4px; }
+  .draft-banner-right #draft-reset-local-btn {
+    margin-right: 4px;
+    color: rgba(252, 165, 165, 0.85);
+    border-color: rgba(252, 165, 165, 0.22);
+  }
+  .draft-banner-right #draft-reset-local-btn:hover {
+    color: white;
+    background: rgba(239, 68, 68, 0.30);
+    border-color: rgba(239, 68, 68, 0.55);
+  }
+  body.is-signed .draft-banner-right #draft-reset-local-btn { display: inline-flex; align-items: center; }
+  /* Mobile: collapse to icon-only */
+  @media (max-width: 760px) {
+    .draft-banner-right #draft-reset-local-btn { padding: 6px 10px; }
+    .draft-banner-right #draft-reset-local-btn span { display: none; }
+  }
   .draft-banner-right #draft-approve-btn { margin-left: 6px; }
 
   /* Subtle separator between Heads-up / Changes / Shortcuts groups */
@@ -3701,6 +3717,7 @@
       </span>
       <button id="draft-preview-btn" class="draft-save-btn" title="Preview what the client will see (hides all editor controls)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client</button>
       <button id="draft-revert-btn" class="draft-save-btn" title="Undo all edits and restore the original quote">↺ Revert</button>
+      <button id="draft-reset-local-btn" class="draft-save-btn" title="Reset this device — clears local edits, signature record, and preview state"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;flex-shrink:0;"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/></svg>Reset</button>
       <button id="draft-approve-btn" class="draft-approve-btn">Approve &amp; Send →</button>
       <button id="draft-download-pdf-btn" class="draft-approve-btn" title="Download the signed PDF copy" style="display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF</button>
     </div>
@@ -6217,6 +6234,45 @@
         _updateHeadsBadge();
       }
     }
+
+    // ── Reset to draft (local-only) button ────────────────────────────────
+    // Clears any per-device state that could put the page out of the
+    // server-rendered baseline: in-progress edits backup, the signed
+    // acceptance snapshot, the view-as-client preview snapshot, and the
+    // line-item accordion state. Does NOT call the webhook — purely local.
+    // Useful for un-sticking demo / template state and for the operator to
+    // re-sign or re-test without round-tripping through the publisher.
+    document.getElementById('draft-reset-local-btn')?.addEventListener('click', async () => {
+      const wasSigned = document.body.classList.contains('is-signed');
+      const ok = await (typeof _vfConfirm === 'function' ? _vfConfirm({
+        title:   'Reset to draft?',
+        body:    '<p style="margin-bottom:14px;">This clears local state for this quote on <strong>this device only</strong>:</p>' +
+                 '<ul style="margin:0 0 14px 18px;color:var(--vf-ink-2);font-size:13px;line-height:1.7;">' +
+                   '<li>In-progress editor backup</li>' +
+                   (wasSigned ? '<li>Signed acceptance record (page returns to pre-sign state)</li>' : '') +
+                   '<li>"View as client" preview snapshot</li>' +
+                   '<li>Collapsed-section memory</li>' +
+                 '</ul>' +
+                 '<p style="font-size:12px;color:var(--vf-ink-3);">Notion is not touched. The server-rendered baseline is unchanged. The page will reload.</p>',
+        confirm: 'Reset to draft',
+        cancel:  'Cancel',
+      }) : Promise.resolve(window.confirm('Reset local state and reload?')));
+      if (!ok) return;
+      // Wipe the per-quote localStorage + sessionStorage keys
+      const qref   = VF.quoteRef  || '';
+      const pageId = VF.pageId    || '';
+      const keys = [
+        'vf_accepted_' + qref,
+        'vf_editor_state_backup_' + pageId,
+        'vf_preview_state_' + pageId,
+      ];
+      for (const k of keys) {
+        try { localStorage.removeItem(k); } catch (_) {}
+      }
+      try { sessionStorage.removeItem('vf_li_expanded_' + pageId); } catch (_) {}
+      // Reload — the page renders from the server-rendered baseline
+      location.reload();
+    });
 
     // ── Revert to Original button ────────────────────────────────────────
     document.getElementById('draft-revert-btn')?.addEventListener('click', async () => {
