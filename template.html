@@ -576,8 +576,10 @@
     border-bottom: 1px solid var(--vf-line);
   }
   .line-items-table .li-th-rate,
+  .line-items-table .li-th-unit,
   .line-items-table .li-th-days,
   .line-items-table .li-th-subtotal { text-align: right; padding-right: 0; padding-left: 16px; }
+  .line-items-table .li-th-unit { text-align: left; padding-left: 16px; }
   .line-items-table .li-th-actions { width: 44px; }
   .line-items-table .li-cell {
     padding: 18px 16px 18px 0;
@@ -610,18 +612,42 @@
     font-size: 13px;
     letter-spacing: 0.02em;
   }
+  .line-items-table .li-unit {
+    text-align: left;
+    padding-left: 16px;
+    padding-right: 0;
+    color: var(--vf-ink-3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .li-unit-display { display: inline-block; }
+  .li-unit-select {
+    display: none;
+    background: transparent;
+    border: 1px dashed transparent;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: -2px -6px;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    text-transform: lowercase;
+  }
+  .li-unit-select:hover, .li-unit-select:focus {
+    border-color: var(--vf-blue);
+    outline: none;
+  }
+  /* Draft mode (non-preview): editor sees the select, client sees plain text */
+  body.draft-mode:not(.client-preview) .li-unit-display { display: none; }
+  body.draft-mode:not(.client-preview) .li-unit-select { display: inline-block; }
   .line-items-table .li-qty-num {
     font-weight: 600;
     color: var(--vf-ink);
     min-width: 1.5em;
     display: inline-block;
   }
-  .line-items-table .li-qty-unit {
-    font-size: 12px;
-    color: var(--vf-ink-4);
-    text-transform: lowercase;
-    margin-left: 4px;
-  }
+  /* .li-qty-unit removed — unit now lives in its own .li-unit column */
   .line-items-table .li-subtotal {
     font-weight: 600;
     color: var(--vf-ink);
@@ -679,6 +705,7 @@
   body.draft-mode .line-items-table .li-row-remove { display: inline-block; }
   /* Mobile: hide the days column to save horizontal space (still computed) */
   @media (max-width: 600px) {
+    .line-items-table .li-th-unit, .line-items-table .li-unit,
     .line-items-table .li-th-days, .line-items-table .li-days { display: none; }
   }
 
@@ -1461,7 +1488,70 @@
     color: var(--grey-900);
   }
 
-  .breakdown-row.fixed-row {
+  /* ── Grouped breakdown — collapsible categories with hover expand ──── */
+  .breakdown-group {
+    border-top: 1px solid var(--vf-line);
+  }
+  .breakdown-group:first-child { border-top: none; }
+  .breakdown-group-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    cursor: pointer;
+    user-select: none;
+  }
+  .breakdown-group-head .bg-chevron {
+    width: 10px; height: 10px;
+    flex-shrink: 0;
+    color: var(--vf-ink-4);
+    transition: transform 200ms var(--ease-out);
+  }
+  .breakdown-group:hover .bg-chevron,
+  .breakdown-group.expanded .bg-chevron {
+    transform: rotate(90deg);
+    color: var(--vf-blue);
+  }
+  .breakdown-group-head .bg-label {
+    flex: 1;
+    font-weight: 600;
+    color: var(--vf-ink);
+    font-size: 14px;
+    letter-spacing: -0.005em;
+  }
+  .breakdown-group-head .bg-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--vf-ink-4);
+    letter-spacing: 0.06em;
+  }
+  .breakdown-group-head .bg-amount {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--vf-ink);
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .breakdown-group.is-discounts .bg-amount { color: var(--green, #16a34a); }
+  .breakdown-group-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 260ms var(--ease-out);
+  }
+  .breakdown-group:hover .breakdown-group-body,
+  .breakdown-group.expanded .breakdown-group-body {
+    max-height: 2000px;
+  }
+  .breakdown-group-body .breakdown-row {
+    padding-left: 22px;
+    font-size: 13px;
+    color: var(--vf-ink-3);
+    border-top: 1px solid var(--vf-line);
+  }
+  .breakdown-group-body .breakdown-row:first-child { border-top: none; }
+
+    .breakdown-row.fixed-row {
     color: var(--grey-400);
     font-size: 13px;
   }
@@ -2837,7 +2927,7 @@
 <div class="white-section" id="pricing-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">02</span> · Production Services</div>
   <div class="section-heading">The <em>Quotation</em></div>
-  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name">Role</th><th class="li-th li-th-rate">Rate</th><th class="li-th li-th-days">Qty</th><th class="li-th li-th-subtotal">Subtotal</th><th class="li-th li-th-actions"></th></tr></thead><tbody id="line-items-body"><tr class="li-row" data-li-id="li_5f4825fb" data-rate="375.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>2nd Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£375/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£375</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_4018ee86" data-rate="275.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£275/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£275</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5a53cb1a" data-rate="475.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Camera Operator</td><td class="li-cell li-rate" data-editable data-single-line>£475/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£475</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5c590c98" data-rate="175.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Colour Grade</td><td class="li-cell li-rate" data-editable data-single-line>£175/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£175</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_35cb5215" data-rate="18.00" data-days="1.00" data-unit="charge"><td class="li-cell li-name" data-editable data-single-line>Congestion Charge</td><td class="li-cell li-rate" data-editable data-single-line>£18/charge</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">charge</span></td><td class="li-cell li-subtotal">£18</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8a0cbc7e" data-rate="700.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director</td><td class="li-cell li-rate" data-editable data-single-line>£700/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£700</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_46f0696f" data-rate="575.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director of Photography</td><td class="li-cell li-rate" data-editable data-single-line>£575/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£575</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8806565f" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Gaffer</td><td class="li-cell li-rate" data-editable data-single-line>£450/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_82d07f1e" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Hero Edit (2–5 min)</td><td class="li-cell li-rate" data-editable data-single-line>£450/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bae0c7ca" data-rate="600.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Long-form Edit (10 min+)</td><td class="li-cell li-rate" data-editable data-single-line>£600/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£600</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_634a7256" data-rate="0.55" data-days="1.00" data-unit="mile"><td class="li-cell li-name" data-editable data-single-line>Mileage</td><td class="li-cell li-rate" data-editable data-single-line>£1/mile</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">mile</span></td><td class="li-cell li-subtotal">£1</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_7260296e" data-rate="550.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Producer</td><td class="li-cell li-rate" data-editable data-single-line>£550/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£550</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5f46e40d" data-rate="200.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Production Assistant (PA)</td><td class="li-cell li-rate" data-editable data-single-line>£200/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£200</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_057aa497" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Social Cut (30–60s)</td><td class="li-cell li-rate" data-editable data-single-line>£300/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_00b2f5ff" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Sound Recordist</td><td class="li-cell li-rate" data-editable data-single-line>£400/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£400</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_f7bceba6" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Spark</td><td class="li-cell li-rate" data-editable data-single-line>£300/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_b3f1bae8" data-rate="125.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Stills Cull + Edit</td><td class="li-cell li-rate" data-editable data-single-line>£125/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£125</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_2e5e3796" data-rate="3.60" data-days="1.00" data-unit="journey"><td class="li-cell li-name" data-editable data-single-line>TfL Journey</td><td class="li-cell li-rate" data-editable data-single-line>£4/journey</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">journey</span></td><td class="li-cell li-subtotal">£4</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_0c160aa2" data-rate="65.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Transcoding / Delivery</td><td class="li-cell li-rate" data-editable data-single-line>£65/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£65</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bfd39ac0" data-rate="95.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£95/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£95</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="3" class="li-foot-label">Subtotal</td><td class="li-foot-amount" id="line-items-subtotal">£6,132</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><details class="tnc-accordion" id="equipment-accordion" open><summary>Equipment Package <span class="tnc-chevron">+</span></summary><div class="tnc-body" style="padding-top:16px;"><div id="equipment-text-block" data-editable data-equip-has-content="0"><span class="equip-empty-placeholder">No equipment list attached. <span class="equip-empty-prompt">Click here to type one.</span></span></div><div class="equip-helper" style="display:none;font-size:11px;color:var(--grey-500);margin-top:8px;font-style:italic;">Type your equipment list here. One item per line, or paste from anywhere. Saves automatically and sticks across regenerations.</div></div></details><div class="price-section-label" style="margin-bottom:14px;">Delivery</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn  selected" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45</span></button><button class="pill-btn" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div><div class="price-section-label" style="margin-bottom:14px;">Post-Production</div><div class="toggle-cards toggle-cards-grid" style="margin-bottom:28px;"><div class="toggle-card" data-postprod-id="34f47fd0-3620-81d5-9e6c-f22f2b06fa2f" data-price="200" data-base-price="200"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Additional Social Cut</div><div class="toggle-card-desc" data-editable>Extra cut beyond what is included in the package (up to 90s).</div></div><div class="toggle-card-price" data-editable data-single-line>+£200</div></div><div class="toggle-card" data-postprod-id="34f47fd0-3620-8134-9b43-de629d459f95" data-price="75" data-base-price="75"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Subtitles / Captions</div><div class="toggle-card-desc" data-editable>Burnt-in or SRT subtitles per video.</div></div><div class="toggle-card-price" data-editable data-single-line>+£75</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
+  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name">Role</th><th class="li-th li-th-rate">Rate</th><th class="li-th li-th-unit">Unit</th><th class="li-th li-th-days">Qty</th><th class="li-th li-th-subtotal">Subtotal</th><th class="li-th li-th-actions"></th></tr></thead><tbody id="line-items-body"><tr class="li-row" data-li-id="li_5f4825fb" data-rate="375.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>2nd Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£375</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£375</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_4018ee86" data-rate="275.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£275</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£275</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5a53cb1a" data-rate="475.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Camera Operator</td><td class="li-cell li-rate" data-editable data-single-line>£475</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£475</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5c590c98" data-rate="175.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Colour Grade</td><td class="li-cell li-rate" data-editable data-single-line>£175</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£175</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_35cb5215" data-rate="18.00" data-days="1.00" data-unit="charge"><td class="li-cell li-name" data-editable data-single-line>Congestion Charge</td><td class="li-cell li-rate" data-editable data-single-line>£18</td><td class="li-cell li-unit"><span class="li-unit-display">charge</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge" selected>charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£18</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8a0cbc7e" data-rate="700.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director</td><td class="li-cell li-rate" data-editable data-single-line>£700</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£700</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_46f0696f" data-rate="575.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director of Photography</td><td class="li-cell li-rate" data-editable data-single-line>£575</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£575</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_8806565f" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Gaffer</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_82d07f1e" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Hero Edit (2–5 min)</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bae0c7ca" data-rate="600.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Long-form Edit (10 min+)</td><td class="li-cell li-rate" data-editable data-single-line>£600</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£600</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_634a7256" data-rate="0.55" data-days="1.00" data-unit="mile"><td class="li-cell li-name" data-editable data-single-line>Mileage</td><td class="li-cell li-rate" data-editable data-single-line>£1</td><td class="li-cell li-unit"><span class="li-unit-display">mile</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile" selected>mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£1</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_7260296e" data-rate="550.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Producer</td><td class="li-cell li-rate" data-editable data-single-line>£550</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£550</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5f46e40d" data-rate="200.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Production Assistant (PA)</td><td class="li-cell li-rate" data-editable data-single-line>£200</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£200</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_057aa497" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Social Cut (30–60s)</td><td class="li-cell li-rate" data-editable data-single-line>£300</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_00b2f5ff" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Sound Recordist</td><td class="li-cell li-rate" data-editable data-single-line>£400</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£400</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_f7bceba6" data-rate="300.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Spark</td><td class="li-cell li-rate" data-editable data-single-line>£300</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£300</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_b3f1bae8" data-rate="125.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Stills Cull + Edit</td><td class="li-cell li-rate" data-editable data-single-line>£125</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£125</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_2e5e3796" data-rate="3.60" data-days="1.00" data-unit="journey"><td class="li-cell li-name" data-editable data-single-line>TfL Journey</td><td class="li-cell li-rate" data-editable data-single-line>£4</td><td class="li-cell li-unit"><span class="li-unit-display">journey</span><select class="li-unit-select" data-no-edit><option value="day">day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey" selected>journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£4</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_0c160aa2" data-rate="65.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Transcoding / Delivery</td><td class="li-cell li-rate" data-editable data-single-line>£65</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£65</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bfd39ac0" data-rate="95.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£95</td><td class="li-cell li-unit"><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal">£95</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="4" class="li-foot-label">Subtotal</td><td class="li-foot-amount" id="line-items-subtotal">£6,132</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><details class="tnc-accordion" id="equipment-accordion" open><summary>Equipment Package <span class="tnc-chevron">+</span></summary><div class="tnc-body" style="padding-top:16px;"><div id="equipment-text-block" data-editable data-equip-has-content="0"><span class="equip-empty-placeholder">No equipment list attached. <span class="equip-empty-prompt">Click here to type one.</span></span></div><div class="equip-helper" style="display:none;font-size:11px;color:var(--grey-500);margin-top:8px;font-style:italic;">Type your equipment list here. One item per line, or paste from anywhere. Saves automatically and sticks across regenerations.</div></div></details><div class="price-section-label" style="margin-bottom:14px;">Delivery</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn  selected" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45</span></button><button class="pill-btn" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div><div class="price-section-label" style="margin-bottom:14px;">Post-Production</div><div class="toggle-cards toggle-cards-grid" style="margin-bottom:28px;"><div class="toggle-card" data-postprod-id="34f47fd0-3620-81d5-9e6c-f22f2b06fa2f" data-price="200" data-base-price="200"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Additional Social Cut</div><div class="toggle-card-desc" data-editable>Extra cut beyond what is included in the package (up to 90s).</div></div><div class="toggle-card-price" data-editable data-single-line>+£200</div></div><div class="toggle-card" data-postprod-id="34f47fd0-3620-8134-9b43-de629d459f95" data-price="75" data-base-price="75"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Subtitles / Captions</div><div class="toggle-card-desc" data-editable>Burnt-in or SRT subtitles per video.</div></div><div class="toggle-card-price" data-editable data-single-line>+£75</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
 
   
 
@@ -3207,7 +3297,7 @@
       const qty       = (_pstate.addonQty && _pstate.addonQty[a.id]) || 1;
       const unitPrice = _addonPriceForCurrentTier(a);
       const lineLabel = qty > 1 ? `${a.name} × ${qty}` : a.name;
-      rows.push({label: lineLabel, amt: unitPrice * qty, cls: ''});
+      rows.push({label: lineLabel, amt: unitPrice * qty, cls: '', cat: 'addons'});
       const unitDisc = _addonDiscountAmount(a);
       const discAmt  = unitDisc * qty;
       if (unitDisc > 0) {
@@ -3216,12 +3306,12 @@
         const lbl = isPct
           ? `  ↳ ${a.name} discount (${disc.value}%)`
           : `  ↳ ${a.name} discount`;
-        rows.push({label: lbl, amt: discAmt, cls: 'discount-row addon-discount-row'});
+        rows.push({label: lbl, amt: discAmt, cls: 'discount-row addon-discount-row', cat: 'addons'});
       }
     };
     if (VF.quoteType === 'Package Based') {
       const pkg = (PRICING.packages || []).find(x => x.id === _pstate.package);
-      if (pkg) rows.push({label: pkg.name, amt: pkg.price, cls: 'base-row'});
+      if (pkg) rows.push({label: pkg.name, amt: pkg.price, cls: 'base-row', cat: 'base'});
       for (const id of _pstate.addons) {
         const a = PRICING.addons.find(x => x.id === id);
         if (a) _pushAddonRows(a);
@@ -3231,7 +3321,7 @@
       // when there are 5+ roles), then standard delivery / post-prod / addons.
       const liItems = Array.isArray(_pstate.lineItems) ? _pstate.lineItems : [];
       if (liItems.length) {
-        rows.push({label: 'Crew & Production', amt: null, cls: 'section-header'});
+        /* group header rendered automatically */
         for (const li of liItems) {
           const sub = Math.max(0, Math.round((parseFloat(li.rate) || 0) * (parseFloat(li.days) || 0)));
           if (sub > 0 || li.days > 0) {
@@ -3241,30 +3331,31 @@
               label: `${li.name} (${dayLabel} @ £${Math.round(li.rate || 0).toLocaleString('en-GB')})`,
               amt:   sub,
               cls:   '',
+              cat:   'items',
             });
           }
         }
       } else if (PRICING.basePrice) {
         // No line items configured — fall back to a single Production Fee row
-        rows.push({label:'Production Fee', amt:PRICING.basePrice, cls:'base-row'});
+        rows.push({label:'Production Fee', amt:PRICING.basePrice, cls:'base-row', cat:'base'});
       }
       const d = (PRICING.delivery || []).find(x => x.id === _pstate.delivery);
-      if (d) rows.push({label:d.name, amt:d.price, cls:''});
+      if (d) rows.push({label:d.name, amt:d.price, cls:'', cat:'addons'});
       if (_pstate.postProd) {
         const p = (PRICING.postProduction || []).find(x => x.id === _pstate.postProd);
-        if (p) rows.push({label:p.name, amt:p.price, cls:''});
+        if (p) rows.push({label:p.name, amt:p.price, cls:'', cat:'addons'});
       }
       for (const id of _pstate.addons) {
         const a = (PRICING.addons || []).find(x => x.id === id);
         if (a) _pushAddonRows(a);
       }
-      if (PRICING.expenses) rows.push({label:'Expenses', amt:PRICING.expenses, cls:'fixed-row'});
-      if (PRICING.storage > 0) rows.push({label:'Storage & Backups', amt:PRICING.storage, cls:'fixed-row'});
+      if (PRICING.expenses) rows.push({label:'Expenses', amt:PRICING.expenses, cls:'fixed-row', cat:'surcharges'});
+      if (PRICING.storage > 0) rows.push({label:'Storage & Backups', amt:PRICING.storage, cls:'fixed-row', cat:'surcharges'});
     }
     // Stepper rows
     const rush = _rushTiers[_pstate.rushTier];
     if (rush && rush.price > 0) {
-      rows.push({label: rush.sublabel, amt: rush.price, cls: ''});
+      rows.push({label: rush.sublabel, amt: rush.price, cls: '', cat: 'surcharges'});
     }
     if (_pstate.extraRevisions > 0) {
       const base = VF.quoteType === 'Package Based'
@@ -3273,22 +3364,22 @@
       const revAmt = Math.round(base * (Math.pow(1.2, _pstate.extraRevisions) - 1));
       const n = _pstate.extraRevisions;
       const revLabel = n === 1 ? 'Additional Revision Round' : `Additional Revision Rounds (×${n})`;
-      rows.push({label: revLabel, amt: revAmt, cls: ''});
+      rows.push({label: revLabel, amt: revAmt, cls: '', cat: 'surcharges'});
     }
     // Travel section
     if (PRICING.travel) {
       const tr = PRICING.travel;
-      rows.push({label: 'Travel', amt: null, cls: 'section-header'});
-      rows.push({label: `Van Hire (${tr.shooting_days} day${tr.shooting_days !== 1 ? 's' : ''})`, amt: tr.van_cost, cls: 'fixed-row'});
-      rows.push({label: `Mileage (${tr.round_trip_miles} miles @ 45p)`, amt: tr.mile_cost, cls: 'fixed-row'});
-      rows.push({label: 'Parking', amt: 'Billed @ cost', cls: 'fixed-row'});
-      if (tr.cc_cost > 0) rows.push({label: 'Congestion Charge', amt: tr.cc_cost, cls: 'fixed-row'});
+      /* travel rows belong to surcharges group */
+      rows.push({label: `Van Hire (${tr.shooting_days} day${tr.shooting_days !== 1 ? 's' : ''})`, amt: tr.van_cost, cls: 'fixed-row', cat: 'surcharges'});
+      rows.push({label: `Mileage (${tr.round_trip_miles} miles @ 45p)`, amt: tr.mile_cost, cls: 'fixed-row', cat: 'surcharges'});
+      rows.push({label: 'Parking', amt: 'Billed @ cost', cls: 'fixed-row', cat: 'surcharges'});
+      if (tr.cc_cost > 0) rows.push({label: 'Congestion Charge', amt: tr.cc_cost, cls: 'fixed-row', cat: 'surcharges'});
     }
     // Multi-day discount line (automatic, not togglable)
     if (PRICING.multiday) {
       const base = _computeBaseTotal();
       const discAmt = Math.round(base * (1 - PRICING.multiday.multiplier));
-      rows.push({label: PRICING.multiday.label, amt: discAmt, cls: 'discount-row multiday-row'});
+      rows.push({label: PRICING.multiday.label, amt: discAmt, cls: 'discount-row multiday-row', cat: 'discounts'});
     }
     // Buyer-type multiplier line (e.g. Agency −10%)
     if (PRICING.buyerTypeMultiplier) {
@@ -3296,11 +3387,11 @@
         ? Math.round(_computeBaseTotal() * PRICING.multiday.multiplier)
         : _computeBaseTotal();
       const discAmt = Math.round(afterMultiday * (1 - PRICING.buyerTypeMultiplier.multiplier));
-      rows.push({label: PRICING.buyerTypeMultiplier.label, amt: discAmt, cls: 'discount-row buyer-type-row'});
+      rows.push({label: PRICING.buyerTypeMultiplier.label, amt: discAmt, cls: 'discount-row buyer-type-row', cat: 'discounts'});
     }
     // Buyout / usage rights (fixed positive line)
     if (PRICING.buyout) {
-      rows.push({label: 'Usage Rights Licence', amt: PRICING.buyout, cls: 'fixed-row buyout-row'});
+      rows.push({label: 'Usage Rights Licence', amt: PRICING.buyout, cls: 'fixed-row buyout-row', cat: 'surcharges'});
     }
     // Client-applied discounts — chained against post-multiplier total
     let _afterMults = _computeBaseTotal();
@@ -3317,7 +3408,7 @@
       const label = d.type === 'Percentage'
         ? `${d.name} (${d.value}% off)`
         : d.name;
-      rows.push({label, amt: discAmt, cls: 'discount-row'});
+      rows.push({label, amt: discAmt, cls: 'discount-row', cat: 'discounts'});
     }
     // Custom discounts (draft mode)
     for (const cd of (_pstate.customDiscounts || [])) {
@@ -3328,12 +3419,10 @@
       const label = cd.type === 'pct'
         ? `${cd.name} (${cd.value}% off)`
         : cd.name;
-      rows.push({label, amt: discAmt, cls: 'discount-row custom-discount-row', cdId: cd.id});
+      rows.push({label, amt: discAmt, cls: 'discount-row custom-discount-row', cdId: cd.id, cat: 'discounts'});
     }
-    container.innerHTML = rows.map(r => {
-      if (r.cls === 'section-header') {
-        return `<div class="breakdown-row section-header"><span style="font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--grey-400);">${r.label}</span><span></span></div>`;
-      }
+    // Render a single row as HTML (used both standalone and inside group bodies)
+    const _renderRow = (r) => {
       if ((r.cls || '').includes('discount-row')) {
         const removeBtn = r.cdId
           ? ` <button type="button" class="draft-remove-btn-inline" data-cd-id="${r.cdId}" title="Remove discount">×</button>`
@@ -3343,15 +3432,69 @@
       let amtStr;
       if (typeof r.amt === 'string') {
         amtStr = r.amt;
-      } else if (r.cls === 'base-row') {
+      } else if ((r.cls || '').includes('base-row')) {
         amtStr = _fmtGBP(r.amt);
       } else if (r.amt === 0) {
         amtStr = 'Included';
       } else {
         amtStr = '+' + _fmtGBP(r.amt);
       }
-      return `<div class="breakdown-row ${r.cls}"><span>${r.label}</span><span>${amtStr}</span></div>`;
-    }).join('');
+      return `<div class="breakdown-row ${r.cls || ''}"><span>${r.label}</span><span>${amtStr}</span></div>`;
+    };
+
+    // Group rows by category. Order is fixed; empty groups skipped.
+    const _groupOrder = ['base', 'items', 'addons', 'surcharges', 'discounts'];
+    const _groupNames = {
+      base:       'Package',
+      items:      'Crew & Production',
+      addons:     'Add-ons & Delivery',
+      surcharges: 'Surcharges & Travel',
+      discounts:  'Discounts',
+    };
+    const _groups = {};
+    for (const r of rows) {
+      if ((r.cls || '').includes('section-header')) continue;
+      const cat = r.cat || 'addons';
+      (_groups[cat] = _groups[cat] || []).push(r);
+    }
+
+    // Sum a group's amounts (numeric only; string amounts like "Billed @ cost"
+    // are excluded from the header total but still render in the body).
+    const _groupSum = (items, isDiscount) => items.reduce((s, r) => {
+      if (typeof r.amt !== 'number') return s;
+      return s + (isDiscount ? -r.amt : r.amt);
+    }, 0);
+
+    container.innerHTML = _groupOrder
+      .filter(cat => _groups[cat] && _groups[cat].length)
+      .map(cat => {
+        const items = _groups[cat];
+        const isDisc = cat === 'discounts';
+        // Single-item groups render inline (no group chrome — feels heavy)
+        if (items.length <= 1) {
+          return items.map(_renderRow).join('');
+        }
+        const sub = _groupSum(items, isDisc);
+        const amtHTML = isDisc
+          ? `-${_fmtGBP(Math.abs(sub))}`
+          : _fmtGBP(sub);
+        const chevron = '<svg class="bg-chevron" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 1 7 5 3 9"/></svg>';
+        return `<div class="breakdown-group ${isDisc ? 'is-discounts' : ''}" data-cat="${cat}">
+  <div class="breakdown-group-head">
+    ${chevron}
+    <span class="bg-label">${_groupNames[cat] || cat}</span>
+    <span class="bg-meta">${items.length} items</span>
+    <span class="bg-amount">${amtHTML}</span>
+  </div>
+  <div class="breakdown-group-body">${items.map(_renderRow).join('')}</div>
+</div>`;
+      })
+      .join('');
+
+    // Wire click-to-toggle for touch / accessibility (hover handles desktop)
+    container.querySelectorAll('.breakdown-group-head').forEach(head => {
+      head.addEventListener('click', () => head.parentElement.classList.toggle('expanded'));
+    });
   }
 
   function _updateTotal() {
@@ -5957,13 +6100,11 @@
         const id = row.dataset.liId;
         const li = _pstate.lineItems.find(x => x.id === id);
         if (!li) return;
-        const nameEl = row.querySelector('.li-name');
-        const rateEl = row.querySelector('.li-rate');
-        // The Qty cell is now a wrapper around .li-qty-num (the editable
-        // number) + .li-qty-unit (the display unit suffix). We blur-sync
-        // off the number span and recompute the unit suffix's pluralisation.
-        const qtyNumEl  = row.querySelector('.li-qty-num');
-        const qtyUnitEl = row.querySelector('.li-qty-unit');
+        const nameEl       = row.querySelector('.li-name');
+        const rateEl       = row.querySelector('.li-rate');
+        const qtyNumEl     = row.querySelector('.li-qty-num');
+        const unitDispEl   = row.querySelector('.li-unit-display');
+        const unitSelectEl = row.querySelector('.li-unit-select');
         if (nameEl) nameEl.addEventListener('blur', () => {
           const t = (nameEl.textContent || '').trim();
           if (t) li.name = t;
@@ -5973,8 +6114,7 @@
           const n = parseFloat(digits);
           if (Number.isFinite(n) && n >= 0) {
             li.rate = n;
-            const unit = li.unit || 'day';
-            rateEl.textContent = '£' + Math.round(n).toLocaleString('en-GB') + '/' + unit;
+            rateEl.textContent = '£' + Math.round(n).toLocaleString('en-GB');
             row.dataset.rate = n.toFixed(2);
             _renderLiSubtotalCell(row);
             _renderLiFooter();
@@ -5988,15 +6128,16 @@
             li.days = n;
             qtyNumEl.textContent = (n === Math.floor(n)) ? String(Math.floor(n)) : String(n);
             row.dataset.days = n.toFixed(2);
-            // Update unit suffix pluralisation
-            if (qtyUnitEl) {
-              const unit = li.unit || 'day';
-              qtyUnitEl.textContent = unit + (n !== 1 ? 's' : '');
-            }
             _renderLiSubtotalCell(row);
             _renderLiFooter();
             _updateTotal();
           }
+        });
+        if (unitSelectEl) unitSelectEl.addEventListener('change', () => {
+          const u = unitSelectEl.value || 'day';
+          li.unit = u;
+          row.dataset.unit = u;
+          if (unitDispEl) unitDispEl.textContent = u;
         });
         // × remove button (visible in draft mode)
         const actionsCell = row.querySelector('.li-actions');
@@ -6082,14 +6223,22 @@
         row.dataset.days = newLi.days.toFixed(2);
         row.dataset.unit = newLi.unit;
         const _qtyDisplay = (newLi.days === Math.floor(newLi.days) ? Math.floor(newLi.days) : newLi.days);
-        const _unitSuffix = newLi.unit + (newLi.days !== 1 ? 's' : '');
+        const _unitOptions = ['day','charge','package','hour','week','mile','journey','item'];
+        const _unitVal = newLi.unit || 'day';
+        if (!_unitOptions.includes(_unitVal)) _unitOptions.unshift(_unitVal);
+        const _unitSelectHTML = _unitOptions.map(u =>
+          '<option value="' + u + '"' + (u === _unitVal ? ' selected' : '') + '>' + u + '</option>'
+        ).join('');
         row.innerHTML =
           '<td class="li-cell li-name" data-editable data-single-line>' + newLi.name + '</td>' +
           '<td class="li-cell li-rate" data-editable data-single-line>£' +
-            Math.round(newLi.rate).toLocaleString('en-GB') + '/' + newLi.unit + '</td>' +
+            Math.round(newLi.rate).toLocaleString('en-GB') + '</td>' +
+          '<td class="li-cell li-unit">' +
+            '<span class="li-unit-display">' + _unitVal + '</span>' +
+            '<select class="li-unit-select" data-no-edit>' + _unitSelectHTML + '</select>' +
+          '</td>' +
           '<td class="li-cell li-days">' +
             '<span class="li-qty-num" data-editable data-single-line>' + _qtyDisplay + '</span>' +
-            ' <span class="li-qty-unit">' + _unitSuffix + '</span>' +
           '</td>' +
           '<td class="li-cell li-subtotal">£' + _liSubtotal(newLi).toLocaleString('en-GB') + '</td>' +
           '<td class="li-cell li-actions" data-no-edit></td>';
