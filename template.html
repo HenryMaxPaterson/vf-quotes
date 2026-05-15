@@ -818,7 +818,8 @@
   }
   /* Draft-mode: show + Add line item button below the table */
   body.draft-mode #line-items-add-btn { display: inline-block !important; }
-  /* Draft-mode: × button per row sits in li-actions cell */
+  /* Draft-mode: × button per row sits in li-actions cell — nudged right */
+  .line-items-table .li-cell.li-actions { text-align: right; padding-right: 12px; }
   .line-items-table .li-row-remove {
     display: none;
     align-items: center;
@@ -1818,9 +1819,10 @@
 
   /* ── STEPPERS (revisions & deadline) ─────────── */
   .stepper-row {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
+    max-width: 220px;
   }
 
   .stepper-btn {
@@ -2003,7 +2005,6 @@
     height: 14px;
     background: rgba(255,255,255,0.10);
   }
-  .draft-banner-right #draft-revert-btn { margin-right: 4px; }
   .draft-banner-right #draft-reset-local-btn {
     margin-right: 4px;
     color: rgba(252, 165, 165, 0.85);
@@ -3326,7 +3327,6 @@
       margin-left: 0;
     }
     .draft-banner-right #draft-preview-btn span,
-    .draft-banner-right #draft-revert-btn { display: none; }
     #draft-total-display, #draft-autosave-indicator {
       display: none;
     }
@@ -3372,14 +3372,12 @@
   body { opacity: 0; transition: opacity 220ms ease; }
   body.vf-ready { opacity: 1; }
 
-  /* ── #8 Location link visible hover affordance ───────────────────────── */
+  /* ── #8 Location link hover — colour-only, no underline ──────────────── */
   .brief-item-value a[href*="google.com/maps"] {
-    border-bottom: 1px dashed rgba(10,15,26,0.18);
-    transition: border-color 150ms, color 150ms;
+    transition: color 150ms;
   }
   .brief-item-value a[href*="google.com/maps"]:hover {
     color: var(--vf-blue) !important;
-    border-bottom-color: var(--vf-blue);
   }
 
   /* ── #9 Status chip subtle dropdown affordance for clients ───────────── */
@@ -3444,7 +3442,12 @@
     .brief-item-internal { display: block !important; background: white !important; border: 1px solid #ccc !important; }
   }
 
-  /* ── SIGNED STATE: page collapses to confirmation + T&C + footer ─── */
+  /* ── Hide Post-Production toggle cards for itemized quotes ─────────────
+     Itemized line items already cover post-prod work (Hero Edit, Colour
+     Grade, etc.) — the toggle-card section becomes redundant noise. */
+  body.quote-type-itemized .postprod-section-marker { display: none !important; }
+
+    /* ── SIGNED STATE: page collapses to confirmation + T&C + footer ─── */
   body.is-signed .cta-section,
   body.is-signed #pricing-section { display: none; }
   /* Closing section stays mounted but the "thank you" beat is hidden;
@@ -3716,8 +3719,7 @@
         <button type="button" id="draft-changes-btn" title="See what's different from the original quote" aria-label="What changed">∆ Changes<span class="dc-count-badge" id="draft-changes-count" style="display:none;">0</span></button>
       </span>
       <button id="draft-preview-btn" class="draft-save-btn" title="Preview what the client will see (hides all editor controls)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client</button>
-      <button id="draft-revert-btn" class="draft-save-btn" title="Undo all edits and restore the original quote">↺ Revert</button>
-      <button id="draft-reset-local-btn" class="draft-save-btn" title="Reset this device — clears local edits, signature record, and preview state"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;flex-shrink:0;"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/></svg>Reset</button>
+      <button id="draft-reset-local-btn" class="draft-save-btn" title="Reset this quote — clears local edits + optionally regenerates from Notion"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Reset</button>
       <button id="draft-approve-btn" class="draft-approve-btn">Approve &amp; Send →</button>
       <button id="draft-download-pdf-btn" class="draft-approve-btn" title="Download the signed PDF copy" style="display:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF</button>
     </div>
@@ -3832,7 +3834,7 @@
 <div class="white-section section-glow-top" id="pricing-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">02</span> · Production Services</div>
   <div class="section-heading">The <em>Quotation</em></div>
-  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name" data-no-edit>Role</th><th class="li-th li-th-rate" data-no-edit>Rate</th><th class="li-th li-th-unit" data-no-edit>Unit</th><th class="li-th li-th-days" data-no-edit>Qty</th><th class="li-th li-th-subtotal" data-no-edit>Subtotal</th><th class="li-th li-th-actions" data-no-edit></th></tr></thead><tbody id="line-items-body"><tr class="li-row" data-li-id="li_46f0696f" data-rate="575.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director of Photography</td><td class="li-cell li-rate" data-editable data-single-line>£575</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£575</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_4018ee86" data-rate="275.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£275</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£275</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_00b2f5ff" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Sound Recordist</td><td class="li-cell li-rate" data-editable data-single-line>£400</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£400</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_82d07f1e" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Hero Edit (2–5 min)</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5c590c98" data-rate="175.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Colour Grade</td><td class="li-cell li-rate" data-editable data-single-line>£175</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£175</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bfd39ac0" data-rate="95.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£95</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£95</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="4" class="li-foot-label" data-no-edit>Subtotal</td><td class="li-foot-amount" id="line-items-subtotal" data-no-edit>£1,970</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><details class="tnc-accordion" id="equipment-accordion" open><summary>Equipment Package <span class="tnc-chevron">+</span></summary><div class="tnc-body" style="padding-top:16px;"><div id="equipment-text-block" data-editable data-equip-has-content="0"><span class="equip-empty-placeholder">No equipment list attached. <span class="equip-empty-prompt">Click here to type one.</span></span></div><div class="equip-helper" style="display:none;font-size:11px;color:var(--grey-500);margin-top:8px;font-style:italic;">Type your equipment list here. One item per line, or paste from anywhere. Saves automatically and sticks across regenerations.</div></div></details><div class="price-section-label" style="margin-bottom:14px;">Delivery</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn  selected" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45</span></button><button class="pill-btn" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div><div class="price-section-label" style="margin-bottom:14px;">Post-Production</div><div class="toggle-cards toggle-cards-grid" style="margin-bottom:28px;"><div class="toggle-card" data-postprod-id="34f47fd0-3620-81d5-9e6c-f22f2b06fa2f" data-price="200" data-base-price="200"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Additional Social Cut</div><div class="toggle-card-desc" data-editable>Extra cut beyond what is included in the package (up to 90s).</div></div><div class="toggle-card-price" data-editable data-single-line>+£200</div></div><div class="toggle-card" data-postprod-id="34f47fd0-3620-8134-9b43-de629d459f95" data-price="75" data-base-price="75"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Subtitles / Captions</div><div class="toggle-card-desc" data-editable>Burnt-in or SRT subtitles per video.</div></div><div class="toggle-card-price" data-editable data-single-line>+£75</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" id="discounts-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
+  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name" data-no-edit>Role</th><th class="li-th li-th-rate" data-no-edit>Rate</th><th class="li-th li-th-unit" data-no-edit>Unit</th><th class="li-th li-th-days" data-no-edit>Qty</th><th class="li-th li-th-subtotal" data-no-edit>Subtotal</th><th class="li-th li-th-actions" data-no-edit></th></tr></thead><tbody id="line-items-body"><tr class="li-row" data-li-id="li_46f0696f" data-rate="575.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Director of Photography</td><td class="li-cell li-rate" data-editable data-single-line>£575</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£575</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_4018ee86" data-rate="275.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Assistant Camera</td><td class="li-cell li-rate" data-editable data-single-line>£275</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£275</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_00b2f5ff" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Sound Recordist</td><td class="li-cell li-rate" data-editable data-single-line>£400</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£400</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_82d07f1e" data-rate="450.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Hero Edit (2–5 min)</td><td class="li-cell li-rate" data-editable data-single-line>£450</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£450</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_5c590c98" data-rate="175.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Colour Grade</td><td class="li-cell li-rate" data-editable data-single-line>£175</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£175</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_bfd39ac0" data-rate="95.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£95</td><td class="li-cell li-unit" data-no-edit><span class="li-unit-display">day</span><select class="li-unit-select" data-no-edit><option value="day" selected>day</option><option value="charge">charge</option><option value="package">package</option><option value="hour">hour</option><option value="week">week</option><option value="mile">mile</option><option value="journey">journey</option><option value="item">item</option></select></td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span></td><td class="li-cell li-subtotal" data-no-edit>£95</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="4" class="li-foot-label" data-no-edit>Subtotal</td><td class="li-foot-amount" id="line-items-subtotal" data-no-edit>£1,970</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><details class="tnc-accordion" id="equipment-accordion" open><summary>Equipment Package <span class="tnc-chevron">+</span></summary><div class="tnc-body" style="padding-top:16px;"><div id="equipment-text-block" data-editable data-equip-has-content="0"><span class="equip-empty-placeholder">No equipment list attached. <span class="equip-empty-prompt">Click here to type one.</span></span></div><div class="equip-helper" style="display:none;font-size:11px;color:var(--grey-500);margin-top:8px;font-style:italic;">Type your equipment list here. One item per line, or paste from anywhere. Saves automatically and sticks across regenerations.</div></div></details><div class="price-section-label" style="margin-bottom:14px;">Delivery</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn  selected" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45</span></button><button class="pill-btn" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div><div class="price-section-label postprod-section-marker" id="postprod-label" style="margin-bottom:14px;">Post-Production</div><div class="toggle-cards toggle-cards-grid postprod-section-marker" id="postprod-grid" style="margin-bottom:28px;"><div class="toggle-card" data-postprod-id="34f47fd0-3620-81d5-9e6c-f22f2b06fa2f" data-price="200" data-base-price="200"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Additional Social Cut</div><div class="toggle-card-desc" data-editable>Extra cut beyond what is included in the package (up to 90s).</div></div><div class="toggle-card-price" data-editable data-single-line>+£200</div></div><div class="toggle-card" data-postprod-id="34f47fd0-3620-8134-9b43-de629d459f95" data-price="75" data-base-price="75"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Subtitles / Captions</div><div class="toggle-card-desc" data-editable>Burnt-in or SRT subtitles per video.</div></div><div class="toggle-card-price" data-editable data-single-line>+£75</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" id="discounts-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
 
   
 
@@ -3971,18 +3973,17 @@
       <div class="col">
         <h5>Valley Films</h5>
         <ul>
-          <li><a href="https://valley.film" target="_blank" rel="noopener">Home ↗</a></li>
-          <li><a href="https://valley.film/#/work" target="_blank" rel="noopener">Work ↗</a></li>
-          <li><a href="https://valley.film/#/journal" target="_blank" rel="noopener">Journal ↗</a></li>
-          <li><a href="https://valley.film/#/about" target="_blank" rel="noopener">About ↗</a></li>
+          <li><a href="https://valley.film" target="_blank" rel="noopener">Valley Films</a></li>
+          <li><a href="https://valley.film/#/about" target="_blank" rel="noopener">About</a></li>
+          <li><a href="https://valley.film/#/contact" target="_blank" rel="noopener">Contact</a></li>
         </ul>
       </div>
       <div class="col">
         <h5>Get in touch</h5>
         <p>
           <a href="mailto:info@valley.film" class="footer-link-inline">info@valley.film</a><br>
-          <a href="https://wa.me/message/UI5I3PDWH5Q3N1" target="_blank" rel="noopener" class="footer-link-inline">+44 7771 039043</a><br>
-          <a href="https://instagram.com/valley.film" target="_blank" rel="noopener" class="footer-link-inline">@valley.film</a>
+          <a href="https://wa.me/message/UI5I3PDWH5Q3N1" target="_blank" rel="noopener" class="footer-link-inline">WhatsApp</a><br>
+          <a href="https://instagram.com/valley.film" target="_blank" rel="noopener" class="footer-link-inline">Instagram</a>
         </p>
       </div>
       <div class="col">
@@ -4110,7 +4111,16 @@
     } catch (_) { return (_vf_geo_cache = {}); }
   }
 
-  // ── Generic confirm modal helper (Promise-based) ────────────────────────
+  // ── Tag body with quote-type so CSS can show/hide type-specific sections ───
+  // Itemized quotes have a line-item table already covering post-prod work,
+  // so the separate Post-Production toggle cards (Additional Social Cut /
+  // Subtitles etc.) are redundant — hidden via CSS below.
+  (function _setQuoteTypeClass() {
+    const qt = (VF.quoteType || '').toLowerCase().replace(/[^a-z]/g, '-');
+    if (qt) document.body.classList.add('quote-type-' + qt);
+  })();
+
+    // ── Generic confirm modal helper (Promise-based) ────────────────────────
   // Used for irreversible actions like "Send to client". Returns true/false.
   function _vfConfirm(opts) {
     return new Promise((resolve) => {
@@ -6244,20 +6254,28 @@
     // re-sign or re-test without round-tripping through the publisher.
     document.getElementById('draft-reset-local-btn')?.addEventListener('click', async () => {
       const wasSigned = document.body.classList.contains('is-signed');
-      const ok = await (typeof _vfConfirm === 'function' ? _vfConfirm({
-        title:   'Reset to draft?',
-        body:    '<p style="margin-bottom:14px;">This clears local state for this quote on <strong>this device only</strong>:</p>' +
+      const result = await (typeof _vfConfirm === 'function' ? _vfConfirm({
+        title:   'Reset this quote?',
+        body:    '<p style="margin-bottom:14px;">Clears local state for this quote on <strong>this device</strong>:</p>' +
                  '<ul style="margin:0 0 14px 18px;color:var(--vf-ink-2);font-size:13px;line-height:1.7;">' +
                    '<li>In-progress editor backup</li>' +
                    (wasSigned ? '<li>Signed acceptance record (page returns to pre-sign state)</li>' : '') +
                    '<li>"View as client" preview snapshot</li>' +
                    '<li>Collapsed-section memory</li>' +
                  '</ul>' +
-                 '<p style="font-size:12px;color:var(--vf-ink-3);">Notion is not touched. The server-rendered baseline is unchanged. The page will reload.</p>',
-        confirm: 'Reset to draft',
+                 '<label style="display:flex;align-items:flex-start;gap:8px;margin:14px 0 4px;padding:12px;background:rgba(9,94,223,0.04);border:1px solid rgba(9,94,223,0.12);border-radius:8px;cursor:pointer;font-size:13px;color:var(--vf-ink-2);">' +
+                   '<input type="checkbox" id="vf-reset-regen" style="margin-top:3px;accent-color:var(--vf-blue);">' +
+                   '<span><strong style="display:block;margin-bottom:2px;">Also regenerate from Notion</strong>' +
+                   '<span style="font-size:12px;color:var(--vf-ink-3);">Queues a server-side rebuild from your original Notion data — clears all custom packages, addon discounts, and inline edits. Takes ~30-60s.</span></span>' +
+                 '</label>' +
+                 '<p style="font-size:12px;color:var(--vf-ink-3);margin-top:14px;">The page will reload.</p>',
+        confirm: 'Reset',
         cancel:  'Cancel',
       }) : Promise.resolve(window.confirm('Reset local state and reload?')));
-      if (!ok) return;
+      if (!result) return;
+      // Read the regen checkbox if it was rendered (only present in the modal)
+      const regenCheckbox = document.getElementById('vf-reset-regen');
+      const wantRegen = regenCheckbox ? regenCheckbox.checked : false;
       // Wipe the per-quote localStorage + sessionStorage keys
       const qref   = VF.quoteRef  || '';
       const pageId = VF.pageId    || '';
@@ -6270,59 +6288,32 @@
         try { localStorage.removeItem(k); } catch (_) {}
       }
       try { sessionStorage.removeItem('vf_li_expanded_' + pageId); } catch (_) {}
-      // Reload — the page renders from the server-rendered baseline
+      // Optionally trigger server-side regen (was the old Revert flow)
+      if (wantRegen && VF.pageId && VF.pageId !== 'template') {
+        _setAutosaveStatus && _setAutosaveStatus('Queuing regen…', 'saving');
+        try {
+          await fetch('https://vf-quotes.vercel.app/api/webhook', {
+            method:  'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              action:       'save_draft',
+              page_id:      VF.pageId,
+              editor_state: { version: 1, saved_at: new Date().toISOString() },
+            }),
+          });
+          await fetch('https://vf-quotes.vercel.app/api/webhook', {
+            method:  'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              action:  'set_trigger',
+              page_id: VF.pageId,
+              trigger: 'Reset & Regenerate',
+            }),
+          });
+        } catch (_) {}
+      }
       location.reload();
     });
-
-    // ── Revert to Original button ────────────────────────────────────────
-    document.getElementById('draft-revert-btn')?.addEventListener('click', async () => {
-      const ok = await _openConfirm(
-        'Revert all edits?',
-        'This will undo every change you\'ve made in this draft and rebuild the quote from your original Notion data. Custom packages, addon discounts, and inline edits will be lost. The Notion fields (Job Type, Deliverables, etc.) will not be touched.',
-        'Revert',
-        'Cancel'
-      );
-      if (!ok) return;
-      _setAutosaveStatus('Reverting…', 'saving');
-      try {
-        // Save an empty editor_state so the next regeneration starts fresh
-        await fetch('https://vf-quotes.vercel.app/api/webhook', {
-          method:  'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            action:       'save_draft',
-            page_id:      VF.pageId,
-            editor_state: { version: 1, saved_at: new Date().toISOString() },  // empty
-          }),
-        });
-        // Trigger a Reset & Regenerate so the mac mini re-renders fresh HTML
-        await fetch('https://vf-quotes.vercel.app/api/webhook', {
-          method:  'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            action:       'set_trigger',
-            page_id:      VF.pageId,
-            trigger:      'Reset & Regenerate',
-          }),
-        });
-        // Revert succeeded server-side → drop the local backup so the
-        // "unsynced edits" toast doesn't fire on next page load.
-        try { _clearLocalBackup(); } catch (_) {}
-        await _openModal({
-          title:        '✓ Revert queued',
-          body:         'The quote will be regenerated from scratch within ~30-60 seconds. Refresh this page after about a minute to see the original version.',
-          fields:       [],
-          submitLabel:  'OK',
-          cancelLabel:  '',
-        });
-        _setAutosaveStatus('Reverted — refresh in ~1 min', 'saved');
-      } catch (e) {
-        _setAutosaveStatus('Revert failed', 'error');
-      }
-    });
-
-    // Initial render of the live total
-    _renderLiveTotal();
 
     // ── Render the warnings strip (collapsible) ───────────────────────────
     // Three logical panels, each independently hideable. Collapsed state is
