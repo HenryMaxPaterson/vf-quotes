@@ -36,7 +36,7 @@ export default async function handler(req, res) {
           properties: {
             'Signed By':        { rich_text: [{ text: { content: signerName } }] },
             'Signed At':        { date: { start: timestamp } },
-            'Financial Status': { select: { name: 'Signed' } },
+            'Financial Status': { status: { name: 'Signed' } },
           },
         }),
       });
