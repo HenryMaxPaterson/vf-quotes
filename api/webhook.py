@@ -1,4 +1,6 @@
 import base64
+import hashlib
+import hmac
 import html
 import json
 import os
@@ -15,10 +17,56 @@ RESEND_API_KEY  = os.environ.get("RESEND_API_KEY")
 GITHUB_REPO    = "HenryMaxPaterson/vf-quotes"
 GITHUB_BRANCH  = "main"
 
+# ── Webhook auth (shared-secret HMAC per page) ────────────────────────────
+# Each generated quote embeds a token = hmac_sha256(VF_WEBHOOK_SECRET, page_id).
+# Server re-derives + compares using constant-time compare. The secret never
+# leaves Vercel; a leak from one quote can't be used against another.
+#
+# Three modes (env: WEBHOOK_AUTH_MODE):
+#   off     — no check, current behaviour. DEFAULT (back-compat).
+#   warn    — check token; log unauthenticated requests; let them through.
+#   enforce — reject unauthenticated requests with HTTP 401.
+#
+# Rollout: deploy with mode=off, regenerate all live quotes so they have
+# tokens, flip to mode=warn for a week (watch Vercel logs for false
+# positives), then flip to mode=enforce. The OPTIONS preflight and the
+# GET pixel are always exempt.
+VF_WEBHOOK_SECRET = os.environ.get("VF_WEBHOOK_SECRET", "")
+WEBHOOK_AUTH_MODE = (os.environ.get("WEBHOOK_AUTH_MODE", "off")
+                     .strip().lower())
+
 # Standard timeout for any third-party API call. Vercel functions cap at
 # 10s on the free tier; keep individual calls under that so an upstream
 # stall doesn't take the whole handler down.
 HTTP_TIMEOUT = 8
+
+
+def expected_webhook_token(page_id: str) -> str:
+    """HMAC-SHA256(secret, page_id), hex. Stable for the lifetime of the
+    secret; rotating VF_WEBHOOK_SECRET invalidates every quote's token at
+    once (force-regenerate to mint new ones)."""
+    if not VF_WEBHOOK_SECRET or not page_id:
+        return ""
+    return hmac.new(
+        VF_WEBHOOK_SECRET.encode("utf-8"),
+        page_id.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def verify_webhook_auth(provided_token: str, page_id: str) -> tuple[bool, str]:
+    """Returns (ok, reason). `ok=True` means the request is authenticated
+    OR the configured mode permits unauthenticated traffic."""
+    if WEBHOOK_AUTH_MODE == "off" or not VF_WEBHOOK_SECRET:
+        return True, "auth disabled"
+    expected = expected_webhook_token(page_id)
+    if expected and provided_token and hmac.compare_digest(expected, provided_token):
+        return True, "authenticated"
+    reason = ("missing X-VF-Token header" if not provided_token
+              else "invalid token for this page_id")
+    if WEBHOOK_AUTH_MODE == "warn":
+        return True, f"warn: {reason}"
+    return False, reason
 
 HEADERS = {
     "Authorization": f"Bearer {NOTION_API_KEY}",
@@ -290,6 +338,29 @@ class handler(BaseHTTPRequestHandler):
 
         action  = data.get("action")
         page_id = data.get("page_id")
+
+        # ── Auth check (HMAC per page_id) ─────────────────────────────────────
+        # See header doc + verify_webhook_auth(). Default mode 'off' makes
+        # this a no-op until VF_WEBHOOK_SECRET is set in Vercel and
+        # WEBHOOK_AUTH_MODE is flipped to 'warn' or 'enforce'.
+        provided_tok = (self.headers.get('X-VF-Token') or
+                        self.headers.get('x-vf-token') or '')
+        auth_ok, auth_reason = verify_webhook_auth(provided_tok, page_id or '')
+        if not auth_ok:
+            print(f"webhook auth denied: action={action} page={page_id} "
+                  f"reason={auth_reason}")
+            self.send_response(401)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "status": "error",
+                "reason": auth_reason,
+            }).encode())
+            return
+        if auth_reason.startswith("warn:"):
+            print(f"webhook auth warn: action={action} page={page_id} "
+                  f"reason={auth_reason}")
 
         # ── Save draft edits ──────────────────────────────────────────────────
         # Two payload shapes are accepted:
