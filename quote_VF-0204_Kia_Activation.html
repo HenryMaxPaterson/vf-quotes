@@ -518,14 +518,18 @@
   }
 
   .hero-eyebrow {
-    /* Matches the website's .eyebrow primitive — mono, narrow tracking. */
+    /* Matches the website's .eyebrow primitive — mono, narrow tracking.
+       Default colour is dark grey; the .hero-dark override above flips it
+       to translucent white for quotes with a dark cover image. The old
+       default was white — which left the eyebrow unreadable on light
+       hero covers (e.g. Kia's piazza shot). */
     display: inline-flex; align-items: center; gap: 8px;
     font-family: var(--font-mono);
     font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.55);
+    color: rgba(10,15,26,0.65);
     margin-bottom: 16px;
   }
 
@@ -891,6 +895,84 @@
     letter-spacing: 0.5px;
   }
 
+  /* ── Camera Op callout ────────────────────────────────────────────────
+     Lives between the package description and the includes list. Visually
+     a small inset chip that reads as its own line ("Camera Op · Max
+     Paterson") rather than yet another bullet. In draft mode the whole
+     chip is a clickable selector. */
+  .pkg-camera-op {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 4px 0 12px;
+    padding: 6px 10px;
+    background: var(--vf-blue-50, rgba(26,86,255,0.06));
+    border: 1px solid rgba(26,86,255,0.15);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--grey-700, #43464d);
+    line-height: 1.2;
+    user-select: none;
+    position: relative;
+  }
+  .pkg-camera-op-icon  { color: var(--vf-blue, #1a56ff); flex-shrink: 0; }
+  .pkg-camera-op-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--vf-blue, #1a56ff);
+    margin-right: 2px;
+  }
+  .pkg-camera-op-name  { font-weight: 600; color: var(--grey-900, #0A0F1A); flex: 1; }
+  .pkg-camera-op-caret { color: var(--grey-400); display: none; flex-shrink: 0; }
+  /* Operator-only affordances — the caret + click affordance only show
+     when the editor's open. Clients always see a static, read-only chip. */
+  body.draft-mode .pkg-camera-op:not(.client-preview) { cursor: pointer; }
+  body.draft-mode .pkg-camera-op-caret { display: inline-block; }
+  body.draft-mode .pkg-camera-op:hover {
+    background: rgba(26,86,255,0.10);
+    border-color: rgba(26,86,255,0.30);
+  }
+  body.client-preview .pkg-camera-op { cursor: default; }
+  body.client-preview .pkg-camera-op-caret { display: none; }
+
+  /* Dropdown menu shown when the operator clicks the chip. */
+  .pkg-camera-op-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--grey-200, #e4e6eb);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(10,15,26,0.10);
+    padding: 4px;
+    z-index: 30;
+    display: none;
+  }
+  .pkg-camera-op-menu.open { display: block; }
+  .pkg-camera-op-menu-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: transparent;
+    padding: 7px 10px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--grey-800, #2a2d33);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .pkg-camera-op-menu-item:hover { background: rgba(26,86,255,0.08); color: var(--vf-blue, #1a56ff); }
+  .pkg-camera-op-menu-item.is-current { font-weight: 600; }
+  .pkg-camera-op-menu-sep {
+    height: 1px;
+    background: var(--grey-100);
+    margin: 4px 2px;
+  }
+
   .pkg-includes {
     list-style: none;
     padding: 0;
@@ -907,11 +989,15 @@
   }
 
   .pkg-includes li::before {
-    content: '✓';
+    /* Bullet (•) instead of a tick — reads more like a list of inclusions
+       and less like a "completed task" checklist. */
+    content: '\2022';
     position: absolute;
-    left: 0;
+    left: 4px;
+    top: 4px;
     color: var(--blue);
-    font-size: 11px;
+    font-size: 14px;
+    line-height: 1;
     font-weight: 700;
   }
 
@@ -3139,6 +3225,116 @@
     color: white;
     border-color: rgba(255,255,255,0.45);
   }
+
+  /* ── Client-preview exit ribbon ────────────────────────────────────────
+     Floating bar pinned to the top while body.client-preview is on. Hides
+     the draft banner (the operator chrome) and gives a clear way back to
+     the editor. */
+  body.client-preview #draft-banner { display: none !important; }
+  #vf-preview-ribbon {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 44px;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 0 16px;
+    background: #0A0F1A;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.30);
+  }
+  #vf-preview-ribbon.open { display: flex; }
+  .vf-preview-ribbon-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    color: #5A98F0;
+    padding: 2px 8px;
+    border: 1px solid rgba(90,152,240,0.40);
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+  .vf-preview-ribbon-label {
+    color: rgba(255,255,255,0.75);
+    font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, sans-serif);
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  /* Freshness dot — green when public URL is in sync, amber while the
+     monitor is still regenerating. */
+  .vf-preview-ribbon-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vf-preview-ribbon-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;     /* sync = green */
+    box-shadow: 0 0 0 2px rgba(74,222,128,0.20);
+    transition: background 200ms ease, box-shadow 200ms ease;
+  }
+  .vf-preview-ribbon-dot[data-state="pending"] {
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245,158,11,0.20);
+    /* Subtle pulse so the operator notices a regen is in flight */
+    animation: vf-preview-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes vf-preview-pulse {
+    0%, 100% { box-shadow: 0 0 0 2px rgba(245,158,11,0.20); }
+    50%      { box-shadow: 0 0 0 5px rgba(245,158,11,0.10); }
+  }
+  .vf-preview-ribbon-dot[data-state="unknown"] {
+    background: rgba(255,255,255,0.40);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.10);
+  }
+  .vf-preview-ribbon-status {
+    color: rgba(255,255,255,0.85);
+  }
+
+  /* The two action buttons on the right share the same outline style. */
+  .vf-preview-ribbon-exit,
+  .vf-preview-ribbon-public {
+    border: 1px solid rgba(255,255,255,0.40);
+    background: transparent;
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 4px;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .vf-preview-ribbon-exit:hover,
+  .vf-preview-ribbon-public:hover {
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.75);
+  }
+  /* The 'Open public URL' is the primary affordance — accent it slightly */
+  .vf-preview-ribbon-public {
+    background: rgba(90,152,240,0.18);
+    border-color: rgba(90,152,240,0.55);
+    color: #fff;
+  }
+  .vf-preview-ribbon-public:hover {
+    background: rgba(90,152,240,0.30);
+    border-color: rgba(90,152,240,0.85);
+  }
+  /* If this HTML is ever served via the actual public client URL (no
+     editor JS at all), the ribbon should never show. The serve.js
+     transform forces body.client-preview AND body.is-client-view; the
+     #vf-preview-ribbon element doesn't exist there because the editor
+     JS that creates it isn't even loaded the same way — but belt-and-
+     braces. */
+  body.is-client-view:not(.draft-mode) #vf-preview-ribbon { display: none; }
   .addon-add-plus  { font-size: 28px; line-height: 1; font-weight: 300; }
   .addon-add-label { font-size: 12px; font-weight: 500; }
 
@@ -3370,7 +3566,7 @@
     <div class="hero-title"><em>Client</em> Quotation</div>
     <div class="hero-sub">
       <strong data-editable data-single-line>Prepared for Florence Williams, Saracens Ltd.</strong>
-      <a href="https://www.notion.so/33747fd03620814697b7c966a52c88c8" target="_blank" rel="noopener" class="client-notion-link" title="Open this client in Notion (Buyer Type, multiplier, etc.)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Edit client in Notion</a>
+      <!--VF_EDITOR_ONLY:START_CLIENT_LINK--><a href="https://www.notion.so/33747fd03620814697b7c966a52c88c8" target="_blank" rel="noopener" class="client-notion-link" title="Open this client in Notion (Buyer Type, multiplier, etc.)"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg> Edit client in Notion</a><!--VF_EDITOR_ONLY:END_CLIENT_LINK-->
     </div>
   </div>
 </div>
@@ -3412,7 +3608,7 @@
         </div>
   </div>
   <div id="deliverables-section"><div class="sub-label deliverables-header">Deliverables<button type="button" id="deliv-section-remove" class="section-remove-btn" data-no-edit title="Remove the entire deliverables section from this quote" contenteditable="false">×</button></div>
-  <span id="deliv-list"><span class="tag" data-deliv-id="dl_c6cd0b" style="vertical-align:top;"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_dc2f71" style="vertical-align:top;"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
+  <span id="deliv-list"><span class="tag" data-deliv-id="dl_5a2bc2" style="vertical-align:top;"><span data-deliv-title>Wrap-up Montage Edit (~1.5m)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
   <div style="margin-top:24px;">
     <div class="brief-grid" style="margin-bottom:0;">
       <div class="brief-item"><div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/></svg>1st Draft Deadline</div><div class="brief-item-value"><div class="stepper-row" style="align-items:flex-start;gap:6px;"><button class="stepper-btn" id="deadline-faster" aria-label="Faster delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div style="flex:1;min-width:0;"><span id="deadline-label" data-editable data-single-line style="font-size:15px;font-weight:600;color:var(--grey-900);">TBC</span><div id="deadline-sublabel" style="font-size:10px;color:var(--grey-400);font-weight:500;margin-top:3px;letter-spacing:0.3px;">2 Week Delivery</div></div><button class="stepper-btn" id="deadline-slower" disabled aria-label="Slower delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div>
@@ -3433,22 +3629,26 @@
 <div class="white-section section-glow-top" id="pricing-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">02</span> · Production Services</div>
   <div class="section-heading">The <em>Quotation</em></div>
-  <div class="pkg-grid" id="pkg-grid"><div class="pkg-card " data-pkg-id="34f47fd0-3620-8132-b8ac-cde2813c1a88" data-pkg-price="485"><div class="pkg-name" data-editable data-single-line>Core</div><div class="pkg-price" data-editable data-single-line data-field="price">£485.00</div><div class="pkg-desc" data-editable>Simple coverage</div><ul class="pkg-includes"><li data-editable data-single-line>Camera Op: Pete</li><li data-editable data-single-line>6K Camera Package</li><li data-editable data-single-line>Tripod</li><li data-editable data-single-line>Lapel Mics</li><li data-editable data-single-line>DJI RS3 Pro Gimbal</li></ul></div><div class="pkg-card selected" data-pkg-id="34f47fd0-3620-81e6-aeb3-faa26eb085f5" data-pkg-price="585"><div class="pkg-badge">Recommended</div><div class="pkg-name" data-editable data-single-line>Primary</div><div class="pkg-price" data-editable data-single-line data-field="price">£585.00</div><div class="pkg-desc" data-editable>Interviews & coverage</div><ul class="pkg-includes"><li data-editable data-single-line>Camera Op: Max</li><li data-editable data-single-line>6K Camera Package</li><li data-editable data-single-line>Tripod</li><li data-editable data-single-line>Lapel Mics</li><li data-editable data-single-line>Basic Grip Package</li><li data-editable data-single-line>DJI RS4 Pro Gimbal</li><li data-editable data-single-line>Flycam Floline</li></ul></div><div class="pkg-card " data-pkg-id="34f47fd0-3620-81f7-a35e-f74fae800de6" data-pkg-price="785"><div class="pkg-name" data-editable data-single-line>Premium</div><div class="pkg-price" data-editable data-single-line data-field="price">£785.00</div><div class="pkg-desc" data-editable>Large event interviews</div><ul class="pkg-includes"><li data-editable data-single-line>Camera Op: Max</li><li data-editable data-single-line>6K Camera Package</li><li data-editable data-single-line>Tripod</li><li data-editable data-single-line>Lapel Mics</li><li data-editable data-single-line>DJI RS4 Pro Gimbal</li><li data-editable data-single-line>Adicam Standard+</li><li data-editable data-single-line>Long Lens (for in-game)</li><li data-editable data-single-line>Dropbox delivery incl.</li><li data-editable data-single-line>Travel incl. (capped @ 50mi)</li></ul></div><div class="pkg-card pkg-add-card" id="pkg-add-card" style="display:none;align-items:center;justify-content:center;border:2px dashed var(--grey-200);background:transparent;cursor:pointer;min-height:240px;color:var(--grey-500);font-weight:600;"><div style="text-align:center;line-height:1.5;"><div style="font-size:32px;font-weight:300;color:var(--grey-400);">+</div><div style="font-size:13px;">Add Package</div></div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra">📌</button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125.00</div></div><div class="toggle-card" data-addon-id="addon_kia_main_edit" data-price="375.0" data-base-price="375.0"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="addon_kia_main_edit" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="addon_kia_main_edit" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra">📌</button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Wrap-up Montage Edit (~1.5m)</div><div class="toggle-card-desc" data-editable>Hero montage of Kia activation + match day. 2x revisions, 2-week draft, 72hr revision turnaround.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="addon_kia_main_edit" data-qty-min="1" data-qty-max="99"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="addon_kia_main_edit" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="addon_kia_main_edit">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="addon_kia_main_edit" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="addon_kia_main_edit" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="addon_kia_main_edit"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£375.00</div></div><div class="toggle-card" data-addon-id="addon_kia_social_60s" data-price="150.0" data-base-price="150.0"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="addon_kia_social_60s" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="addon_kia_social_60s" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra">📌</button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>+ 60s Social Cut</div><div class="toggle-card-desc" data-editable>Re-cut from approved master. 1x revision included.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="addon_kia_social_60s" data-qty-min="1" data-qty-max="99"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="addon_kia_social_60s" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="addon_kia_social_60s">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="addon_kia_social_60s" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="addon_kia_social_60s" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="addon_kia_social_60s"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£150.00</div></div><div class="toggle-card" data-addon-id="addon_kia_teaser_30s" data-price="100.0" data-base-price="100.0"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="addon_kia_teaser_30s" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="addon_kia_teaser_30s" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra">📌</button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>+ 30s Teaser</div><div class="toggle-card-desc" data-editable>Re-cut from approved master. 1x revision included.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="addon_kia_teaser_30s" data-qty-min="1" data-qty-max="99"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="addon_kia_teaser_30s" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="addon_kia_teaser_30s">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="addon_kia_teaser_30s" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="addon_kia_teaser_30s" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="addon_kia_teaser_30s"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£100.00</div></div><div class="toggle-card" data-addon-id="addon_kia_vertical_916" data-price="125.0" data-base-price="125.0"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="addon_kia_vertical_916" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="addon_kia_vertical_916" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra">📌</button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>+ 9:16 Vertical Reformat</div><div class="toggle-card-desc" data-editable>Vertical reformat from approved master for social/Stories.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="addon_kia_vertical_916" data-qty-min="1" data-qty-max="99"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="addon_kia_vertical_916" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="addon_kia_vertical_916">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="addon_kia_vertical_916" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="addon_kia_vertical_916" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="addon_kia_vertical_916"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125.00</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;color:var(--green);">Discounts</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-81b7-a90d-c464b52709d6" data-discount-type="Percentage" data-discount-value="10"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 3–5 days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 3–5 days. Auto-suggested when shooting_days is in this range.</div></div><div class="toggle-card-price">-10%</div></div><div class="toggle-card discount-card" data-discount-id="35847fd0-3620-8129-8cd1-cf0165312c45" data-discount-type="Percentage" data-discount-value="20"><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name">Multi-day: 6+ days</div><div class="toggle-card-desc">Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days ≥ 6.</div></div><div class="toggle-card-price">-20%</div></div><div class="toggle-card discount-add-card" id="discount-add-card" data-no-edit title="Add a one-off discount for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom discount</div></div></div>
+  <div class="pkg-grid" id="pkg-grid"><div class="pkg-card " data-pkg-id="34f47fd0-3620-8132-b8ac-cde2813c1a88" data-pkg-price="315"><div class="pkg-name" data-editable data-single-line>Core</div><div class="pkg-price" data-editable data-single-line data-field="price">£315.00</div><div class="pkg-desc" data-editable>Simple coverage</div><div class="pkg-camera-op" data-pkg-id="34f47fd0-3620-8132-b8ac-cde2813c1a88" role="button" tabindex="0" data-no-edit title="Camera operator — click in draft mode to change"><svg class="pkg-camera-op-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span class="pkg-camera-op-label">Camera Op</span><span class="pkg-camera-op-name" data-camera-op-name>Peter Dundas</span><svg class="pkg-camera-op-caret" width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><ul class="pkg-includes"><li data-editable data-single-line>4K Camera Package</li><li data-editable data-single-line>Tripod</li><li data-editable data-single-line>Lapel Mics</li><li data-editable data-single-line>DJI RS3 Pro Gimbal</li></ul></div><div class="pkg-card selected" data-pkg-id="34f47fd0-3620-81e6-aeb3-faa26eb085f5" data-pkg-price="485"><div class="pkg-badge">Recommended</div><div class="pkg-name" data-editable data-single-line>Primary</div><div class="pkg-price" data-editable data-single-line data-field="price">£485.00</div><div class="pkg-desc" data-editable>Interviews & coverage</div><div class="pkg-camera-op" data-pkg-id="34f47fd0-3620-81e6-aeb3-faa26eb085f5" role="button" tabindex="0" data-no-edit title="Camera operator — click in draft mode to change"><svg class="pkg-camera-op-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span class="pkg-camera-op-label">Camera Op</span><span class="pkg-camera-op-name" data-camera-op-name>Max Paterson</span><svg class="pkg-camera-op-caret" width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><ul class="pkg-includes"><li data-editable data-single-line>6K Camera Package</li><li data-editable data-single-line>Tripod</li><li data-editable data-single-line>Lapel Mics</li><li data-editable data-single-line>Basic Grip Package</li><li data-editable data-single-line>DJI RS4 Pro Gimbal</li><li data-editable data-single-line>Flycam Floline</li></ul></div><div class="pkg-card " data-pkg-id="34f47fd0-3620-81f7-a35e-f74fae800de6" data-pkg-price="585"><div class="pkg-name" data-editable data-single-line>Premium</div><div class="pkg-price" data-editable data-single-line data-field="price">£585.00</div><div class="pkg-desc" data-editable>Large event interviews</div><div class="pkg-camera-op" data-pkg-id="34f47fd0-3620-81f7-a35e-f74fae800de6" role="button" tabindex="0" data-no-edit title="Camera operator — click in draft mode to change"><svg class="pkg-camera-op-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span class="pkg-camera-op-label">Camera Op</span><span class="pkg-camera-op-name" data-camera-op-name>Max Paterson</span><svg class="pkg-camera-op-caret" width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><ul class="pkg-includes"><li data-editable data-single-line>6K Camera Package</li><li data-editable data-single-line>Tripod</li><li data-editable data-single-line>Lapel Mics</li><li data-editable data-single-line>DJI RS4 Pro Gimbal</li><li data-editable data-single-line>Adicam Standard+</li><li data-editable data-single-line>Flycam Floline</li><li data-editable data-single-line>Telephoto Zoom Lens</li></ul></div><div class="pkg-card pkg-add-card" id="pkg-add-card" style="display:none;align-items:center;justify-content:center;border:2px dashed var(--grey-200);background:transparent;cursor:pointer;min-height:240px;color:var(--grey-500);font-weight:600;"><div style="text-align:center;line-height:1.5;"><div style="font-size:32px;font-weight:300;color:var(--grey-400);">+</div><div style="font-size:13px;">Add Package</div></div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125.00</div></div><div class="toggle-card" data-addon-id="addon_kia_main_edit" data-price="375.0" data-base-price="375.0"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="addon_kia_main_edit" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="addon_kia_main_edit" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Wrap-up Montage Edit (~1.5m)</div><div class="toggle-card-desc" data-editable>Hero montage of Kia activation + match day</div><div class="addon-qty-stepper" data-no-edit data-addon-id="addon_kia_main_edit" data-qty-min="1" data-qty-max="99"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="addon_kia_main_edit" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="addon_kia_main_edit">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="addon_kia_main_edit" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="addon_kia_main_edit" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="addon_kia_main_edit"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£375.00</div></div><div class="toggle-card" data-addon-id="addon_kia_social_60s" data-price="75.0" data-base-price="75.0"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="addon_kia_social_60s" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="addon_kia_social_60s" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>+ 60s Social Cut</div><div class="toggle-card-desc" data-editable>Re-cut from approved master. 1x revision included.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="addon_kia_social_60s" data-qty-min="1" data-qty-max="99"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="addon_kia_social_60s" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="addon_kia_social_60s">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="addon_kia_social_60s" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="addon_kia_social_60s" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="addon_kia_social_60s"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£75.00</div></div><div class="toggle-card" data-addon-id="addon_kia_teaser_30s" data-price="75.0" data-base-price="75.0"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="addon_kia_teaser_30s" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="addon_kia_teaser_30s" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>+ 30s Teaser</div><div class="toggle-card-desc" data-editable>Re-cut from approved master. 1x revision included.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="addon_kia_teaser_30s" data-qty-min="1" data-qty-max="99"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="addon_kia_teaser_30s" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="addon_kia_teaser_30s">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="addon_kia_teaser_30s" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="addon_kia_teaser_30s" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="addon_kia_teaser_30s"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£75.00</div></div><div class="toggle-card" data-addon-id="addon_kia_vertical_916" data-price="45.0" data-base-price="45.0"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="addon_kia_vertical_916" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="addon_kia_vertical_916" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>+ 9:16 Vertical Reformat</div><div class="toggle-card-desc" data-editable>Vertical reformat from approved master for social/Stories</div><div class="addon-qty-stepper" data-no-edit data-addon-id="addon_kia_vertical_916" data-qty-min="1" data-qty-max="99"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="addon_kia_vertical_916" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="addon_kia_vertical_916">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="addon_kia_vertical_916" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="addon_kia_vertical_916" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="addon_kia_vertical_916"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£45.00</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div>
 
-  <!--VF_EDITOR_ONLY:START_NOTES--><div class="quote-notes-block"><div class="quote-notes-label">Notes <span class="quote-notes-internal-pill">Internal</span></div><div class="quote-notes-text" data-editable><strong>Pricing &amp; Schedule</strong>
+  <!--VF_EDITOR_ONLY:START_NOTES--><div class="quote-notes-block"><div class="quote-notes-label">Notes <span class="quote-notes-internal-pill">Internal</span></div><div class="quote-notes-text" data-editable><strong>Costing Considerations</strong>
 <ul class="qn-list">
 <li>20-25% day rate uplift for weekend shoot (May 30, 2026).</li>
-<li>Rush premium due to tight turnaround (brief received May 28, shoot May 30).</li>
+<li>Rush premium recommended for tight turnaround (brief received May 28, shoot May 30).</li>
 </ul>
 
-<strong>Technical Considerations</strong>
+<strong>Information Needed</strong>
 <ul class="qn-list">
-<li>Capturing a clean shot of the logo on the big screen may be challenging.</li>
+<li>Before quoting, clarify video length, aspect ratio, and platform delivery.</li>
 </ul>
 
-<strong>Required Information &amp; References</strong>
+<strong>Production Notes</strong>
 <ul class="qn-list">
-<li>Clarification needed on final video length, aspect ratio, and platform delivery before quoting.</li>
+<li>Clean logo shot on big screen may be challenging.</li>
+</ul>
+
+<strong>Reference Materials</strong>
+<ul class="qn-list">
 <li>Reference film: https://youtu.be/iIAzKnuRwxI?si=yh15KK6fP_QfaaNn</li>
 <li>Kia brand toolkit: https://www.kia.com/au/discover-kia/brand-toolkit.html</li>
 </ul></div></div><!--VF_EDITOR_ONLY:END_NOTES-->
@@ -3617,11 +3817,11 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
   // ── Quote data & pricing ─────────────────────────
-  const VF     = {"pageId": "0ef56e25-1d3e-45af-b970-79b42da2caac", "quoteRef": "VF-0204", "webhookToken": "", "clientName": "Florence Williams", "clientCompany": "Saracens Ltd.", "clientEmail": "FloWilliams@saracens.net", "projectTitle": "Kia Activation", "productionDate": "10:00\u201315:00 \u00b7 30th May", "productionDateISO": "2026-05-30", "total": "TBC", "basePrice": 0, "validUntil": "4 June 2026", "generatedDate": "28 May 2026", "quoteType": "Package Based", "jobType": "Brand Videos", "defaultPkgId": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "isDraft": true, "financialStatus": "Generated", "briefIssues": "", "briefQuestions": "\u2022 What are the desired length, aspect ratio (16:9 / 9:16), and platform delivery for the wrap-up montage?", "qcNotes": "*   [Job type] \"Brand Videos\" is not a defined job type in the \"Job Type Rules\" list. The project deliverables and description suggest it aligns with \"Live Event\" and/or \"Social Content\" types.", "warnings": [], "quoteUrl": "https://valley.film/quotes/nsfZA9Rh", "quoteFilename": "nsfZA9Rh"};
-  const PRICING = {"basePrice": 0, "expenses": 65, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "addon_kia_main_edit", "name": "Wrap-up Montage Edit (~1.5m)", "price": 375.0, "price_core": 375.0, "price_primary": 375.0, "price_premium": 375.0, "desc": "Hero montage of Kia activation + match day. 2x revisions, 2-week draft, 72hr revision turnaround.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 99, "default_qty": 1, "per_day": false, "days_out": null, "custom": true}, {"id": "addon_kia_social_60s", "name": "+ 60s Social Cut", "price": 150.0, "price_core": 150.0, "price_primary": 150.0, "price_premium": 150.0, "desc": "Re-cut from approved master. 1x revision included.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 99, "default_qty": 1, "per_day": false, "days_out": null, "custom": true}, {"id": "addon_kia_teaser_30s", "name": "+ 30s Teaser", "price": 100.0, "price_core": 100.0, "price_primary": 100.0, "price_premium": 100.0, "desc": "Re-cut from approved master. 1x revision included.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 99, "default_qty": 1, "per_day": false, "days_out": null, "custom": true}, {"id": "addon_kia_vertical_916", "name": "+ 9:16 Vertical Reformat", "price": 125.0, "price_core": 125.0, "price_primary": 125.0, "price_premium": 125.0, "desc": "Vertical reformat from approved master for social/Stories.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 99, "default_qty": 1, "per_day": false, "days_out": null, "custom": true}], "discounts": [{"id": "35847fd0-3620-81b7-a90d-c464b52709d6", "name": "Multi-day: 3\u20135 days", "type": "Percentage", "value": 10, "desc": "Standard multi-day discount for shoots of 3\u20135 days. Auto-suggested when shooting_days is in this range.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}, {"id": "35847fd0-3620-8129-8cd1-cf0165312c45", "name": "Multi-day: 6+ days", "type": "Percentage", "value": 20, "desc": "Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days \u2265 6.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}], "packages": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 485, "desc": "Simple coverage", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Camera Op: Pete", "6K Camera Package", "Tripod", "Lapel Mics", "DJI RS3 Pro Gimbal"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 585, "desc": "Interviews & coverage", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Camera Op: Max", "6K Camera Package", "Tripod", "Lapel Mics", "Basic Grip Package", "DJI RS4 Pro Gimbal", "Flycam Floline"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 785, "desc": "Large event interviews", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Camera Op: Max", "6K Camera Package", "Tripod", "Lapel Mics", "DJI RS4 Pro Gimbal", "Adicam Standard+", "Long Lens (for in-game)", "Dropbox delivery incl.", "Travel incl. (capped @ 50mi)"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "dropbox", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "Standard Delivery", "travel": {"one_way_miles": 9, "round_trip_miles": 18, "shooting_days": 1, "van_cost": 95.0, "mile_cost": 9.9, "mile_rate": 0.55, "cc_cost": 0, "in_cc_zone": false}, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null, "suggestedDiscounts": [], "lineItems": [], "lineItemsSource": "", "rateCard": [{"id": "35247fd0-3620-8161-88d3-d67b5f4825fb", "name": "2nd Assistant Camera", "my_rate": 375, "apa_ceiling": 400, "apa_bracket": "Crew", "ot_per_hr": 56.25, "ooh_uplift": 0, "half_day_rate": 225.0, "travel_day_rate": 187.5}, {"id": "34f47fd0-3620-81b5-ae9f-e9334018ee86", "name": "Assistant Camera", "my_rate": 275, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 41.25, "ooh_uplift": 0, "half_day_rate": 165.0, "travel_day_rate": 137.5}, {"id": "34f47fd0-3620-81f6-8508-c4f45a53cb1a", "name": "Camera Operator", "my_rate": 475, "apa_ceiling": 650, "apa_bracket": "Crew", "ot_per_hr": 71.25, "ooh_uplift": 0, "half_day_rate": 285.0, "travel_day_rate": 237.5}, {"id": "34f47fd0-3620-81bd-a585-c0e35c590c98", "name": "Colour Grade", "my_rate": 175, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 26.25, "ooh_uplift": 0, "half_day_rate": 105.0, "travel_day_rate": 87.5}, {"id": "35247fd0-3620-8092-9cb5-e6a135cb5215", "name": "Congestion Charge", "my_rate": 18, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 2.7, "ooh_uplift": 0, "half_day_rate": 10.8, "travel_day_rate": 9.0}, {"id": "35247fd0-3620-81f7-af92-e16d8a0cbc7e", "name": "Director", "my_rate": 700, "apa_ceiling": 1200, "apa_bracket": "HoD", "ot_per_hr": 105.0, "ooh_uplift": 0, "half_day_rate": 420.0, "travel_day_rate": 350.0}, {"id": "34f47fd0-3620-81be-8870-f75746f0696f", "name": "Director of Photography", "my_rate": 575, "apa_ceiling": 750, "apa_bracket": "HoD", "ot_per_hr": 86.25, "ooh_uplift": 0, "half_day_rate": 345.0, "travel_day_rate": 287.5}, {"id": "35247fd0-3620-815d-98a6-e42a8806565f", "name": "Gaffer", "my_rate": 450, "apa_ceiling": 650, "apa_bracket": "HoD", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-815a-8b70-fdd982d07f1e", "name": "Hero Edit (2\u20135 min)", "my_rate": 450, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-81f2-9370-c167bae0c7ca", "name": "Long-form Edit (10 min+)", "my_rate": 600, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 90.0, "ooh_uplift": 0, "half_day_rate": 360.0, "travel_day_rate": 300.0}, {"id": "34f47fd0-3620-8145-a058-e0ce634a7256", "name": "Mileage", "my_rate": 0.55, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.08, "ooh_uplift": 0, "half_day_rate": 0.33, "travel_day_rate": 0.28}, {"id": "35247fd0-3620-8178-ae82-f5277260296e", "name": "Producer", "my_rate": 550, "apa_ceiling": 1000, "apa_bracket": "HoD", "ot_per_hr": 82.5, "ooh_uplift": 0, "half_day_rate": 330.0, "travel_day_rate": 275.0}, {"id": "35247fd0-3620-8151-9809-e9ff5f46e40d", "name": "Production Assistant (PA)", "my_rate": 200, "apa_ceiling": 220, "apa_bracket": "Trainee", "ot_per_hr": 30.0, "ooh_uplift": 0, "half_day_rate": 120.0, "travel_day_rate": 100.0}, {"id": "34f47fd0-3620-815d-93d3-efcd057aa497", "name": "Social Cut (30\u201360s)", "my_rate": 300, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "35247fd0-3620-81bc-879f-ff9900b2f5ff", "name": "Sound Recordist", "my_rate": 400, "apa_ceiling": 600, "apa_bracket": "HoD", "ot_per_hr": 60.0, "ooh_uplift": 0, "half_day_rate": 240.0, "travel_day_rate": 200.0}, {"id": "35247fd0-3620-81e7-8028-fb60f7bceba6", "name": "Spark", "my_rate": 300, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "34f47fd0-3620-81a2-a7c4-fd40b3f1bae8", "name": "Stills Cull + Edit", "my_rate": 125, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 18.75, "ooh_uplift": 0, "half_day_rate": 75.0, "travel_day_rate": 62.5}, {"id": "34f47fd0-3620-81dd-911d-d1d92e5e3796", "name": "TfL Journey", "my_rate": 3.6, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.54, "ooh_uplift": 0, "half_day_rate": 2.16, "travel_day_rate": 1.8}, {"id": "34f47fd0-3620-81b6-b5c8-d8640c160aa2", "name": "Transcoding / Delivery", "my_rate": 65, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 9.75, "ooh_uplift": 0, "half_day_rate": 39.0, "travel_day_rate": 32.5}, {"id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0", "name": "Van Hire", "my_rate": 95, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 14.25, "ooh_uplift": 0, "half_day_rate": 57.0, "travel_day_rate": 47.5}], "defaultDays": 1};
+  const VF     = {"pageId": "0ef56e25-1d3e-45af-b970-79b42da2caac", "quoteRef": "VF-0204", "webhookToken": "", "clientName": "Florence Williams", "clientCompany": "Saracens Ltd.", "clientEmail": "FloWilliams@saracens.net", "projectTitle": "Kia Activation", "productionDate": "10:00\u201315:00 \u00b7 30th May", "productionDateISO": "2026-05-30", "total": "TBC", "basePrice": 0, "validUntil": "4 June 2026", "generatedDate": "28 May 2026", "quoteType": "Package Based", "jobType": "Brand Videos", "defaultPkgId": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "isDraft": true, "financialStatus": "Generated", "briefIssues": "", "briefQuestions": "\u2022 What are the desired length, aspect ratio (16:9 / 9:16), and platform delivery for the wrap-up montage?", "qcNotes": "*   [Job type] The description strongly suggests a 'Live Event' project, but the quote does not flag same-day turnaround as an option with a premium.\n*   [Scope & Deliverable Rules] The quote for an edited video project does not mention the standard inclusion of 2 revision rounds.", "warnings": [], "quoteUrl": "https://valley.film/quotes/nsfZA9Rh", "quoteFilename": "nsfZA9Rh"};
+  const PRICING = {"basePrice": 0, "expenses": 65, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "addon_kia_main_edit", "name": "Wrap-up Montage Edit (~1.5m)", "price": 375.0, "price_core": 375.0, "price_primary": 375.0, "price_premium": 375.0, "desc": "Hero montage of Kia activation + match day", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 99, "default_qty": 1, "per_day": false, "days_out": null, "custom": true}, {"id": "addon_kia_social_60s", "name": "+ 60s Social Cut", "price": 75.0, "price_core": 75.0, "price_primary": 75.0, "price_premium": 75.0, "desc": "Re-cut from approved master. 1x revision included.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 99, "default_qty": 1, "per_day": false, "days_out": null, "custom": true}, {"id": "addon_kia_teaser_30s", "name": "+ 30s Teaser", "price": 75.0, "price_core": 75.0, "price_primary": 75.0, "price_premium": 75.0, "desc": "Re-cut from approved master. 1x revision included.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 99, "default_qty": 1, "per_day": false, "days_out": null, "custom": true}, {"id": "addon_kia_vertical_916", "name": "+ 9:16 Vertical Reformat", "price": 45.0, "price_core": 45.0, "price_primary": 45.0, "price_premium": 45.0, "desc": "Vertical reformat from approved master for social/Stories", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 99, "default_qty": 1, "per_day": false, "days_out": null, "custom": true}], "discounts": [{"id": "35847fd0-3620-81b7-a90d-c464b52709d6", "name": "Multi-day: 3\u20135 days", "type": "Percentage", "value": 10, "desc": "Standard multi-day discount for shoots of 3\u20135 days. Auto-suggested when shooting_days is in this range.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}, {"id": "35847fd0-3620-8129-8cd1-cf0165312c45", "name": "Multi-day: 6+ days", "type": "Percentage", "value": 20, "desc": "Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days \u2265 6.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}], "packages": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 315, "desc": "Simple coverage", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Camera Op: Peter Dundas", "4K Camera Package", "Tripod", "Lapel Mics", "DJI RS3 Pro Gimbal"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 485, "desc": "Interviews & coverage", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Camera Op: Max Paterson", "6K Camera Package", "Tripod", "Lapel Mics", "Basic Grip Package", "DJI RS4 Pro Gimbal", "Flycam Floline"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 585, "desc": "Large event interviews", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Camera Op: Max Paterson", "6K Camera Package", "Tripod", "Lapel Mics", "DJI RS4 Pro Gimbal", "Adicam Standard+", "Flycam Floline", "Telephoto Zoom Lens"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "dropbox", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "Standard Delivery", "travel": {"one_way_miles": 9, "round_trip_miles": 18, "shooting_days": 1, "van_cost": 95.0, "mile_cost": 9.9, "mile_rate": 0.55, "cc_cost": 0, "in_cc_zone": false}, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null, "suggestedDiscounts": [], "lineItems": [], "lineItemsSource": "", "rateCard": [{"id": "35247fd0-3620-8161-88d3-d67b5f4825fb", "name": "2nd Assistant Camera", "my_rate": 375, "apa_ceiling": 400, "apa_bracket": "Crew", "ot_per_hr": 56.25, "ooh_uplift": 0, "half_day_rate": 225.0, "travel_day_rate": 187.5}, {"id": "34f47fd0-3620-81b5-ae9f-e9334018ee86", "name": "Assistant Camera", "my_rate": 275, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 41.25, "ooh_uplift": 0, "half_day_rate": 165.0, "travel_day_rate": 137.5}, {"id": "34f47fd0-3620-81f6-8508-c4f45a53cb1a", "name": "Camera Operator", "my_rate": 475, "apa_ceiling": 650, "apa_bracket": "Crew", "ot_per_hr": 71.25, "ooh_uplift": 0, "half_day_rate": 285.0, "travel_day_rate": 237.5}, {"id": "34f47fd0-3620-81bd-a585-c0e35c590c98", "name": "Colour Grade", "my_rate": 175, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 26.25, "ooh_uplift": 0, "half_day_rate": 105.0, "travel_day_rate": 87.5}, {"id": "35247fd0-3620-8092-9cb5-e6a135cb5215", "name": "Congestion Charge", "my_rate": 18, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 2.7, "ooh_uplift": 0, "half_day_rate": 10.8, "travel_day_rate": 9.0}, {"id": "35247fd0-3620-81f7-af92-e16d8a0cbc7e", "name": "Director", "my_rate": 700, "apa_ceiling": 1200, "apa_bracket": "HoD", "ot_per_hr": 105.0, "ooh_uplift": 0, "half_day_rate": 420.0, "travel_day_rate": 350.0}, {"id": "34f47fd0-3620-81be-8870-f75746f0696f", "name": "Director of Photography", "my_rate": 575, "apa_ceiling": 750, "apa_bracket": "HoD", "ot_per_hr": 86.25, "ooh_uplift": 0, "half_day_rate": 345.0, "travel_day_rate": 287.5}, {"id": "35247fd0-3620-815d-98a6-e42a8806565f", "name": "Gaffer", "my_rate": 450, "apa_ceiling": 650, "apa_bracket": "HoD", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-815a-8b70-fdd982d07f1e", "name": "Hero Edit (2\u20135 min)", "my_rate": 450, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-81f2-9370-c167bae0c7ca", "name": "Long-form Edit (10 min+)", "my_rate": 600, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 90.0, "ooh_uplift": 0, "half_day_rate": 360.0, "travel_day_rate": 300.0}, {"id": "34f47fd0-3620-8145-a058-e0ce634a7256", "name": "Mileage", "my_rate": 0.55, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.08, "ooh_uplift": 0, "half_day_rate": 0.33, "travel_day_rate": 0.28}, {"id": "35247fd0-3620-8178-ae82-f5277260296e", "name": "Producer", "my_rate": 550, "apa_ceiling": 1000, "apa_bracket": "HoD", "ot_per_hr": 82.5, "ooh_uplift": 0, "half_day_rate": 330.0, "travel_day_rate": 275.0}, {"id": "35247fd0-3620-8151-9809-e9ff5f46e40d", "name": "Production Assistant (PA)", "my_rate": 200, "apa_ceiling": 220, "apa_bracket": "Trainee", "ot_per_hr": 30.0, "ooh_uplift": 0, "half_day_rate": 120.0, "travel_day_rate": 100.0}, {"id": "34f47fd0-3620-815d-93d3-efcd057aa497", "name": "Social Cut (30\u201360s)", "my_rate": 300, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "35247fd0-3620-81bc-879f-ff9900b2f5ff", "name": "Sound Recordist", "my_rate": 400, "apa_ceiling": 600, "apa_bracket": "HoD", "ot_per_hr": 60.0, "ooh_uplift": 0, "half_day_rate": 240.0, "travel_day_rate": 200.0}, {"id": "35247fd0-3620-81e7-8028-fb60f7bceba6", "name": "Spark", "my_rate": 300, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "34f47fd0-3620-81a2-a7c4-fd40b3f1bae8", "name": "Stills Cull + Edit", "my_rate": 125, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 18.75, "ooh_uplift": 0, "half_day_rate": 75.0, "travel_day_rate": 62.5}, {"id": "34f47fd0-3620-81dd-911d-d1d92e5e3796", "name": "TfL Journey", "my_rate": 3.6, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.54, "ooh_uplift": 0, "half_day_rate": 2.16, "travel_day_rate": 1.8}, {"id": "34f47fd0-3620-81b6-b5c8-d8640c160aa2", "name": "Transcoding / Delivery", "my_rate": 65, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 9.75, "ooh_uplift": 0, "half_day_rate": 39.0, "travel_day_rate": 32.5}, {"id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0", "name": "Van Hire", "my_rate": 95, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 14.25, "ooh_uplift": 0, "half_day_rate": 57.0, "travel_day_rate": 47.5}], "defaultDays": 1};
   // Initial Editor State as saved on the Notion Production page. Used by
   // draft-mode features that pre-fill from prior saves (e.g. brief Q&A inputs).
-  window._editor_state_initial = {"version": 1, "saved_at": "2026-05-28T19:23:32.988Z", "custom_addons": [{"id": "addon_kia_main_edit", "name": "Wrap-up Montage Edit (~1.5m)", "price": 375, "desc": "Hero montage of Kia activation + match day. 2x revisions, 2-week draft, 72hr revision turnaround."}, {"id": "addon_kia_social_60s", "name": "+ 60s Social Cut", "price": 150, "desc": "Re-cut from approved master. 1x revision included."}, {"id": "addon_kia_teaser_30s", "name": "+ 30s Teaser", "price": 100, "desc": "Re-cut from approved master. 1x revision included."}, {"id": "addon_kia_vertical_916", "name": "+ 9:16 Vertical Reformat", "price": 125, "desc": "Vertical reformat from approved master for social/Stories."}], "travel_expanded": true, "travel_overrides": {"mile_cost": 9.9, "van_cost": 95}, "deliverables_override": [{"title": "Highlight Video (60s)", "spec": "3840 \u00d7 2160"}, {"title": "Social Cut (30s)", "spec": "1080 \u00d7 1920"}], "package_edits": {"34f47fd0-3620-8132-b8ac-cde2813c1a88": {"name": "Core", "desc": "Simple coverage", "price": 485, "includes": ["Camera Op: Pete", "6K Camera Package", "Tripod", "Lapel Mics", "DJI RS3 Pro Gimbal"]}, "34f47fd0-3620-81e6-aeb3-faa26eb085f5": {"name": "Primary", "desc": "Interviews & coverage", "price": 585, "includes": ["Camera Op: Max", "6K Camera Package", "Tripod", "Lapel Mics", "Basic Grip Package", "DJI RS4 Pro Gimbal", "Flycam Floline"]}, "34f47fd0-3620-81f7-a35e-f74fae800de6": {"name": "Premium", "desc": "Large event interviews", "price": 785, "includes": ["Camera Op: Max", "6K Camera Package", "Tripod", "Lapel Mics", "DJI RS4 Pro Gimbal", "Adicam Standard+", "Long Lens (for in-game)", "Dropbox delivery incl.", "Travel incl. (capped @ 50mi)"]}}, "removed_addon_ids": ["34f47fd0-3620-81e2-b77d-c78d07516482"]};
+  window._editor_state_initial = {"version": 1, "saved_at": "2026-05-28T20:35:52.925Z", "custom_addons": [{"id": "addon_kia_main_edit", "name": "Wrap-up Montage Edit (~1.5m)", "price": 375, "desc": "Hero montage of Kia activation + match day"}, {"id": "addon_kia_social_60s", "name": "+ 60s Social Cut", "price": 75, "desc": "Re-cut from approved master. 1x revision included."}, {"id": "addon_kia_teaser_30s", "name": "+ 30s Teaser", "price": 75, "desc": "Re-cut from approved master. 1x revision included."}, {"id": "addon_kia_vertical_916", "name": "+ 9:16 Vertical Reformat", "price": 45, "desc": "Vertical reformat from approved master for social/Stories"}], "travel_discounts": {"van_cost": {"value": 75, "type": "pct"}}, "travel_parking_label": "Supplied", "addon_order": ["addon_kia_main_edit", "addon_kia_vertical_916", "addon_kia_social_60s", "addon_kia_teaser_30s", "34f47fd0-3620-811e-9830-ee030ffaa6ca"], "deliverables_override": [{"title": "Wrap-up Montage Edit (~1.5m)", "spec": "3840 \u00d7 2160"}], "package_edits": {"34f47fd0-3620-8132-b8ac-cde2813c1a88": {"price": 315, "includes": ["Camera Op: Peter Dundas", "4K Camera Package", "Tripod", "Lapel Mics", "DJI RS3 Pro Gimbal"], "name": "Core", "desc": "Simple coverage"}, "34f47fd0-3620-81e6-aeb3-faa26eb085f5": {"price": 485, "name": "Primary", "desc": "Interviews & coverage", "includes": ["Camera Op: Max Paterson", "6K Camera Package", "Tripod", "Lapel Mics", "Basic Grip Package", "DJI RS4 Pro Gimbal", "Flycam Floline"]}, "34f47fd0-3620-81f7-a35e-f74fae800de6": {"price": 585, "includes": ["Camera Op: Max Paterson", "6K Camera Package", "Tripod", "Lapel Mics", "DJI RS4 Pro Gimbal", "Adicam Standard+", "Flycam Floline", "Telephoto Zoom Lens"], "name": "Premium", "desc": "Large event interviews"}}, "addon_edits": {"addon_kia_main_edit": {"desc": "Hero montage of Kia activation + match day"}, "addon_kia_social_60s": {"price": 75}, "addon_kia_teaser_30s": {"price": 75}, "addon_kia_vertical_916": {"desc": "Vertical reformat from approved master for social/Stories", "price": 45}}, "removed_addon_ids": ["34f47fd0-3620-81e2-b77d-c78d07516482"], "travel_overrides": {"mile_cost": 9.9, "van_cost": 95}};
 
   // Split rush addons: slower-than-2-weeks (daysOut > 14) come before the
   // default 2-week tier; faster (≤14) come after. Both sorted SLOWEST → FASTEST
@@ -3645,10 +3845,12 @@
     hideExpenses:   !!(window._editor_state_initial && window._editor_state_initial.hide_expenses),
     extraRevisions: 0,
     rushTier:       _slowerAddons.length,   // default = 2-week tier
-    // Travel detail rows are collapsed by default — operator (and client)
-    // see a single "Travel +£N" header. Operator can expand to inspect/edit
-    // and we remember the choice for the rest of the session.
-    travelExpanded: !!(window._editor_state_initial && window._editor_state_initial.travel_expanded),
+    // Travel detail rows are ALWAYS collapsed on page load — for both the
+    // operator and the client. Ephemeral: the operator can expand to
+    // inspect/edit during this session, but the choice doesn't persist
+    // into editor_state (otherwise a once-expanded quote stays expanded
+    // forever for every viewer, defeating the compact-by-default intent).
+    travelExpanded: false,
   };
 
   // ── Travel overrides ────────────────────────────────────────────────────
@@ -3672,6 +3874,10 @@
     {},
     (window._editor_state_initial || {}).travel_discounts || {}
   );
+  // Parking row's label override — operator can write 'Supplied', a fixed
+  // amount as text, etc. Empty = use the default 'Billed @ cost'.
+  _pstate.travelParkingLabel =
+    ((window._editor_state_initial || {}).travel_parking_label || '').toString();
 
   function _fmtGBP(n) {
     // Always 2 decimal places — matches the £0.00 convention used everywhere
@@ -4026,10 +4232,14 @@
         const lblSuffix = d.type === 'pct' ? ` (${v}%)` : '';
         return { amt: Math.max(0, Math.min(Number(base) || 0, amt)), suffix: lblSuffix };
       };
+      // Parking displays the operator's free-text override if set, else
+      // 'Billed @ cost'. Marked editable so the click handler turns the
+      // amount into a text input (kind='text' branch below).
+      const parkingLabel = (_pstate.travelParkingLabel || '').trim() || 'Billed @ cost';
       const detailRows = [
-        { field: 'van_cost',  label: `Van Hire (${tr.shooting_days} day${tr.shooting_days !== 1 ? 's' : ''})`, amt: tr.van_cost,  editable: true },
-        { field: 'mile_cost', label: `Mileage (${tr.round_trip_miles} miles @ ${ratePence}p)`,                amt: tr.mile_cost, editable: true },
-        { field: 'parking',   label: 'Parking',                                                                 amt: 'Billed @ cost', editable: false },
+        { field: 'van_cost',  label: `Van Hire (${tr.shooting_days} day${tr.shooting_days !== 1 ? 's' : ''})`, amt: tr.van_cost,  editable: true, kind: 'number' },
+        { field: 'mile_cost', label: `Mileage (${tr.round_trip_miles} miles @ ${ratePence}p)`,                amt: tr.mile_cost, editable: true, kind: 'number' },
+        { field: 'parking',   label: 'Parking',                                                                 amt: parkingLabel, editable: true, kind: 'text' },
       ];
       if (tr.cc_cost > 0) {
         detailRows.push({ field: 'cc_cost', label: 'Congestion Charge', amt: tr.cc_cost, editable: true });
@@ -4043,7 +4253,8 @@
           ? d.amt
           : '+' + _fmtGBP(Number(d.amt) || 0);
         const cls    = 'breakdown-row travel-detail-row fixed-row' + (d.editable ? ' travel-editable' : '');
-        const dataAttr = d.editable ? ` data-travel-field="${d.field}"` : '';
+        const kindAttr = d.editable ? ` data-travel-kind="${d.kind || 'number'}"` : '';
+        const dataAttr = d.editable ? ` data-travel-field="${d.field}"${kindAttr}` : '';
         // The discount trigger is rendered for every editable row so the
         // operator can apply / edit / remove a discount inline.
         const discBtn = d.editable
@@ -4206,11 +4417,96 @@
   document.querySelectorAll('.pkg-card[data-pkg-id]').forEach(card => {
     card.addEventListener('click', (e) => {
       if (e.target.closest('[data-editable]')) return;
+      if (e.target.closest('.pkg-camera-op')) return;
+      if (e.target.closest('.pkg-camera-op-menu')) return;
       document.querySelectorAll('.pkg-card[data-pkg-id]').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       _pstate.package = card.dataset.pkgId;
       _refreshAddonPriceLabels();
       _updateTotal();
+    });
+  });
+
+  // ── Camera Op selector ─────────────────────────────────────────────────
+  // Click the chip in draft mode → menu of Max Paterson / Peter Dundas /
+  // Custom name… Picking one rewrites the "Camera Op: <name>" entry inside
+  // PRICING.packages[pkg].includes — that's how the change shows up in
+  // package_edits on save, and how the chip's text stays consistent on
+  // the next regen. Outside draft mode the chip is read-only.
+  const _CAMERA_OPS = ['Max Paterson', 'Peter Dundas'];
+  function _setPkgCameraOp(pkgId, newName) {
+    const pkg = (PRICING.packages || []).find(p => p.id === pkgId);
+    if (!pkg) return;
+    const inc = pkg.includes || [];
+    const idx = inc.findIndex(s => typeof s === 'string' && s.trim().toLowerCase().startsWith('camera op:'));
+    if (idx >= 0) inc[idx] = 'Camera Op: ' + newName;
+    else inc.unshift('Camera Op: ' + newName);
+    pkg.includes = inc;
+    // Repaint the chip text
+    document.querySelectorAll('.pkg-camera-op[data-pkg-id="' + pkgId + '"] [data-camera-op-name]')
+      .forEach(el => { el.textContent = newName; });
+    if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
+  }
+  function _closeCameraOpMenus() {
+    document.querySelectorAll('.pkg-camera-op-menu.open').forEach(m => m.classList.remove('open'));
+  }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.pkg-camera-op') && !e.target.closest('.pkg-camera-op-menu')) {
+      _closeCameraOpMenus();
+    }
+  });
+  document.querySelectorAll('.pkg-camera-op').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!document.body.classList.contains('draft-mode')) return;
+      const pkgId = chip.dataset.pkgId;
+      // Close any other open menu first
+      _closeCameraOpMenus();
+      let menu = chip.querySelector('.pkg-camera-op-menu');
+      if (!menu) {
+        const current = (chip.querySelector('[data-camera-op-name]')?.textContent || '').trim();
+        menu = document.createElement('div');
+        menu.className = 'pkg-camera-op-menu';
+        menu.setAttribute('data-no-edit', '');
+        menu.addEventListener('click', (ev) => ev.stopPropagation());
+        _CAMERA_OPS.forEach(name => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'pkg-camera-op-menu-item' + (name === current ? ' is-current' : '');
+          btn.textContent = name;
+          btn.addEventListener('click', () => {
+            _setPkgCameraOp(pkgId, name);
+            _closeCameraOpMenus();
+          });
+          menu.appendChild(btn);
+        });
+        const sep = document.createElement('div');
+        sep.className = 'pkg-camera-op-menu-sep';
+        menu.appendChild(sep);
+        const other = document.createElement('button');
+        other.type = 'button';
+        other.className = 'pkg-camera-op-menu-item';
+        other.textContent = 'Other (type a name)…';
+        other.addEventListener('click', async () => {
+          _closeCameraOpMenus();
+          const r = await _openModal({
+            title:  'Camera operator',
+            fields: [{ id: 'name', label: 'Name', type: 'text', required: true,
+                       value: current }],
+            submitLabel: 'Set',
+          });
+          if (r && (r.name || '').trim()) _setPkgCameraOp(pkgId, r.name.trim());
+        });
+        menu.appendChild(other);
+        chip.appendChild(menu);
+      }
+      menu.classList.add('open');
+    });
+    chip.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && document.body.classList.contains('draft-mode')) {
+        e.preventDefault();
+        chip.click();
+      }
     });
   });
 
@@ -4991,11 +5287,11 @@
       if (typeof window._isExpensesHidden === 'function' && window._isExpensesHidden()) {
         state.hide_expenses = true;
       }
-      // Travel collapsible — preserve the expanded/collapsed state across
-      // regens, plus any per-field cost overrides the operator typed in.
-      if (typeof window._getTravelExpanded === 'function' && window._getTravelExpanded()) {
-        state.travel_expanded = true;
-      }
+      // Travel: per-field cost overrides the operator typed in persist.
+      // The expand/collapse state does NOT persist — every page load
+      // (operator and client) starts with travel collapsed for a tidy
+      // first view; the operator can expand at will but it resets next
+      // time the page is opened.
       if (typeof window._getTravelOverrides === 'function') {
         const ov = window._getTravelOverrides();
         if (ov && Object.keys(ov).length) state.travel_overrides = ov;
@@ -5003,6 +5299,10 @@
       if (typeof window._getTravelDiscounts === 'function') {
         const td = window._getTravelDiscounts();
         if (td && Object.keys(td).length) state.travel_discounts = td;
+      }
+      if (typeof window._getTravelParkingLabel === 'function') {
+        const pl = window._getTravelParkingLabel();
+        if (pl) state.travel_parking_label = pl;
       }
       // Pinned add-ons + the manual ordering applied to the Optional grid.
       if (typeof window._getPinnedAddons === 'function') {
@@ -5114,7 +5414,7 @@
         'addon_edits',   'addon_qty',           'custom_addons',
         'addon_discounts', 'custom_discounts',
         'removed_addon_ids',
-        'travel_expanded', 'travel_overrides', 'travel_discounts',
+        'travel_overrides', 'travel_discounts', 'travel_parking_label',
         'pinned_addons',   'addon_order',
       ];
       preserveKeys.forEach((k) => {
@@ -5446,6 +5746,10 @@
     // ── Debounced autosave (3s after last edit → PATCH Editor State) ─────
     let _autosaveTimer = null;
     let _lastSaveTime  = null;
+    // ISO timestamp of the most recent successful autosave's editor_state.
+    // null until the first autosave lands. Used by the preview ribbon to
+    // detect when the public URL's regenerated HTML matches.
+    let _lastSavedAt   = (window._editor_state_initial && window._editor_state_initial.saved_at) || null;
 
     // ── localStorage backup ────────────────────────────────────────────────
     // Every editor_state is stamped to localStorage BEFORE we attempt the
@@ -5573,6 +5877,13 @@
                 }).catch(() => {});
         } catch (_) {}
         _lastSaveTime = Date.now();
+        // Remember the saved_at we just sent — used by the preview ribbon
+        // to detect when the monitor has finished regenerating the public
+        // URL with these exact edits.
+        _lastSavedAt = editorState.saved_at || null;
+        if (typeof _refreshPreviewFreshness === 'function') {
+          try { _refreshPreviewFreshness(); } catch (_) {}
+        }
         _writeLocalBackup(editorState, 'saved');
         _setAutosaveStatus('✓ Saved', 'saved');
         // Switch to relative time display
@@ -5645,32 +5956,148 @@
       setTimeout(_refreshSavedRelative, 30000);
     }
 
-    // ── "View as client" — opens the CLIENT URL in a new tab ─────────────
-    // The editor view lives at `/quotes/<token>/edit`. The plain
-    // `/quotes/<token>` URL is what the client sees: server-side stripped
-    // of operator chrome, with the webhookToken blanked so it cannot
-    // PATCH back to Notion. Open that URL directly so we know with
-    // certainty there is no editor JS / DOM in the client tab.
+    // ── "View as client" — IN-TAB preview of current edits ──────────────
+    // Toggles body.client-preview so all the existing hide-operator-chrome
+    // CSS rules fire. The reason for in-tab (vs. new tab to the public
+    // URL): the public URL serves the last-regenerated HTML from KV, and
+    // autosave only writes editor_state to Notion — KV stays stale until
+    // a full regen runs. So opening the new tab right after an edit
+    // would show outdated prices. The in-tab toggle reflects the live
+    // in-memory PRICING.packages + addons, which IS what the operator
+    // just edited.
+    //
+    // A small floating ribbon appears at the top with an "Exit preview"
+    // button so it's obvious you're in preview and how to get back.
+    // The picker's separate "View as client ↗" link still goes to the
+    // bare URL for the truly-public view.
     {
       const _previewBtn = document.getElementById('draft-preview-btn');
-      _previewBtn?.addEventListener('click', () => {
-        // Strip the trailing `/edit` (and any query/hash) to get the
-        // canonical client URL. Falls back to the current href with
-        // ?view=client if we're somehow not on the /edit path so the
-        // legacy bootstrap still produces a client-ish view.
+      // Derive the canonical public-client URL by stripping /edit from the
+      // current location. The picker uses the same URL; what the operator
+      // would paste into an email.
+      function _publicClientUrl() {
         const here = new URL(window.location.href);
-        let clientUrl;
         if (/\/edit\/?$/.test(here.pathname)) {
           here.pathname = here.pathname.replace(/\/edit\/?$/, '');
-          here.search = '';
-          here.hash = '';
-          clientUrl = here.toString();
         } else {
           here.searchParams.set('view', 'client');
-          clientUrl = here.toString();
         }
-        window.open(clientUrl, '_blank', 'noopener');
+        here.search = here.search.replace(/[?&]view=client(?=$|&)/, '');
+        here.hash = '';
+        return here.toString().replace(/\?$/, '');
+      }
+      // ── Freshness state ────────────────────────────────────────────────
+      // _publishedSavedAt = the editor_state saved_at currently baked into
+      // the served public HTML (Vercel KV). Polled when the operator's in
+      // preview so the ribbon can report 'in sync' vs. 'regenerating'.
+      let _publishedSavedAt = (window._editor_state_initial && window._editor_state_initial.saved_at) || null;
+      let _pollTimer = null;
+      function _isInSync() {
+        if (!_lastSavedAt) return true;          // no edits this session
+        return _lastSavedAt === _publishedSavedAt;
+      }
+      function _setRibbonStatus(state, label) {
+        // state: 'sync' | 'pending' | 'unknown'
+        if (!_exitRibbon) return;
+        const dot   = _exitRibbon.querySelector('.vf-preview-ribbon-dot');
+        const txt   = _exitRibbon.querySelector('.vf-preview-ribbon-status');
+        if (dot) dot.dataset.state = state;
+        if (txt) txt.textContent = label;
+      }
+      function _refreshPreviewFreshness() {
+        if (!_exitRibbon) return;
+        if (_isInSync()) {
+          _setRibbonStatus('sync', 'Public URL is up to date with your edits');
+        } else {
+          _setRibbonStatus('pending', 'Edits saved — public URL regenerating (~30s)');
+        }
+      }
+      // Expose globally so the autosave success handler can call it
+      window._refreshPreviewFreshness = _refreshPreviewFreshness;
+      async function _pollPublicSavedAt() {
+        // Fetch the bare client URL with cache-bust and pull
+        // window._editor_state_initial.saved_at out of the response. When
+        // it matches _lastSavedAt the public URL is in sync.
+        try {
+          const r = await fetch(_publicClientUrl() + '?_freshness=' + Date.now(),
+                                { cache: 'no-store' });
+          if (!r.ok) return;
+          const txt = await r.text();
+          // Match the inline `window._editor_state_initial = { ... }` blob
+          // and look for the saved_at value.
+          const m = txt.match(/window\._editor_state_initial\s*=\s*\{[\s\S]*?"saved_at"\s*:\s*"([^"]+)"/);
+          if (m && m[1]) {
+            _publishedSavedAt = m[1];
+            _refreshPreviewFreshness();
+          }
+        } catch (_) { /* network blip — try again next tick */ }
+      }
+      function _startPolling() {
+        if (_pollTimer) return;
+        _pollTimer = setInterval(_pollPublicSavedAt, 5000);
+        _pollPublicSavedAt();                    // one immediate hit
+      }
+      function _stopPolling() {
+        if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+      }
+
+      // ── Ribbon — built once and reused ─────────────────────────────────
+      let _exitRibbon = null;
+      function _buildExitRibbon() {
+        if (_exitRibbon) return _exitRibbon;
+        const bar = document.createElement('div');
+        bar.id = 'vf-preview-ribbon';
+        bar.innerHTML =
+            '<span class="vf-preview-ribbon-eyebrow">PREVIEW</span>'
+          + '<span class="vf-preview-ribbon-label">'
+          +   '<span class="vf-preview-ribbon-dot" data-state="sync" aria-hidden="true"></span>'
+          +   '<span class="vf-preview-ribbon-status">Public URL is up to date with your edits</span>'
+          + '</span>'
+          + '<button type="button" class="vf-preview-ribbon-public" title="Open exactly what the client sees in a new tab">Open public URL ↗</button>'
+          + '<button type="button" class="vf-preview-ribbon-exit">Exit preview</button>';
+        bar.querySelector('.vf-preview-ribbon-exit').addEventListener('click', _exitPreview);
+        bar.querySelector('.vf-preview-ribbon-public').addEventListener('click', () => {
+          window.open(_publicClientUrl(), '_blank', 'noopener');
+        });
+        document.body.appendChild(bar);
+        _exitRibbon = bar;
+        return bar;
+      }
+      function _enterPreview() {
+        document.body.classList.add('client-preview', 'is-client-view');
+        _buildExitRibbon().classList.add('open');
+        document.body.style.paddingTop = '44px';
+        if (typeof _updateTotal === 'function') {
+          try { _updateTotal(); } catch (_) {}
+        }
+        if (typeof _refreshStatusPillForView === 'function') {
+          try { _refreshStatusPillForView(); } catch (_) {}
+        }
+        _refreshPreviewFreshness();
+        _startPolling();
+      }
+      function _exitPreview() {
+        _stopPolling();
+        document.body.classList.remove('client-preview', 'is-client-view');
+        if (_exitRibbon) _exitRibbon.classList.remove('open');
+        const banner = document.getElementById('draft-banner');
+        if (banner) document.body.style.paddingTop = banner.offsetHeight + 'px';
+        if (typeof _refreshStatusPillForView === 'function') {
+          try { _refreshStatusPillForView(); } catch (_) {}
+        }
+      }
+      _previewBtn?.addEventListener('click', () => {
+        if (document.body.classList.contains('client-preview')) _exitPreview();
+        else _enterPreview();
       });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.body.classList.contains('client-preview')) {
+          e.stopPropagation();
+          _exitPreview();
+        }
+      }, true);
+      window._enterClientPreview = _enterPreview;
+      window._exitClientPreview  = _exitPreview;
     }
 
     // ── Client-view bootstrap (URL ?view=client) ─────────────────────────
@@ -6342,8 +6769,17 @@
       if (!card) return;
       const pkg = (PRICING.packages || []).find(p => p.id === pkgId);
       if (!pkg) return;
-      // Read each LI's text (excluding any nested × button text)
       const items = [];
+      // ⚠️ Read the Camera Op chip FIRST. The chip lives outside the
+      // .pkg-includes <ul>, but its underlying value is a "Camera Op: X"
+      // entry in pkg.includes — if we skipped it here, every bullet
+      // edit would wipe the camera operator from the data layer.
+      const camChip = card.querySelector('.pkg-camera-op [data-camera-op-name]');
+      if (camChip) {
+        const name = (camChip.textContent || '').trim();
+        if (name) items.push('Camera Op: ' + name);
+      }
+      // Then the visible bullets (excluding any nested × button text)
       card.querySelectorAll('.pkg-includes li').forEach(li => {
         // Clone so we can strip the remove button without mutating the live DOM
         const clone = li.cloneNode(true);
@@ -6594,6 +7030,10 @@
         return;
       }
       // ── Travel group: header expands/collapses; details are click-to-edit ──
+      // Expand state is ephemeral — not autosaved, doesn't persist across
+      // page loads. Compact-by-default is the design intent for both
+      // operator and client; the operator opens it to inspect/edit and it
+      // collapses again on next visit.
       const travHdr = e.target.closest('.travel-header');
       if (travHdr) {
         const grp = travHdr.closest('.travel-group');
@@ -6601,26 +7041,64 @@
           grp.classList.toggle('collapsed');
           _pstate.travelExpanded = !grp.classList.contains('collapsed');
           travHdr.setAttribute('aria-expanded', _pstate.travelExpanded ? 'true' : 'false');
-          if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
         }
         return;
       }
       // Click-to-edit a travel detail row (operator/draft only — gated by
       // body.draft-mode). Replaces the amount span with an inline input;
       // on commit we update PRICING.travel + persist the override.
+      // Two modes:
+      //   kind='number'  — van hire, mileage, congestion charge (£ value)
+      //   kind='text'    — parking (free text: 'Supplied', '£20 cash', etc.)
       const travRow = e.target.closest('.travel-detail-row.travel-editable');
       if (travRow && document.body.classList.contains('draft-mode')) {
         const field = travRow.dataset.travelField;
-        if (!field || !PRICING.travel) return;
+        const kind  = travRow.dataset.travelKind || 'number';
+        if (!field) return;
         const amtEl = travRow.querySelector('.travel-amt');
         if (!amtEl || amtEl.querySelector('input')) return;   // already editing
-        const current = Number(PRICING.travel[field]) || 0;
+
         const input = document.createElement('input');
-        input.type = 'number';
-        input.step = '0.01';
-        input.min  = '0';
-        input.value = current.toFixed(2);
         input.className = 'travel-edit-input';
+        if (kind === 'text') {
+          // Free-text override for the Parking row. Lives in
+          // _pstate.travelParkingLabel so it round-trips through
+          // editor_state.travel_parking_label.
+          input.type  = 'text';
+          input.value = (_pstate.travelParkingLabel || '').trim() || 'Billed @ cost';
+          input.style.width = '140px';
+          input.style.textAlign = 'right';
+          input.setAttribute('aria-label', `Edit ${field} text`);
+          amtEl.textContent = '';
+          amtEl.appendChild(input);
+          input.focus();
+          input.select();
+          const commit = () => {
+            const v = (input.value || '').trim();
+            // Treat 'Billed @ cost' (case-insensitive) as the default and
+            // clear the override so future regens don't carry the literal
+            // default string in editor_state.
+            const isDefault = !v || v.toLowerCase() === 'billed @ cost';
+            _pstate.travelParkingLabel = isDefault ? '' : v;
+            _updateTotal();
+            if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
+          };
+          const cancel = () => { _updateTotal(); };
+          input.addEventListener('blur', commit);
+          input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter')  { ev.preventDefault(); input.blur(); }
+            if (ev.key === 'Escape') { ev.preventDefault(); input.removeEventListener('blur', commit); cancel(); }
+          });
+          return;
+        }
+
+        // Numeric mode — van hire, mileage, congestion charge.
+        if (!PRICING.travel) return;
+        const current = Number(PRICING.travel[field]) || 0;
+        input.type  = 'number';
+        input.step  = '0.01';
+        input.min   = '0';
+        input.value = current.toFixed(2);
         input.setAttribute('aria-label', `Edit ${field} value`);
         amtEl.textContent = '';
         amtEl.appendChild(input);
@@ -6629,16 +7107,12 @@
         const commit = () => {
           const v = Math.max(0, Math.round(parseFloat(input.value || '0') * 100) / 100);
           PRICING.travel[field] = v;
-          // Persist override so it survives the next regen (Python re-applies
-          // it from editor_state on render).
           _pstate.travelOverrides = Object.assign({}, _pstate.travelOverrides || {});
           _pstate.travelOverrides[field] = v;
-          _updateTotal();   // re-renders the row (input goes away)
+          _updateTotal();
           if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
         };
-        const cancel = () => {
-          _updateTotal();   // re-render with original value
-        };
+        const cancel = () => { _updateTotal(); };
         input.addEventListener('blur', commit);
         input.addEventListener('keydown', (ev) => {
           if (ev.key === 'Enter')  { ev.preventDefault(); input.blur(); }
@@ -6654,6 +7128,7 @@
     window._getTravelExpanded  = () => !!_pstate.travelExpanded;
     window._getTravelOverrides = () => Object.assign({}, _pstate.travelOverrides || {});
     window._getTravelDiscounts = () => Object.assign({}, _pstate.travelDiscounts || {});
+    window._getTravelParkingLabel = () => (_pstate.travelParkingLabel || '').toString();
 
     // ── Deliverables editor: × per pill, "+ Add deliverable" button ──────────
     function _wireDelivPill(pill) {
@@ -7965,7 +8440,7 @@
     lv('Accepted by', signerName + (VF.clientCompany ? ', ' + VF.clientCompany : ''));
     lv('Production date', VF.productionDate);
     lv('Location', 'StoneX Stadium');
-    lv('Deliverables', 'Highlight Video (60s), Social Cut (30s)');
+    lv('Deliverables', 'Wrap-up Montage Edit (~1.5m)');
     lv('Turnaround', '3 Working Days');
     y += 2; rule();
 
