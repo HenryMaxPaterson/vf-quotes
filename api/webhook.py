@@ -109,10 +109,31 @@ def mark_quote_signed(page_id, signer_name, timestamp):
         return False, str(e)
 
 
-def send_signed_email(quote_ref, signer_name, project_title, total,
-                       production_date, client_company, timestamp):
-    """Send the operator a notification email when a client signs a quote.
+def _fmt_money_str(v):
+    """Best-effort GBP rendering. Accepts the already-formatted strings the
+    client sends ("£723.65") AND raw numbers ("123.4"). Falls back to
+    'TBC' on None / unparseable input."""
+    if v is None: return "TBC"
+    s = str(v).strip()
+    if not s:     return "TBC"
+    if s.startswith("£") or s.startswith("\xa3"): return s
+    try:
+        return f"\xa3{float(s):,.2f}"
+    except Exception:
+        return s
+
+
+def send_signed_email(payload, client_ip=""):
+    """Send the operator a detailed notification email when a client signs.
     No-op (returns True) if RESEND_API_KEY isn't set.
+
+    `payload` is the full `accepted`-action POST body from the editor JS
+    (quote_generator.py). It carries everything the client saw at sign
+    time: selectedPackage / selectedPostProd / selectedAddons with
+    detail + discounts, selectedDelivery, rushSelected, addonDiscounts,
+    signerName, signatureDataUrl, timestamp, total. We render all of
+    this so the email is a complete audit record of what was signed,
+    by whom, for how much, from where (IP), at what time.
 
     All interpolations are HTML-escaped — signers can put anything in
     their name; we don't want stray <script> or <img onerror> reaching
@@ -120,53 +141,171 @@ def send_signed_email(quote_ref, signer_name, project_title, total,
     """
     if not RESEND_API_KEY:
         return True, ""
-    try:
-        signed_date = datetime.datetime.fromisoformat(
-            (timestamp or "").replace("Z", "+00:00")
-        ).strftime("%-d %B %Y") if timestamp else "—"
-    except Exception:
-        signed_date = "—"
-
     e = html.escape
-    client_line = e(signer_name or "")
+
+    # ── Header fields ─────────────────────────────────────────────
+    quote_ref      = payload.get("quoteRef") or "—"
+    signer_name    = payload.get("signerName") or "—"
+    project_title  = payload.get("projectTitle") or "TBC"
+    client_company = payload.get("clientCompany") or ""
+    timestamp      = payload.get("timestamp") or ""
+    total_str      = _fmt_money_str(payload.get("total"))
+    production_date = payload.get("productionDate") or "TBC"
+    quote_url       = payload.get("quoteUrl") or ""
+    page_id         = payload.get("page_id") or ""
+
+    try:
+        ts_dt = datetime.datetime.fromisoformat((timestamp or "").replace("Z", "+00:00"))
+        signed_date_full = ts_dt.strftime("%-d %B %Y, %H:%M UTC")
+    except Exception:
+        signed_date_full = timestamp or "—"
+
+    client_line = e(signer_name)
     if client_company:
         client_line += f", {e(client_company)}"
 
-    subject = f"Quote Accepted: {quote_ref or '—'} — {signer_name or '—'}"
+    # ── What she signed for: itemise everything ──────────────────────
+    rows = []
+
+    # Package (Package Based mode only)
+    pkg = payload.get("selectedPackage") or {}
+    if pkg and pkg.get("name"):
+        rows.append((
+            "Package",
+            f"{e(pkg.get('name'))} — {_fmt_money_str(pkg.get('price'))}",
+        ))
+
+    # Post-production (optional)
+    post_name = payload.get("selectedPostProdName") or ""
+    if post_name:
+        rows.append(("Post-production", e(post_name)))
+
+    # Add-ons w/ unit prices + any per-addon discounts the operator applied
+    addons_detail = payload.get("selectedAddonsDetail") or []
+    addon_discs   = payload.get("addonDiscounts") or {}
+    if addons_detail:
+        items_html = []
+        for a in addons_detail:
+            name  = a.get("name") or a.get("id") or "—"
+            price = a.get("price")
+            disc  = addon_discs.get(a.get("id")) or {}
+            disc_str = ""
+            if isinstance(disc, dict) and float(disc.get("value") or 0) > 0:
+                if disc.get("type") == "pct":
+                    disc_str = f' <span style="color:#B91C1C;font-weight:600;">&minus;{int(float(disc["value"]))}%</span>'
+                else:
+                    disc_str = f' <span style="color:#B91C1C;font-weight:600;">&minus;\xa3{float(disc["value"]):,.2f}</span>'
+            items_html.append(
+                f'<div style="padding:2px 0;">{e(name)} — {_fmt_money_str(price)}{disc_str}</div>'
+            )
+        rows.append(("Add-ons", "".join(items_html)))
+
+    # Delivery method
+    delivery = payload.get("selectedDeliveryName") or payload.get("selectedDelivery") or ""
+    if delivery:
+        rows.append(("Delivery", e(delivery)))
+
+    # Rush selection (if any)
+    rush = payload.get("rushSelected") or {}
+    if isinstance(rush, dict) and rush.get("sublabel"):
+        rush_line = e(str(rush.get("sublabel")))
+        if rush.get("price"):
+            rush_line += f" — {_fmt_money_str(rush.get('price'))}"
+        rows.append(("Turnaround", rush_line))
+
+    # Whole-quote discounts (if any)
+    qd = payload.get("selectedDiscountsDetail") or []
+    if qd:
+        qd_html = "".join(
+            f'<div style="padding:2px 0;">{e(d.get("name") or d.get("id") or "—")}</div>'
+            for d in qd
+        )
+        rows.append(("Quote discounts", qd_html))
+
+    selected_rows_html = "".join(
+        f'<tr style="border-bottom:1px solid #f0f0f0;vertical-align:top;">'
+        f'  <td style="padding:10px 0;color:#999;font-size:13px;width:140px;">{label}</td>'
+        f'  <td style="padding:10px 0;font-size:13px;">{value}</td>'
+        f'</tr>'
+        for label, value in rows
+    )
+
+    # ── Signature block (inline data-URI image) ──────────────────────
+    sig_data_url = payload.get("signatureDataUrl") or ""
+    if sig_data_url and sig_data_url.startswith("data:image/"):
+        sig_html = (
+            f'<div style="margin-top:8px;padding:12px;background:#fafafa;'
+            f'border:1px solid #eee;border-radius:6px;display:inline-block;">'
+            f'<img src="{sig_data_url}" alt="Signature" '
+            f'style="max-width:280px;height:auto;display:block;background:white;" />'
+            f'</div>'
+        )
+    else:
+        sig_html = '<span style="color:#bbb;font-size:12px;">No signature image captured.</span>'
+
+    # ── Build subject + body ─────────────────────────────────────────
+    subject = f"Quote Accepted: {quote_ref} — {signer_name} — {total_str}"
+
+    quote_link_html = (
+        f'<p style="margin:24px 0 0;font-size:12px;">'
+        f'<a href="{e(quote_url)}" style="color:#095EDF;text-decoration:none;">View signed quote &rarr;</a>'
+        f'</p>'
+    ) if quote_url else ""
+
     body_html = f"""
-      <div style="font-family:Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
+      <div style="font-family:Helvetica,Arial,sans-serif;max-width:600px;margin:0 auto;color:#111;">
         <div style="background:#095EDF;padding:28px 32px;border-radius:12px 12px 0 0;">
           <p style="color:white;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin:0 0 6px;">Valley Films</p>
           <h1 style="color:white;margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">Quote Accepted</h1>
         </div>
         <div style="border:1px solid #e4e4e4;border-top:none;padding:28px 32px;border-radius:0 0 12px 12px;">
           <p style="font-size:14px;color:#555;margin:0 0 24px;">
-            <strong style="color:#111;">{e(quote_ref or '—')}</strong> has been accepted and signed.
+            <strong style="color:#111;">{e(quote_ref)}</strong> has been accepted and signed.
           </p>
-          <table style="width:100%;border-collapse:collapse;">
+
+          <h2 style="font-size:13px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#999;margin:0 0 8px;border-top:1px solid #f0f0f0;padding-top:18px;">Signed by</h2>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
             <tr style="border-bottom:1px solid #f0f0f0;">
-              <td style="padding:10px 0;color:#999;font-size:13px;width:140px;">Signed by</td>
+              <td style="padding:10px 0;color:#999;font-size:13px;width:140px;">Name on signature</td>
               <td style="padding:10px 0;font-size:13px;font-weight:600;">{client_line}</td>
             </tr>
             <tr style="border-bottom:1px solid #f0f0f0;">
-              <td style="padding:10px 0;color:#999;font-size:13px;">Project</td>
-              <td style="padding:10px 0;font-size:13px;">{e(project_title or 'TBC')}</td>
+              <td style="padding:10px 0;color:#999;font-size:13px;">Signed at</td>
+              <td style="padding:10px 0;font-size:13px;">{e(signed_date_full)}</td>
             </tr>
             <tr style="border-bottom:1px solid #f0f0f0;">
-              <td style="padding:10px 0;color:#999;font-size:13px;">Production</td>
-              <td style="padding:10px 0;font-size:13px;">{e(production_date or 'TBC')}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #f0f0f0;">
-              <td style="padding:10px 0;color:#999;font-size:13px;">Total</td>
-              <td style="padding:10px 0;font-size:13px;font-weight:700;">{e(str(total) if total is not None else 'TBC')}</td>
+              <td style="padding:10px 0;color:#999;font-size:13px;">Client IP</td>
+              <td style="padding:10px 0;font-size:12px;color:#888;font-family:monospace;">{e(client_ip or '—')}</td>
             </tr>
             <tr>
-              <td style="padding:10px 0;color:#999;font-size:13px;">Date signed</td>
-              <td style="padding:10px 0;font-size:13px;">{e(signed_date)}</td>
+              <td style="padding:10px 0;color:#999;font-size:13px;vertical-align:top;">Signature</td>
+              <td style="padding:10px 0;font-size:13px;">{sig_html}</td>
             </tr>
           </table>
-          <p style="font-size:12px;color:#bbb;margin:24px 0 0;border-top:1px solid #f0f0f0;padding-top:16px;">
-            Automated notification from the Valley Films quote system.
+
+          <h2 style="font-size:13px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#999;margin:0 0 8px;border-top:1px solid #f0f0f0;padding-top:18px;">Quote</h2>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:10px 0;color:#999;font-size:13px;width:140px;">Project</td>
+              <td style="padding:10px 0;font-size:13px;">{e(project_title)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:10px 0;color:#999;font-size:13px;">Production date</td>
+              <td style="padding:10px 0;font-size:13px;">{e(production_date)}</td>
+            </tr>
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:10px 0;color:#999;font-size:13px;">Total signed</td>
+              <td style="padding:10px 0;font-size:14px;font-weight:700;">{e(total_str)}</td>
+            </tr>
+          </table>
+
+          {f'<h2 style="font-size:13px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#999;margin:0 0 8px;border-top:1px solid #f0f0f0;padding-top:18px;">What she signed for</h2><table style="width:100%;border-collapse:collapse;margin-bottom:8px;">{selected_rows_html}</table>' if selected_rows_html else ''}
+
+          {quote_link_html}
+
+          <p style="font-size:11px;color:#bbb;margin:24px 0 0;border-top:1px solid #f0f0f0;padding-top:16px;">
+            Automated notification from the Valley Films quote system.<br>
+            Page&nbsp;ID: <span style="font-family:monospace;">{e(page_id or '—')}</span>
           </p>
         </div>
       </div>
@@ -495,27 +634,24 @@ class handler(BaseHTTPRequestHandler):
             if not ok:
                 print(f"mark_quote_signed failed: {err}")
 
-            # Notify Max by email via Resend (no-op if RESEND_API_KEY unset).
-            # All payload strings are HTML-escaped inside send_signed_email.
-            email_ok, email_err = send_signed_email(
-                quote_ref       = data.get("quoteRef"),
-                signer_name     = signer_name,
-                project_title   = data.get("projectTitle"),
-                total           = data.get("total"),
-                production_date = data.get("productionDate"),
-                client_company  = data.get("clientCompany"),
-                timestamp       = timestamp,
-            )
-            if not email_ok:
-                print(f"send_signed_email failed: {email_err}")
-
-            # Capture client IP from the standard Vercel/Cloudflare proxy header.
-            # x-forwarded-for is a comma-separated list; the original client IP
-            # is always the first entry.
+            # Capture client IP from the standard Vercel/Cloudflare proxy header
+            # FIRST so we can include it in the email audit trail. x-forwarded-for
+            # is a comma-separated list; the original client IP is always the
+            # first entry.
             xff = self.headers.get('x-forwarded-for', '') or self.headers.get('X-Forwarded-For', '')
             client_ip = (xff.split(',')[0].strip() if xff else
                          self.headers.get('x-real-ip', '') or
                          self.client_address[0])
+
+            # Notify Max by email via Resend (no-op if RESEND_API_KEY unset).
+            # Detailed email now renders package, addons w/ discounts, delivery,
+            # turnaround tier, signature image, IP — a full audit record of
+            # what the client saw and signed for. All interpolations are
+            # HTML-escaped inside send_signed_email.
+            email_ok, email_err = send_signed_email(data, client_ip=client_ip)
+            if not email_ok:
+                print(f"send_signed_email failed: {email_err}")
+
             print(f"Signed: page={page_id} signer='{signer_name}' ip={client_ip} "
                   f"notion_ok={ok} email_ok={email_ok}")
 
