@@ -333,7 +333,7 @@
     position: relative;
     min-height: 56vh;
     background: var(--vf-bg);
-    background-image: url('https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/127DE/production/_93924757_mediaitem93924756.jpg'); background-size: cover; background-position: center;
+    background-image: url('https://ichef.bbci.co.uk/ace/standard/976/cpsprodpb/127DE/production/_93924757_mediaitem93924756.jpg'); background-size: cover; background-position: 50% 29%;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -973,6 +973,134 @@
     margin: 4px 2px;
   }
 
+  /* ── Camera-op chip on line items ──────────────────────────────────────
+     Same conceptual chip as on package cards, but compressed to live
+     inline alongside the line item name in the table. Stacks under the
+     name on narrow rows. Assignee picker reuses _CAMERA_OPS / the same
+     dropdown UX as the package version. */
+  .li-camera-op {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding: 2px 8px;
+    background: var(--vf-blue-50, rgba(26,86,255,0.06));
+    border: 1px solid rgba(26,86,255,0.15);
+    border-radius: 999px;
+    font-size: 11px;
+    color: var(--grey-700, #43464d);
+    line-height: 1.2;
+    user-select: none;
+    position: relative;
+    vertical-align: middle;
+  }
+  .li-camera-op-icon { color: var(--vf-blue, #1a56ff); flex-shrink: 0; }
+  .li-camera-op-name { font-weight: 600; color: var(--grey-900, #0A0F1A); }
+  .li-camera-op-caret { color: var(--grey-400); display: none; flex-shrink: 0; }
+  body.draft-mode .li-camera-op:not(.client-preview) { cursor: pointer; }
+  body.draft-mode .li-camera-op-caret { display: inline-block; }
+  body.draft-mode .li-camera-op:hover {
+    background: rgba(26,86,255,0.12);
+    border-color: rgba(26,86,255,0.30);
+  }
+  body.client-preview .li-camera-op { cursor: default; }
+  body.client-preview .li-camera-op-caret { display: none; }
+  /* Reuse the package dropdown styling for line item chips too. */
+  .li-camera-op-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 160px;
+    background: #fff;
+    border: 1px solid var(--grey-200, #e4e6eb);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(10,15,26,0.10);
+    padding: 4px;
+    z-index: 30;
+    display: none;
+  }
+  .li-camera-op-menu.open { display: block; }
+  .li-camera-op-menu-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: transparent;
+    padding: 7px 10px;
+    font: inherit;
+    font-size: 12px;
+    color: var(--grey-800, #2a2d33);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .li-camera-op-menu-item:hover { background: rgba(26,86,255,0.08); color: var(--vf-blue, #1a56ff); }
+  .li-camera-op-menu-item.is-current { font-weight: 600; }
+  .li-camera-op-menu-sep {
+    height: 1px;
+    background: var(--grey-100);
+    margin: 4px 2px;
+  }
+
+  /* ── Line-item discount chip + add affordance ─────────────────────────
+     The chip shows "−30%" / "−£60" when a discount is set. The "+ Disc"
+     affordance is operator-only (hidden in client view) and appears
+     inline next to the name as a faint hint. Subtotal cell gets a small
+     strikethrough of the gross when a discount applies. */
+  .li-disc-chip {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    padding: 2px 9px;
+    background: rgba(220,38,38,0.10);
+    border: 1px solid rgba(220,38,38,0.30);
+    color: #B91C1C;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .li-disc-chip:hover { background: rgba(220,38,38,0.16); border-color: rgba(220,38,38,0.50); }
+  /* The add-affordance is more muted than the chip — it's an invitation,
+     not a status. Always visible in draft mode so the operator can spot
+     it without hovering; the dashed border + grey text reads as
+     "available action" rather than "applied state". */
+  .li-disc-add {
+    display: none;
+    margin-left: 8px;
+    padding: 2px 9px;
+    background: transparent;
+    border: 1px dashed rgba(10,15,26,0.28);
+    color: var(--vf-ink-3, #8892A6);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+  }
+  body.draft-mode .li-disc-add { display: inline-flex; align-items: center; }
+  body.draft-mode .li-disc-add:hover {
+    color: var(--vf-blue, #1a56ff);
+    border-color: rgba(26,86,255,0.55);
+    border-style: solid;
+    background: rgba(26,86,255,0.05);
+  }
+  body.client-preview .li-disc-add { display: none !important; }
+
+  /* Subtotal cell — net price + a small strikethrough of the gross when
+     discounted. Keeps the discount obvious without needing a sub-row. */
+  .li-subtotal-net   { color: var(--vf-ink, #0A0F1A); font-weight: 600; }
+  .li-subtotal-gross {
+    margin-left: 6px;
+    color: var(--vf-ink-3, #8892A6);
+    font-size: 11px;
+    font-weight: 400;
+    text-decoration: line-through;
+  }
+
   .pkg-includes {
     list-style: none;
     padding: 0;
@@ -1058,6 +1186,22 @@
     padding-top: 0;
   }
   .line-items-table .li-name { font-weight: 600; }
+  /* When a line item carries a crew chip, render name + chip as a flex
+     row so the chip sits inline on a single baseline. flex-wrap keeps
+     it from breaking the table on very narrow viewports — the chip
+     drops below the name only when there genuinely isn't room. */
+  .line-items-table .li-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    row-gap: 4px;
+  }
+  /* Rich-text styling on line item names is intentional now — operator
+     can ⌘B / ⌘I to bold or italicise inline. The paste handler still
+     strips formatting from clipboard content (so a paste from Notion /
+     Word doesn't smuggle in random fonts/colours) — see _attachEditable.
+     We do not force font-weight/style here. */
 
   /* ── Drag-to-reorder line items ──────────────────────────────────────
      Draft-mode only. A small grip handle on the left of each row's first
@@ -1776,7 +1920,81 @@
     color: var(--vf-ink-2);
     cursor: pointer;
     transition: all var(--dur-base) var(--ease-out);
+    position: relative;          /* discount badge anchors to this */
   }
+
+  /* ── Delivery-pill discount badge + add-affordance ─────────────────────
+     The badge sits in the pill's top-right corner like a notification dot.
+     When no discount: in draft mode only, a small "+" affordance fades in
+     on hover to invite the operator to apply one. When set: the badge
+     shows the same red pill chip style as line-item discounts (.li-disc-chip)
+     so the discount language is consistent across the editor — including
+     a 100% discount (which renders as "−100%", never "Waived"). */
+  .pill-disc-badge {
+    position: absolute;
+    top: -10px;
+    right: -8px;
+    min-width: 18px;
+    padding: 2px 9px;
+    /* OPAQUE background — must NOT be rgba(.., 0.10) like the inline
+       line-item chip. The badge straddles the pill's top border (top:-10),
+       so a semi-transparent background lets the pill's blue (selected)
+       border bleed through the badge and read visually as a strikethrough
+       across "−100%". Solid pink avoids the bleed. */
+    background: #FDE9E9;
+    border: 1px solid rgba(220,38,38,0.40);
+    color: #B91C1C;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0;
+    border-radius: 999px;
+    line-height: 1.4;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(10,15,26,0.06);
+    pointer-events: auto;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .pill-disc-badge:not([hidden]):hover {
+    background: #FBDADA;
+    border-color: rgba(220,38,38,0.60);
+  }
+
+  /* The "+" affordance — only visible on draft-mode hover of a pill that
+     doesn't yet carry a discount. */
+  .pill-disc-add {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 1px solid rgba(26,86,255,0.45);
+    background: #fff;
+    color: var(--vf-blue, #1a56ff);
+    border-radius: 999px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(10,15,26,0.10);
+    transition: background 120ms ease, transform 120ms ease, border-color 120ms ease;
+  }
+  /* Always visible in draft mode (was only on hover of the pill — too
+     hidden to discover). Hover scales it slightly + fills the background
+     with a faint blue tint so it reads as actively clickable. */
+  body.draft-mode .pill-disc-add { display: inline-flex; }
+  body.draft-mode .pill-disc-add:hover {
+    background: rgba(26,86,255,0.10);
+    border-color: var(--vf-blue, #1a56ff);
+    transform: scale(1.10);
+  }
+  /* When a discount is already set, the badge is shown — hide the "+"
+     affordance entirely so they don't overlap. */
+  .pill-btn:has(.pill-disc-badge:not([hidden])) .pill-disc-add { display: none; }
+  /* Client view never sees the +/badge editing affordances. */
+  body.client-preview .pill-disc-add { display: none !important; }
+  body.client-preview .pill-disc-badge[hidden] { display: none !important; }
 
   .pill-btn:hover { border-color: var(--vf-line-strong); color: var(--vf-ink); }
 
@@ -3476,6 +3694,7 @@
       <span id="draft-total-display"></span>
       <span id="draft-autosave-indicator"></span>
       <button id="draft-preview-btn" class="draft-save-btn" title="Preview what the client will see (hides all editor controls)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>View as client</button>
+      <button id="draft-refresh-btn" class="draft-save-btn" title="Re-pull the latest Notion data (location, deliverables, brief) and regenerate. Your in-quote edits are preserved."><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 7h-1.8A7 7 0 1 0 4 14.9"/><path d="M12 12v9"/><path d="M16 17l-4 4-4-4"/></svg>Refresh from Notion</button>
       <button id="draft-revert-btn" class="draft-save-btn" title="Undo all edits and restore the original quote">↺ Revert</button>
       <button id="draft-save-btn" class="draft-save-btn">Save Draft</button>
       <button id="draft-approve-btn" class="draft-approve-btn">Approve &amp; Send →</button>
@@ -3584,11 +3803,11 @@
         </div>
         <div class="brief-item">
           <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Location</div>
-          <div class="brief-item-value" data-editable data-single-line data-prod-field="location" data-prod-type="text" data-prod-value="London, England, United Kingdom"><a href="https://www.google.com/maps/search/London,+England,+United+Kingdom" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">London</a></div>
+          <div class="brief-item-value" data-editable data-single-line data-prod-field="location" data-prod-type="text" data-prod-value="Battersea Park Studios"><a href="https://www.google.com/maps/search/Battersea+Park+Studios" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Battersea Park Studios</a></div>
         </div>
         <div class="brief-item">
           <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Production Date</div>
-          <div class="brief-item-value" data-prod-field="production_date" data-prod-type="date" data-prod-value="2026-06-03">3rd June</div>
+          <div class="brief-item-value" data-prod-field="production_date" data-prod-type="date" data-prod-value="2026-06-03">07:00–13:00 · 3rd June</div>
         </div>
         <div class="brief-item">
           <div class="brief-item-label">Shooting Days</div>
@@ -3608,7 +3827,7 @@
         </div>
   </div>
   <div id="deliverables-section" style="display:none;"><div class="sub-label deliverables-header">Deliverables<button type="button" id="deliv-section-remove" class="section-remove-btn" data-no-edit title="Remove the entire deliverables section from this quote" contenteditable="false">×</button></div>
-  <span id="deliv-list"><span class="tag" data-deliv-id="dl_cb93ae" style="vertical-align:top;"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_a8cec3" style="vertical-align:top;"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
+  <span id="deliv-list"><span class="tag" data-deliv-id="dl_57a45b" style="vertical-align:top;"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_848f45" style="vertical-align:top;"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
   <div style="margin-top:24px;">
     <div class="brief-grid" style="margin-bottom:0;">
       <div class="brief-item"><div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 16 2 2 4-4"/></svg>1st Draft Deadline</div><div class="brief-item-value"><div class="stepper-row" style="align-items:flex-start;gap:6px;"><button class="stepper-btn" id="deadline-faster" aria-label="Faster delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><div style="flex:1;min-width:0;"><span id="deadline-label" data-editable data-single-line style="font-size:15px;font-weight:600;color:var(--grey-900);">TBC</span><div id="deadline-sublabel" style="font-size:10px;color:var(--grey-400);font-weight:500;margin-top:3px;letter-spacing:0.3px;">2 Week Delivery</div></div><button class="stepper-btn" id="deadline-slower" disabled aria-label="Slower delivery" style="margin-top:2px;"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div>
@@ -3629,7 +3848,7 @@
 <div class="white-section section-glow-top" id="pricing-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">02</span> · Production Services</div>
   <div class="section-heading">The <em>Quotation</em></div>
-  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name">Role</th><th class="li-th li-th-rate">Rate</th><th class="li-th li-th-days">Qty</th><th class="li-th li-th-subtotal">Subtotal</th><th class="li-th li-th-actions"></th></tr></thead><tbody id="line-items-body"><tr class="li-section-header" data-no-edit><td colspan="5" class="li-section-header-cell">Crew &amp; Production</td></tr><tr class="li-row" data-li-id="li_cam_op_1" data-rate="335.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Camera Op (1 of 2)</td><td class="li-cell li-rate" data-editable data-single-line>£335.00/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£335.00</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_cam_op_2" data-rate="335.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Camera Op (2 of 2)</td><td class="li-cell li-rate" data-editable data-single-line>£335.00/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£335.00</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-section-header" data-no-edit><td colspan="5" class="li-section-header-cell">Equipment</td></tr><tr class="li-row" data-li-id="li_kit_3cam" data-rate="875.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>3× Cam & Lighting Buyout (was £925)</td><td class="li-cell li-rate" data-editable data-single-line>£875.00/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£875.00</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_kit_2cam" data-rate="583.33" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Additional 2× Cam Setup (pro-rata)</td><td class="li-cell li-rate" data-editable data-single-line>£583.33/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£583.33</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_van" data-rate="90.00" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Van Hire</td><td class="li-cell li-rate" data-editable data-single-line>£90.00/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£90.00</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_miles" data-rate="6.82" data-days="1.00" data-unit="day"><td class="li-cell li-name" data-editable data-single-line>Mileage (≈ 12.4 mi @ £0.55)</td><td class="li-cell li-rate" data-editable data-single-line>£6.82/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£6.82</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_eq_0ed7a5cd" data-rate="10.00" data-days="1.00" data-unit="rental"><td class="li-cell li-name" data-editable data-single-line>Matthews MD-427802 Mini Boom</td><td class="li-cell li-rate" data-editable data-single-line>£10.00/rental</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">rental</span></td><td class="li-cell li-subtotal">£10.00</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="3" class="li-foot-label">Subtotal</td><td class="li-foot-amount" id="line-items-subtotal">£2,235.15</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><div id="delivery-section"><div class="price-section-label" style="margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span>Delivery</span><button type="button" id="delivery-section-remove" class="section-remove-btn" data-no-edit contenteditable="false" title="Remove the delivery section (use when there is no footage handover)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site</button><button class="pill-btn" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45.00</span></button><button class="pill-btn  selected" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25.00</span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div></div><button type="button" id="delivery-section-restore" class="section-restore-btn">+ Restore delivery section</button>
+  <div class="price-section-label" style="margin-top:24px;margin-bottom:14px;">Crew &amp; Production</div><table class="line-items-table" id="line-items-table"><thead><tr><th class="li-th li-th-name">Role</th><th class="li-th li-th-rate">Rate</th><th class="li-th li-th-days">Qty</th><th class="li-th li-th-subtotal">Subtotal</th><th class="li-th li-th-actions"></th></tr></thead><tbody id="line-items-body"><tr class="li-section-header" data-no-edit><td colspan="5" class="li-section-header-cell">Crew &amp; Production</td></tr><tr class="li-row li-row-cam" data-li-id="li_cam_op_1" data-rate="400.00" data-days="1.00" data-unit="day"><td class="li-cell li-name"><span class="li-name-text" data-editable data-single-line>Director of Photography</span><div class="li-camera-op" data-li-id="li_cam_op_1" role="button" tabindex="0" data-no-edit title="Camera operator — click in draft mode to change"><svg class="li-camera-op-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span class="li-camera-op-name" data-camera-op-name>Unassigned</span><svg class="li-camera-op-caret" width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><button type="button" class="li-disc-add" data-no-edit data-li-id="li_cam_op_1" title="Apply a discount to this line" aria-label="Apply discount">+ Disc</button></td><td class="li-cell li-rate" data-editable data-single-line>£400.00/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£400.00</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row li-row-cam" data-li-id="li_cam_op_2" data-rate="360.00" data-days="1.00" data-unit="day"><td class="li-cell li-name"><span class="li-name-text" data-editable data-single-line>Camera Operator</span><div class="li-camera-op" data-li-id="li_cam_op_2" role="button" tabindex="0" data-no-edit title="Camera operator — click in draft mode to change"><svg class="li-camera-op-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg><span class="li-camera-op-name" data-camera-op-name>Unassigned</span><svg class="li-camera-op-caret" width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><button type="button" class="li-disc-add" data-no-edit data-li-id="li_cam_op_2" title="Apply a discount to this line" aria-label="Apply discount">+ Disc</button></td><td class="li-cell li-rate" data-editable data-single-line>£360.00/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£360.00</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-section-header" data-no-edit><td colspan="5" class="li-section-header-cell">Equipment</td></tr><tr class="li-row" data-li-id="li_kit_3cam" data-rate="925.00" data-days="1.00" data-unit="day"><td class="li-cell li-name"><span class="li-name-text" data-editable data-single-line>3× Cam &amp; Lighting Buyout (Same kit package as Chelsea)</span><button type="button" class="li-disc-add" data-no-edit data-li-id="li_kit_3cam" title="Apply a discount to this line" aria-label="Apply discount">+ Disc</button></td><td class="li-cell li-rate" data-editable data-single-line>£925.00/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£925.00</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_kit_2cam" data-rate="333.00" data-days="1.00" data-unit="day"><td class="li-cell li-name"><span class="li-name-text" data-editable data-single-line>Additional Interview setup (Same kit package as original Frank Lampard)&nbsp;</span><button type="button" class="li-disc-add" data-no-edit data-li-id="li_kit_2cam" title="Apply a discount to this line" aria-label="Apply discount">+ Disc</button></td><td class="li-cell li-rate" data-editable data-single-line>£333.00/day</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">day</span></td><td class="li-cell li-subtotal">£333.00</td><td class="li-cell li-actions" data-no-edit></td></tr><tr class="li-row" data-li-id="li_eq_0ed7a5cd" data-rate="10.00" data-days="1.00" data-unit="rental"><td class="li-cell li-name"><span class="li-name-text" data-editable data-single-line>Matthews MD-427802 Mini Boom</span><button type="button" class="li-disc-add" data-no-edit data-li-id="li_eq_0ed7a5cd" title="Apply a discount to this line" aria-label="Apply discount">+ Disc</button></td><td class="li-cell li-rate" data-editable data-single-line>£10.00/rental</td><td class="li-cell li-days"><span class="li-qty-num" data-editable data-single-line>1</span> <span class="li-qty-unit">rental</span></td><td class="li-cell li-subtotal">£10.00</td><td class="li-cell li-actions" data-no-edit></td></tr></tbody><tfoot><tr class="li-foot"><td colspan="3" class="li-foot-label">Subtotal</td><td class="li-foot-amount" id="line-items-subtotal">£2,124.82</td><td></td></tr></tfoot></table><button type="button" id="line-items-add-btn" class="draft-add-row-btn" style="display:none;margin-top:8px;">+ Add line item</button><div id="delivery-section"><div class="price-section-label" style="margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span>Delivery</span><button type="button" id="delivery-section-remove" class="section-remove-btn" data-no-edit contenteditable="false" title="Remove the delivery section (use when there is no footage handover)"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2L8 8M2 8L8 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;"><button class="pill-btn" data-delivery-id="raw_onsite">Raw Footage — On-Site<span class="pill-disc-badge" data-no-edit data-delivery-id="raw_onsite" title="Apply a discount" hidden></span><span class="pill-disc-add" data-no-edit role="button" tabindex="0" data-delivery-id="raw_onsite" title="Apply a discount to this delivery" aria-label="Apply discount"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 1.5v7M1.5 5h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span></button><button class="pill-btn" data-delivery-id="hdd_purchase">Hard Drive Purchase <span class="pill-price">+£45.00</span><span class="pill-disc-badge" data-no-edit data-delivery-id="hdd_purchase" title="Apply a discount" hidden></span><span class="pill-disc-add" data-no-edit role="button" tabindex="0" data-delivery-id="hdd_purchase" title="Apply a discount to this delivery" aria-label="Apply discount"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 1.5v7M1.5 5h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span></button><button class="pill-btn  selected" data-delivery-id="dropbox">Dropbox Delivery <span class="pill-price">+£25.00</span><span class="pill-disc-badge" data-no-edit data-delivery-id="dropbox" title="Apply a discount" hidden></span><span class="pill-disc-add" data-no-edit role="button" tabindex="0" data-delivery-id="dropbox" title="Apply a discount to this delivery" aria-label="Apply discount"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M5 1.5v7M1.5 5h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span></button></div><div id="delivery-desc" style="font-size:12px;color:var(--grey-400);margin-top:-18px;margin-bottom:24px;"></div></div><button type="button" id="delivery-section-restore" class="section-restore-btn">+ Restore delivery section</button>
 
   
 
@@ -3797,11 +4016,11 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
   // ── Quote data & pricing ─────────────────────────
-  const VF     = {"pageId": "434fb2df-6a44-45c7-bfaf-c32c090a4907", "quoteRef": "VF-0197", "webhookToken": "", "clientName": "Hugo De Boo", "clientCompany": "Frame the Game B.V.", "clientEmail": "hugodeboo@matchwornshirt.com", "projectTitle": "Frank Lampard x MWS", "productionDate": "3rd June", "productionDateISO": "2026-06-03", "total": "TBC", "basePrice": 0, "validUntil": "5 June 2026", "generatedDate": "29 May 2026", "quoteType": "Itemized", "jobType": "Interviews & Case Studies", "defaultPkgId": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "isDraft": true, "financialStatus": "Generated", "briefIssues": "", "briefQuestions": "", "qcNotes": "* [Buyer type] Field is empty, preventing full check against quote type rules.", "warnings": ["No Brief Paste, Deliverables, or Quote Notes are set \u2014 the LLM has nothing to work with. Paste the client's brief into 'Brief Paste' or add Deliverables, then re-trigger generation."], "quoteUrl": "https://valley.film/quotes/OodY9YX9", "quoteFilename": "OodY9YX9"};
-  const PRICING = {"basePrice": 0, "expenses": 65, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-81e2-b77d-c78d07516482", "name": "Colour Grade / Transcode", "price": 350, "price_core": 350, "price_primary": 350, "price_premium": 350, "desc": "Simple transcoding of footage & colour grade to get this edit ready", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "discounts": [{"id": "35847fd0-3620-81b7-a90d-c464b52709d6", "name": "Multi-day: 3\u20135 days", "type": "Percentage", "value": 10, "desc": "Standard multi-day discount for shoots of 3\u20135 days. Auto-suggested when shooting_days is in this range.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}, {"id": "35847fd0-3620-8129-8cd1-cf0165312c45", "name": "Multi-day: 6+ days", "type": "Percentage", "value": 20, "desc": "Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days \u2265 6.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}], "packages": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "dropbox", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "Standard Delivery", "travel": null, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null, "suggestedDiscounts": [], "lineItems": [{"id": "li_cam_op_1", "name": "Camera Op (1 of 2)", "rate": 335, "days": 1, "category": "Crew & Production", "subtotal": 335.0}, {"id": "li_cam_op_2", "name": "Camera Op (2 of 2)", "rate": 335, "days": 1, "category": "Crew & Production", "subtotal": 335.0}, {"id": "li_kit_3cam", "name": "3\u00d7 Cam & Lighting Buyout (was \u00a3925)", "rate": 875, "days": 1, "category": "equipment", "subtotal": 875.0}, {"id": "li_kit_2cam", "name": "Additional 2\u00d7 Cam Setup (pro-rata)", "rate": 583.33, "days": 1, "category": "equipment", "subtotal": 583.33}, {"id": "li_van", "name": "Van Hire", "rate": 90, "days": 1, "category": "equipment", "subtotal": 90.0}, {"id": "li_miles", "name": "Mileage (\u2248 12.4 mi @ \u00a30.55)", "rate": 6.82, "days": 1, "category": "equipment", "subtotal": 6.82}, {"id": "li_eq_0ed7a5cd", "name": "Matthews MD-427802 Mini Boom", "rate": 10.0, "days": 1, "unit": "rental", "category": "equipment", "subtotal": 10.0}], "lineItemsSource": "rate_card_all", "rateCard": [{"id": "35247fd0-3620-8161-88d3-d67b5f4825fb", "name": "2nd Assistant Camera", "my_rate": 375, "apa_ceiling": 400, "apa_bracket": "Crew", "ot_per_hr": 56.25, "ooh_uplift": 0, "half_day_rate": 225.0, "travel_day_rate": 187.5}, {"id": "34f47fd0-3620-81b5-ae9f-e9334018ee86", "name": "Assistant Camera", "my_rate": 275, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 41.25, "ooh_uplift": 0, "half_day_rate": 165.0, "travel_day_rate": 137.5}, {"id": "34f47fd0-3620-81f6-8508-c4f45a53cb1a", "name": "Camera Operator", "my_rate": 475, "apa_ceiling": 650, "apa_bracket": "Crew", "ot_per_hr": 71.25, "ooh_uplift": 0, "half_day_rate": 285.0, "travel_day_rate": 237.5}, {"id": "34f47fd0-3620-81bd-a585-c0e35c590c98", "name": "Colour Grade", "my_rate": 175, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 26.25, "ooh_uplift": 0, "half_day_rate": 105.0, "travel_day_rate": 87.5}, {"id": "35247fd0-3620-8092-9cb5-e6a135cb5215", "name": "Congestion Charge", "my_rate": 18, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 2.7, "ooh_uplift": 0, "half_day_rate": 10.8, "travel_day_rate": 9.0}, {"id": "35247fd0-3620-81f7-af92-e16d8a0cbc7e", "name": "Director", "my_rate": 700, "apa_ceiling": 1200, "apa_bracket": "HoD", "ot_per_hr": 105.0, "ooh_uplift": 0, "half_day_rate": 420.0, "travel_day_rate": 350.0}, {"id": "34f47fd0-3620-81be-8870-f75746f0696f", "name": "Director of Photography", "my_rate": 575, "apa_ceiling": 750, "apa_bracket": "HoD", "ot_per_hr": 86.25, "ooh_uplift": 0, "half_day_rate": 345.0, "travel_day_rate": 287.5}, {"id": "35247fd0-3620-815d-98a6-e42a8806565f", "name": "Gaffer", "my_rate": 450, "apa_ceiling": 650, "apa_bracket": "HoD", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-815a-8b70-fdd982d07f1e", "name": "Hero Edit (2\u20135 min)", "my_rate": 450, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-81f2-9370-c167bae0c7ca", "name": "Long-form Edit (10 min+)", "my_rate": 600, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 90.0, "ooh_uplift": 0, "half_day_rate": 360.0, "travel_day_rate": 300.0}, {"id": "34f47fd0-3620-8145-a058-e0ce634a7256", "name": "Mileage", "my_rate": 0.55, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.08, "ooh_uplift": 0, "half_day_rate": 0.33, "travel_day_rate": 0.28}, {"id": "35247fd0-3620-8178-ae82-f5277260296e", "name": "Producer", "my_rate": 550, "apa_ceiling": 1000, "apa_bracket": "HoD", "ot_per_hr": 82.5, "ooh_uplift": 0, "half_day_rate": 330.0, "travel_day_rate": 275.0}, {"id": "35247fd0-3620-8151-9809-e9ff5f46e40d", "name": "Production Assistant (PA)", "my_rate": 200, "apa_ceiling": 220, "apa_bracket": "Trainee", "ot_per_hr": 30.0, "ooh_uplift": 0, "half_day_rate": 120.0, "travel_day_rate": 100.0}, {"id": "34f47fd0-3620-815d-93d3-efcd057aa497", "name": "Social Cut (30\u201360s)", "my_rate": 300, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "35247fd0-3620-81bc-879f-ff9900b2f5ff", "name": "Sound Recordist", "my_rate": 400, "apa_ceiling": 600, "apa_bracket": "HoD", "ot_per_hr": 60.0, "ooh_uplift": 0, "half_day_rate": 240.0, "travel_day_rate": 200.0}, {"id": "35247fd0-3620-81e7-8028-fb60f7bceba6", "name": "Spark", "my_rate": 300, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "34f47fd0-3620-81a2-a7c4-fd40b3f1bae8", "name": "Stills Cull + Edit", "my_rate": 125, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 18.75, "ooh_uplift": 0, "half_day_rate": 75.0, "travel_day_rate": 62.5}, {"id": "34f47fd0-3620-81dd-911d-d1d92e5e3796", "name": "TfL Journey", "my_rate": 3.6, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.54, "ooh_uplift": 0, "half_day_rate": 2.16, "travel_day_rate": 1.8}, {"id": "34f47fd0-3620-81b6-b5c8-d8640c160aa2", "name": "Transcoding / Delivery", "my_rate": 65, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 9.75, "ooh_uplift": 0, "half_day_rate": 39.0, "travel_day_rate": 32.5}, {"id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0", "name": "Van Hire", "my_rate": 95, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 14.25, "ooh_uplift": 0, "half_day_rate": 57.0, "travel_day_rate": 47.5}], "defaultDays": 1};
+  const VF     = {"pageId": "434fb2df-6a44-45c7-bfaf-c32c090a4907", "quoteRef": "VF-0197", "webhookToken": "", "clientName": "Hugo De Boo", "clientCompany": "Frame the Game B.V.", "clientEmail": "hugodeboo@matchwornshirt.com", "projectTitle": "Frank Lampard x MWS", "productionDate": "07:00\u201313:00 \u00b7 3rd June", "productionDateISO": "2026-06-03", "total": "TBC", "basePrice": 0, "validUntil": "5 June 2026", "generatedDate": "29 May 2026", "quoteType": "Itemized", "jobType": "Interviews & Case Studies", "defaultPkgId": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "isDraft": true, "financialStatus": "Generated", "briefIssues": "", "briefQuestions": "", "qcNotes": "", "warnings": ["No Brief Paste, Deliverables, or Quote Notes are set \u2014 the LLM has nothing to work with. Paste the client's brief into 'Brief Paste' or add Deliverables, then re-trigger generation."], "quoteUrl": "https://valley.film/quotes/OodY9YX9", "quoteFilename": "OodY9YX9"};
+  const PRICING = {"basePrice": 0, "expenses": 0, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-81e2-b77d-c78d07516482", "name": "Colour Grade / Transcode", "price": 350, "price_core": 350, "price_primary": 350, "price_premium": 350, "desc": "Simple transcoding of footage & colour grade to get this edit ready", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "discounts": [{"id": "35847fd0-3620-81b7-a90d-c464b52709d6", "name": "Multi-day: 3\u20135 days", "type": "Percentage", "value": 10, "desc": "Standard multi-day discount for shoots of 3\u20135 days. Auto-suggested when shooting_days is in this range.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}, {"id": "35847fd0-3620-8129-8cd1-cf0165312c45", "name": "Multi-day: 6+ days", "type": "Percentage", "value": 20, "desc": "Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days \u2265 6.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}], "packages": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "dropbox", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "Standard Delivery", "travel": null, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null, "suggestedDiscounts": [], "lineItems": [{"id": "li_cam_op_1", "role_id": null, "name": "Director of Photography", "rate": 400, "days": 1, "category": "Crew & Production", "subtotal": 400.0}, {"id": "li_cam_op_2", "role_id": null, "name": "Camera Operator", "rate": 360, "days": 1, "category": "Crew & Production", "subtotal": 360.0}, {"id": "li_kit_3cam", "role_id": null, "name": "3\u00d7 Cam &amp; Lighting Buyout (Same kit package as Chelsea)", "rate": 925, "days": 1, "category": "equipment", "subtotal": 925.0}, {"id": "li_kit_2cam", "role_id": null, "name": "Additional Interview setup (Same kit package as original Frank Lampard)&nbsp;", "rate": 333, "days": 1, "category": "equipment", "subtotal": 333.0}, {"id": "li_van", "role_id": null, "name": "Van Hire", "rate": 90, "days": 1, "category": "equipment", "subtotal": 90.0}, {"id": "li_miles", "role_id": null, "name": "Mileage (\u2248 12.4 mi @ \u00a30.55)", "rate": 6.82, "days": 1, "category": "equipment", "subtotal": 6.82}, {"id": "li_eq_0ed7a5cd", "name": "Matthews MD-427802 Mini Boom", "rate": 10.0, "days": 1, "unit": "rental", "category": "equipment", "subtotal": 10.0}], "lineItemsSource": "rate_card_all", "rateCard": [{"id": "35247fd0-3620-8161-88d3-d67b5f4825fb", "name": "2nd Assistant Camera", "my_rate": 375, "apa_ceiling": 400, "apa_bracket": "Crew", "ot_per_hr": 56.25, "ooh_uplift": 0, "half_day_rate": 225.0, "travel_day_rate": 187.5}, {"id": "34f47fd0-3620-81b5-ae9f-e9334018ee86", "name": "Assistant Camera", "my_rate": 275, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 41.25, "ooh_uplift": 0, "half_day_rate": 165.0, "travel_day_rate": 137.5}, {"id": "34f47fd0-3620-81f6-8508-c4f45a53cb1a", "name": "Camera Operator", "my_rate": 475, "apa_ceiling": 650, "apa_bracket": "Crew", "ot_per_hr": 71.25, "ooh_uplift": 0, "half_day_rate": 285.0, "travel_day_rate": 237.5}, {"id": "34f47fd0-3620-81bd-a585-c0e35c590c98", "name": "Colour Grade", "my_rate": 175, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 26.25, "ooh_uplift": 0, "half_day_rate": 105.0, "travel_day_rate": 87.5}, {"id": "35247fd0-3620-8092-9cb5-e6a135cb5215", "name": "Congestion Charge", "my_rate": 18, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 2.7, "ooh_uplift": 0, "half_day_rate": 10.8, "travel_day_rate": 9.0}, {"id": "35247fd0-3620-81f7-af92-e16d8a0cbc7e", "name": "Director", "my_rate": 700, "apa_ceiling": 1200, "apa_bracket": "HoD", "ot_per_hr": 105.0, "ooh_uplift": 0, "half_day_rate": 420.0, "travel_day_rate": 350.0}, {"id": "34f47fd0-3620-81be-8870-f75746f0696f", "name": "Director of Photography", "my_rate": 575, "apa_ceiling": 750, "apa_bracket": "HoD", "ot_per_hr": 86.25, "ooh_uplift": 0, "half_day_rate": 345.0, "travel_day_rate": 287.5}, {"id": "35247fd0-3620-815d-98a6-e42a8806565f", "name": "Gaffer", "my_rate": 450, "apa_ceiling": 650, "apa_bracket": "HoD", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-815a-8b70-fdd982d07f1e", "name": "Hero Edit (2\u20135 min)", "my_rate": 450, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-81f2-9370-c167bae0c7ca", "name": "Long-form Edit (10 min+)", "my_rate": 600, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 90.0, "ooh_uplift": 0, "half_day_rate": 360.0, "travel_day_rate": 300.0}, {"id": "34f47fd0-3620-8145-a058-e0ce634a7256", "name": "Mileage", "my_rate": 0.55, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.08, "ooh_uplift": 0, "half_day_rate": 0.33, "travel_day_rate": 0.28}, {"id": "35247fd0-3620-8178-ae82-f5277260296e", "name": "Producer", "my_rate": 550, "apa_ceiling": 1000, "apa_bracket": "HoD", "ot_per_hr": 82.5, "ooh_uplift": 0, "half_day_rate": 330.0, "travel_day_rate": 275.0}, {"id": "35247fd0-3620-8151-9809-e9ff5f46e40d", "name": "Production Assistant (PA)", "my_rate": 200, "apa_ceiling": 220, "apa_bracket": "Trainee", "ot_per_hr": 30.0, "ooh_uplift": 0, "half_day_rate": 120.0, "travel_day_rate": 100.0}, {"id": "34f47fd0-3620-815d-93d3-efcd057aa497", "name": "Social Cut (30\u201360s)", "my_rate": 300, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "35247fd0-3620-81bc-879f-ff9900b2f5ff", "name": "Sound Recordist", "my_rate": 400, "apa_ceiling": 600, "apa_bracket": "HoD", "ot_per_hr": 60.0, "ooh_uplift": 0, "half_day_rate": 240.0, "travel_day_rate": 200.0}, {"id": "35247fd0-3620-81e7-8028-fb60f7bceba6", "name": "Spark", "my_rate": 300, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "34f47fd0-3620-81a2-a7c4-fd40b3f1bae8", "name": "Stills Cull + Edit", "my_rate": 125, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 18.75, "ooh_uplift": 0, "half_day_rate": 75.0, "travel_day_rate": 62.5}, {"id": "34f47fd0-3620-81dd-911d-d1d92e5e3796", "name": "TfL Journey", "my_rate": 3.6, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.54, "ooh_uplift": 0, "half_day_rate": 2.16, "travel_day_rate": 1.8}, {"id": "34f47fd0-3620-81b6-b5c8-d8640c160aa2", "name": "Transcoding / Delivery", "my_rate": 65, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 9.75, "ooh_uplift": 0, "half_day_rate": 39.0, "travel_day_rate": 32.5}, {"id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0", "name": "Van Hire", "my_rate": 95, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 14.25, "ooh_uplift": 0, "half_day_rate": 57.0, "travel_day_rate": 47.5}], "defaultDays": 1};
   // Initial Editor State as saved on the Notion Production page. Used by
   // draft-mode features that pre-fill from prior saves (e.g. brief Q&A inputs).
-  window._editor_state_initial = {"version": 1, "saved_at": "2026-05-29T12:00:00.000Z", "hide_deliverables": true, "deliverables_override": [{"title": "Highlight Video (60s)", "spec": "3840 \u00d7 2160"}, {"title": "Social Cut (30s)", "spec": "1080 \u00d7 1920"}], "line_items": {"removed_ids": ["li_00b2f5ff", "li_057aa497", "li_0c160aa2", "li_2e5e3796", "li_35cb5215", "li_4018ee86", "li_46f0696f", "li_5a53cb1a", "li_5c590c98", "li_5f46e40d", "li_5f4825fb", "li_634a7256", "li_7260296e", "li_82d07f1e", "li_8806565f", "li_8a0cbc7e", "li_b3f1bae8", "li_bae0c7ca", "li_bfd39ac0", "li_eq_09d8492a", "li_eq_09f630a2", "li_eq_13d6252b", "li_eq_19b559bd", "li_eq_1ffd6ded", "li_eq_27524407", "li_eq_2c527d78", "li_eq_31d8a106", "li_eq_377b7a8f", "li_eq_3a6f6685", "li_eq_4a038d5e", "li_eq_4a728b50", "li_eq_4f89a29c", "li_eq_553573d1", "li_eq_553a0f54", "li_eq_569bdb22", "li_eq_65cb1b51", "li_eq_7aa06ecc", "li_eq_7b46096a", "li_eq_7c2efe07", "li_eq_8455a93c", "li_eq_9df05d04", "li_eq_b06df6c9", "li_eq_d58903ac", "li_eq_d789186f", "li_eq_e0304152", "li_f7bceba6"], "added": [{"id": "li_cam_op_1", "name": "Camera Op (1 of 2)", "rate": 335, "days": 1, "category": "Crew & Production"}, {"id": "li_cam_op_2", "name": "Camera Op (2 of 2)", "rate": 335, "days": 1, "category": "Crew & Production"}, {"id": "li_kit_3cam", "name": "3\u00d7 Cam & Lighting Buyout (was \u00a3925)", "rate": 875, "days": 1, "category": "equipment"}, {"id": "li_kit_2cam", "name": "Additional 2\u00d7 Cam Setup (pro-rata)", "rate": 583.33, "days": 1, "category": "equipment"}, {"id": "li_van", "name": "Van Hire", "rate": 90, "days": 1, "category": "equipment"}, {"id": "li_miles", "name": "Mileage (\u2248 12.4 mi @ \u00a30.55)", "rate": 6.82, "days": 1, "category": "equipment"}], "order": ["li_cam_op_1", "li_cam_op_2", "li_kit_3cam", "li_kit_2cam", "li_van", "li_miles"]}, "travel_overrides": {"van_cost": 90}};
+  window._editor_state_initial = {"version": 1, "saved_at": "2026-05-29T15:09:41.197Z", "hide_deliverables": true, "hide_expenses": true, "delivery_discounts": {"dropbox": {"value": 100, "type": "pct"}}, "deliverables_override": [{"title": "Highlight Video (60s)", "spec": "3840 \u00d7 2160"}, {"title": "Social Cut (30s)", "spec": "1080 \u00d7 1920"}], "line_items": {"removed_ids": ["li_00b2f5ff", "li_057aa497", "li_0c160aa2", "li_2e5e3796", "li_35cb5215", "li_4018ee86", "li_46f0696f", "li_5a53cb1a", "li_5c590c98", "li_5f46e40d", "li_5f4825fb", "li_634a7256", "li_7260296e", "li_82d07f1e", "li_8806565f", "li_8a0cbc7e", "li_b3f1bae8", "li_bae0c7ca", "li_bfd39ac0", "li_eq_09d8492a", "li_eq_09f630a2", "li_eq_13d6252b", "li_eq_19b559bd", "li_eq_1ffd6ded", "li_eq_27524407", "li_eq_2c527d78", "li_eq_31d8a106", "li_eq_377b7a8f", "li_eq_3a6f6685", "li_eq_4a038d5e", "li_eq_4a728b50", "li_eq_4f89a29c", "li_eq_553573d1", "li_eq_553a0f54", "li_eq_569bdb22", "li_eq_65cb1b51", "li_eq_7aa06ecc", "li_eq_7b46096a", "li_eq_7c2efe07", "li_eq_8455a93c", "li_eq_9df05d04", "li_eq_b06df6c9", "li_eq_d58903ac", "li_eq_d789186f", "li_eq_e0304152", "li_f7bceba6"], "added": [{"id": "li_cam_op_1", "role_id": null, "name": "Director of Photography", "rate": 400, "days": 1, "category": "Crew & Production"}, {"id": "li_cam_op_2", "role_id": null, "name": "Camera Operator", "rate": 360, "days": 1, "category": "Crew & Production"}, {"id": "li_kit_3cam", "role_id": null, "name": "3\u00d7 Cam &amp; Lighting Buyout (Same kit package as Chelsea)", "rate": 925, "days": 1, "category": "equipment"}, {"id": "li_kit_2cam", "role_id": null, "name": "Additional Interview setup (Same kit package as original Frank Lampard)&nbsp;", "rate": 333, "days": 1, "category": "equipment"}, {"id": "li_van", "role_id": null, "name": "Van Hire", "rate": 90, "days": 1, "category": "equipment"}, {"id": "li_miles", "role_id": null, "name": "Mileage (\u2248 12.4 mi @ \u00a30.55)", "rate": 6.82, "days": 1, "category": "equipment"}]}, "travel_overrides": {"van_cost": 90}};
 
   // Split rush addons: slower-than-2-weeks (daysOut > 14) come before the
   // default 2-week tier; faster (≤14) come after. Both sorted SLOWEST → FASTEST
@@ -3955,12 +4174,18 @@
       }
     } else {
       // Itemized: sum line items from current _pstate.lineItems (live state)
-      // rather than the static PRICING.basePrice. Each line is rate × days.
+      // rather than the static PRICING.basePrice. Each line contributes
+      // its NET subtotal (rate × days minus any per-line discount).
       t = 0;
       if (Array.isArray(_pstate.lineItems)) {
-        for (const li of _pstate.lineItems) {
-          t += Math.max(0, Math.round((parseFloat(li.rate) || 0) * (parseFloat(li.days) || 0)));
-        }
+        const _liNet = (li) => {
+          const gross = Math.max(0, (parseFloat(li.rate) || 0) * (parseFloat(li.days) || 0));
+          const d = li.discount;
+          if (!d || !Number(d.value)) return gross;
+          const amt = d.type === 'pct' ? gross * (Number(d.value) / 100) : Number(d.value);
+          return Math.max(0, gross - Math.max(0, Math.min(gross, amt)));
+        };
+        for (const li of _pstate.lineItems) t += _liNet(li);
       }
       // Delivery: skip when operator hid the Delivery section (the cost
       // would otherwise still show up in the total even though the section
@@ -3974,7 +4199,15 @@
                             || (typeof window._isDeliveryMethodHidden === 'function'
                                 && window._isDeliveryMethodHidden());
       const d = (PRICING.delivery || []).find(x => x.id === _pstate.delivery);
-      if (d && !_dmHiddenForCalc) t += d.price;
+      if (d && !_dmHiddenForCalc) {
+        t += d.price;
+        // Subtract any operator-applied discount on the selected delivery
+        // method (badge in the pill's top-right). _deliveryDiscountAmount
+        // returns a positive value capped to the delivery's own price.
+        if (typeof _deliveryDiscountAmount === 'function') {
+          t -= _deliveryDiscountAmount(d.id);
+        }
+      }
       if (_pstate.postProd) {
         const p = (PRICING.postProduction || []).find(x => x.id === _pstate.postProd);
         if (p) t += p.price;
@@ -4128,33 +4361,82 @@
         if (a) _pushAddonRows(a);
       }
     } else {
-      // Itemized: one breakdown row per line item (so totals stay legible
-      // when there are 5+ roles), then standard delivery / post-prod / addons.
-      const liItems = Array.isArray(_pstate.lineItems) ? _pstate.lineItems : [];
-      if (liItems.length) {
-        rows.push({label: 'Crew & Production', amt: null, cls: 'section-header'});
-        for (const li of liItems) {
-          const sub = Math.max(0, Math.round((parseFloat(li.rate) || 0) * (parseFloat(li.days) || 0)));
-          if (sub > 0 || li.days > 0) {
-            const days = parseFloat(li.days) || 0;
-            const dayLabel = days === 1 ? '1 day' : days + ' days';
-            rows.push({
-              label: `${li.name} (${dayLabel} @ £${Number(li.rate || 0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})})`,
-              amt:   sub,
-              cls:   '',
-            });
-          }
+      // Itemized breakdown — DON'T repeat every line item here. The full
+      // crew / equipment table above already lists each row; duplicating
+      // them in the breakdown is visual noise. Instead show:
+      //   • One 'Crew & Production' subtotal so the operator sees what
+      //     the table sums to without scanning every row.
+      //   • Travel rows (Van Hire / Mileage / Parking / Congestion Charge),
+      //     wrapped in the existing collapsed travel-group so they read
+      //     as a single 'Travel +£N' header in the closed view.
+      //   • Standard delivery / post-prod / addons / discounts (handled
+      //     by the shared code below).
+      const liItems   = Array.isArray(_pstate.lineItems) ? _pstate.lineItems : [];
+      const _TRAVEL_RE = /^\s*(van hire|mileage|parking|congestion charge)\b/i;
+      const travelLis = liItems.filter(li => _TRAVEL_RE.test(li.name || ''));
+      const otherLis  = liItems.filter(li => !_TRAVEL_RE.test(li.name || ''));
+      // Net subtotal — rate × days minus any per-line discount. Mirrors
+      // the _liSubtotal helper used by the table footer.
+      const _liNetForRow = (li) => {
+        const gross = Math.max(0, (parseFloat(li.rate) || 0) * (parseFloat(li.days) || 0));
+        const d = li.discount;
+        if (!d || !Number(d.value)) return gross;
+        const amt = d.type === 'pct' ? gross * (Number(d.value) / 100) : Number(d.value);
+        return Math.max(0, gross - Math.max(0, Math.min(gross, amt)));
+      };
+      // Crew & Production subtotal — single line, no per-row breakdown.
+      if (otherLis.length) {
+        const subtotal = otherLis.reduce((s, li) => s + _liNetForRow(li), 0);
+        if (subtotal > 0) {
+          rows.push({label:'Crew & Production', amt: subtotal, cls:'base-row'});
         }
       } else if (PRICING.basePrice) {
         // No line items configured — fall back to a single Production Fee row
         rows.push({label:'Production Fee', amt:PRICING.basePrice, cls:'base-row'});
+      }
+      // Travel — render as the same collapsed group as Package Based.
+      // Sums up Van Hire / Mileage / Parking / Congestion Charge line
+      // items rather than re-using PRICING.travel (which is null for
+      // Itemized to avoid double-counting against the rate-card items).
+      if (travelLis.length) {
+        const total = travelLis.reduce((s, li) => s + _liNetForRow(li), 0);
+        const detailsHtml = travelLis.map(li => {
+          const sub = Math.max(0, (parseFloat(li.rate) || 0) * (parseFloat(li.days) || 0));
+          return `<div class="breakdown-row travel-detail-row fixed-row"><span>${li.name}</span><span class="travel-amt">+${_fmtGBP(sub)}</span></div>`;
+        }).join('');
+        const expanded = !!_pstate.travelExpanded;
+        const groupHtml =
+            `<div class="travel-group${expanded ? '' : ' collapsed'}" data-travel-group>`
+          + `<div class="breakdown-row travel-header" role="button" tabindex="0" aria-expanded="${expanded ? 'true' : 'false'}">`
+          +   `<span><span class="travel-caret" aria-hidden="true">+</span>Travel</span>`
+          +   `<span class="travel-total">+${_fmtGBP(total)}</span>`
+          + `</div>`
+          + `<div class="travel-details">${detailsHtml}</div>`
+          + `</div>`;
+        rows.push({ customHtml: groupHtml });
       }
       // Delivery row mirrors the calc: skip when the section is hidden.
       const _dmHidden = (window._editor_state_initial && window._editor_state_initial.hide_delivery_method)
                      || (typeof window._isDeliveryMethodHidden === 'function'
                          && window._isDeliveryMethodHidden());
       const d = (PRICING.delivery || []).find(x => x.id === _pstate.delivery);
-      if (d && !_dmHidden) rows.push({label:d.name, amt:d.price, cls:''});
+      if (d && !_dmHidden) {
+        // When a discount is set, render the delivery row with the gross
+        // strikethrough (same .li-subtotal-net/gross pattern as line items).
+        // We pass `amt` as a pre-built HTML string — the renderer treats
+        // string amts as raw output, no extra "+" prefix added. NO sibling
+        // discount sub-row — the strikethrough alone communicates it.
+        const _ddAmt = (typeof _deliveryDiscountAmount === 'function') ? _deliveryDiscountAmount(d.id) : 0;
+        if (_ddAmt > 0) {
+          const _net   = Math.max(0, (d.price || 0) - _ddAmt);
+          const _netStr = _net > 0 ? ('+' + _fmtGBP(_net)) : 'Included';
+          const _amtHtml = `<span class="li-subtotal-net">${_netStr}</span> `
+                         + `<span class="li-subtotal-gross">+${_fmtGBP(d.price)}</span>`;
+          rows.push({label:d.name, amt:_amtHtml, cls:''});
+        } else {
+          rows.push({label:d.name, amt:d.price, cls:''});
+        }
+      }
       if (_pstate.postProd) {
         const p = (PRICING.postProduction || []).find(x => x.id === _pstate.postProd);
         if (p) rows.push({label:p.name, amt:p.price, cls:''});
@@ -4490,9 +4772,188 @@
     });
   });
 
-  // Delivery pills — radio
+  // ── Camera-op chip on line items ───────────────────────────────────────
+  // Same pick-Max/Pete/Other interaction as the package chip; assignee
+  // lives on the underlying line item so it round-trips through
+  // editor_state.line_items.edits[id].assignee on save.
+  //
+  // CRITICAL: _pstate.lineItems is a shallow-spread copy of PRICING.lineItems
+  // (see init around line 12498). The autosave (_buildEditorState) reads
+  // from _pstate.lineItems, so mutations that only touch PRICING.lineItems
+  // are invisible to the saver — the field shows on screen (the chip
+  // re-renders from PRICING) but never reaches editor_state. We update both
+  // arrays here for that reason. Same fix applies to li.discount below.
+  function _setLiCameraOp(liId, newName) {
+    const pli = (PRICING.lineItems || []).find(x => x.id === liId);
+    const sli = (_pstate.lineItems || []).find(x => x.id === liId);
+    if (!pli && !sli) return;
+    if (pli) pli.assignee = newName;
+    if (sli) sli.assignee = newName;
+    document.querySelectorAll('.li-camera-op[data-li-id="' + liId + '"] [data-camera-op-name]')
+      .forEach(el => { el.textContent = newName || 'Unassigned'; });
+    if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
+  }
+  function _closeLiCameraOpMenus() {
+    document.querySelectorAll('.li-camera-op-menu.open').forEach(m => m.classList.remove('open'));
+  }
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.li-camera-op') && !e.target.closest('.li-camera-op-menu')) {
+      _closeLiCameraOpMenus();
+    }
+  });
+  function _wireLiCameraOpChip(chip) {
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!document.body.classList.contains('draft-mode')) return;
+      const liId = chip.dataset.liId;
+      _closeLiCameraOpMenus();
+      let menu = chip.querySelector('.li-camera-op-menu');
+      if (!menu) {
+        const current = (chip.querySelector('[data-camera-op-name]')?.textContent || '').trim();
+        menu = document.createElement('div');
+        menu.className = 'li-camera-op-menu';
+        menu.setAttribute('data-no-edit', '');
+        menu.addEventListener('click', (ev) => ev.stopPropagation());
+        _CAMERA_OPS.forEach(name => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'li-camera-op-menu-item' + (name === current ? ' is-current' : '');
+          btn.textContent = name;
+          btn.addEventListener('click', () => {
+            _setLiCameraOp(liId, name);
+            _closeLiCameraOpMenus();
+          });
+          menu.appendChild(btn);
+        });
+        const sep = document.createElement('div');
+        sep.className = 'li-camera-op-menu-sep';
+        menu.appendChild(sep);
+        const other = document.createElement('button');
+        other.type = 'button';
+        other.className = 'li-camera-op-menu-item';
+        other.textContent = 'Other (type a name)…';
+        other.addEventListener('click', async () => {
+          _closeLiCameraOpMenus();
+          const r = await _openModal({
+            title:  'Camera operator',
+            fields: [{ id: 'name', label: 'Name', type: 'text', required: true,
+                       value: current === 'Unassigned' ? '' : current }],
+            submitLabel: 'Set',
+          });
+          if (r && (r.name || '').trim()) _setLiCameraOp(liId, r.name.trim());
+        });
+        menu.appendChild(other);
+        const clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'li-camera-op-menu-item';
+        clear.textContent = 'Clear assignment';
+        clear.addEventListener('click', () => {
+          _setLiCameraOp(liId, '');
+          _closeLiCameraOpMenus();
+        });
+        menu.appendChild(clear);
+        chip.appendChild(menu);
+      }
+      menu.classList.add('open');
+    });
+    chip.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && document.body.classList.contains('draft-mode')) {
+        e.preventDefault();
+        chip.click();
+      }
+    });
+  }
+  document.querySelectorAll('.li-camera-op').forEach(_wireLiCameraOpChip);
+
+  // ── Line-item discount chip + add-affordance ───────────────────────
+  // Click opens the same pct/fixed modal used elsewhere. Saving sets
+  // (or clears) li.discount on BOTH PRICING.lineItems and _pstate.lineItems
+  // — same shallow-copy desync gotcha as _setLiCameraOp above. The render
+  // helpers read from PRICING; the autosave reads from _pstate.
+  async function _openLiDiscountModal(liId) {
+    const pli = (PRICING.lineItems || []).find(x => x.id === liId);
+    const sli = (_pstate.lineItems || []).find(x => x.id === liId);
+    const li  = pli || sli;
+    if (!li) return;
+    const cur  = li.discount || {};
+    const gross = (Number(li.rate) || 0) * (Number(li.days) || 0);
+    const r = await _openModal({
+      title:  `Discount on ${(li.name || '').replace(/<[^>]+>/g, '')} (£${gross.toFixed(2)})`,
+      fields: [
+        { id: 'kind', label: 'Type', type: 'radio',
+           options: [{value:'pct', label:'Percentage (%)'}, {value:'fixed', label:'Fixed (£)'}],
+           value: cur.type || 'pct' },
+        { id: 'value', label: 'Amount', type: 'number', required: true, min: 0,
+           value: cur.value != null ? String(cur.value) : '' },
+      ],
+      submitLabel: cur.value ? 'Update' : 'Apply',
+      cancelLabel: 'Cancel',
+    });
+    if (!r) return;
+    const v = Math.max(0, Number(r.value) || 0);
+    if (v <= 0) {
+      if (pli) delete pli.discount;
+      if (sli) delete sli.discount;
+    } else {
+      const disc = { value: v, type: r.kind === 'fixed' ? 'fixed' : 'pct' };
+      if (pli) pli.discount = disc;
+      if (sli) sli.discount = disc;
+    }
+    _renderLiRowChips(liId);
+    _renderLiSubtotalCell(document.querySelector(`.li-row[data-li-id="${liId}"]`));
+    _renderLiFooter();
+    _updateTotal();
+    if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
+  }
+  // Repaint the discount chip on a row when the value changes — swap
+  // between the add-affordance and the populated chip in place.
+  function _renderLiRowChips(liId) {
+    const row = document.querySelector(`.li-row[data-li-id="${liId}"]`);
+    if (!row) return;
+    const li = (PRICING.lineItems || []).find(x => x.id === liId);
+    if (!li) return;
+    const old = row.querySelector('.li-disc-chip, .li-disc-add');
+    if (old) old.remove();
+    const nameCell = row.querySelector('.li-name');
+    if (!nameCell) return;
+    const node = document.createElement('button');
+    node.type = 'button';
+    node.dataset.liId = liId;
+    node.setAttribute('data-no-edit', '');
+    const d = li.discount && Number(li.discount.value) > 0 ? li.discount : null;
+    if (d) {
+      node.className = 'li-disc-chip';
+      node.title = 'Edit / remove discount';
+      node.textContent = d.type === 'pct'
+        ? '−' + (Number(d.value) % 1 === 0 ? Number(d.value).toFixed(0) : Number(d.value)) + '%'
+        : '−£' + Number(d.value).toLocaleString('en-GB', {minimumFractionDigits:2,maximumFractionDigits:2});
+    } else {
+      node.className = 'li-disc-add';
+      node.title = 'Apply a discount to this line';
+      node.textContent = '+ Disc';
+    }
+    node.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!document.body.classList.contains('draft-mode')) return;
+      _openLiDiscountModal(liId);
+    });
+    nameCell.appendChild(node);
+  }
+  // Wire existing chips/affordances on the server-rendered rows.
+  document.querySelectorAll('.li-disc-chip, .li-disc-add').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!document.body.classList.contains('draft-mode')) return;
+      _openLiDiscountModal(el.dataset.liId);
+    });
+  });
+
+  // Delivery pills — radio. The discount badge / + affordance inside the
+  // pill is on its own click path; clicking those shouldn't switch the
+  // selected delivery method.
   document.querySelectorAll('.pill-btn[data-delivery-id]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      if (e.target.closest('.pill-disc-add, .pill-disc-badge')) return;
       document.querySelectorAll('.pill-btn[data-delivery-id]').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       _pstate.delivery = btn.dataset.deliveryId;
@@ -4501,6 +4962,97 @@
     });
   });
   _updateDeliveryHint();
+
+  // ── Delivery method discount ────────────────────────────────────────
+  // Operator can apply a percentage or fixed-amount discount to any
+  // delivery pill. State lives in _pstate.deliveryDiscounts keyed by
+  // delivery_id; renders as a notification-style badge in the pill's
+  // top-right corner. Persists via editor_state.delivery_discounts.
+  _pstate.deliveryDiscounts = Object.assign({},
+    (window._editor_state_initial || {}).delivery_discounts || {});
+
+  function _deliveryDiscountAmount(id) {
+    const d = (_pstate.deliveryDiscounts || {})[id];
+    const def = (PRICING.delivery || []).find(x => x.id === id);
+    if (!d || !d.value || !def) return 0;
+    const base = Number(def.price) || 0;
+    const amt  = d.type === 'pct'
+      ? Math.round(base * (Number(d.value) || 0)) / 100
+      : Number(d.value) || 0;
+    return Math.max(0, Math.min(base, amt));
+  }
+  function _refreshDeliveryDiscountBadges() {
+    document.querySelectorAll('.pill-btn[data-delivery-id]').forEach(pill => {
+      const id = pill.dataset.deliveryId;
+      const badge = pill.querySelector('.pill-disc-badge');
+      if (!badge) return;
+      const d = (_pstate.deliveryDiscounts || {})[id];
+      if (!d || !d.value) {
+        badge.hidden = true;
+        badge.textContent = '';
+        return;
+      }
+      // Label mirrors the line-item discount chip language: "−N%" for
+      // percentage (incl. −100% — never "Waived"), "−£X" for fixed.
+      let label;
+      if (d.type === 'pct') label = '−' + Number(d.value) + '%';
+      else                  label = '−' + _fmtGBP(_deliveryDiscountAmount(id));
+      badge.textContent = label;
+      badge.hidden = false;
+    });
+  }
+  async function _openDeliveryDiscountModal(id) {
+    const def = (PRICING.delivery || []).find(x => x.id === id);
+    if (!def) return;
+    const cur = (_pstate.deliveryDiscounts || {})[id] || {};
+    const r = await _openModal({
+      title:  `Discount on ${def.name} (£${(def.price||0).toFixed(2)})`,
+      fields: [
+        { id: 'kind', label: 'Type', type: 'radio',
+           options: [{value:'pct', label:'Percentage (%)'}, {value:'fixed', label:'Fixed (£)'}],
+           value: cur.type || 'pct' },
+        { id: 'value', label: 'Amount', type: 'number', required: true, min: 0,
+           value: cur.value != null ? String(cur.value) : '100' },
+      ],
+      submitLabel: cur.value ? 'Update discount' : 'Apply discount',
+      cancelLabel: 'Cancel',
+    });
+    if (!r) return;
+    const v = Math.max(0, Number(r.value) || 0);
+    _pstate.deliveryDiscounts = Object.assign({}, _pstate.deliveryDiscounts || {});
+    if (v <= 0) delete _pstate.deliveryDiscounts[id];
+    else _pstate.deliveryDiscounts[id] = { value: v, type: r.kind === 'fixed' ? 'fixed' : 'pct' };
+    _refreshDeliveryDiscountBadges();
+    _updateTotal();
+    if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
+  }
+
+  // Wire the + add affordance + the existing badge as click-to-edit.
+  // The add is a span (HTML forbids nested buttons), so also listen for
+  // Enter/Space to preserve keyboard accessibility.
+  document.querySelectorAll('.pill-disc-add[data-delivery-id]').forEach(btn => {
+    const open = (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (!document.body.classList.contains('draft-mode')) return;
+      _openDeliveryDiscountModal(btn.dataset.deliveryId);
+    };
+    btn.addEventListener('click', open);
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') open(e);
+    });
+  });
+  document.querySelectorAll('.pill-disc-badge[data-delivery-id]').forEach(badge => {
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!document.body.classList.contains('draft-mode')) return;
+      _openDeliveryDiscountModal(badge.dataset.deliveryId);
+    });
+  });
+
+  // Initial paint + expose for editor_state save layer.
+  _refreshDeliveryDiscountBadges();
+  window._getDeliveryDiscounts = () => Object.assign({}, _pstate.deliveryDiscounts || {});
 
   // Post-production — toggle one or none
   document.querySelectorAll('.toggle-card[data-postprod-id]').forEach(card => {
@@ -5074,6 +5626,12 @@
         clientCompany:   VF.clientCompany,
         productionDate:  VF.productionDate,
         validUntil:      VF.validUntil,
+        // Needed by the operator notification email (signed-quote audit
+        // record). addonDiscounts surfaces the per-addon discount chips
+        // the client actually saw; quoteUrl gives a one-click jump back
+        // to the signed quote.
+        addonDiscounts:  _pstate.addonDiscounts || {},
+        quoteUrl:        VF.quoteUrl || '',
       }),
     }).catch(() => {/* silent — client flow already complete */});
   });
@@ -5284,6 +5842,10 @@
         const pl = window._getTravelParkingLabel();
         if (pl) state.travel_parking_label = pl;
       }
+      if (typeof window._getDeliveryDiscounts === 'function') {
+        const dd = window._getDeliveryDiscounts();
+        if (dd && Object.keys(dd).length) state.delivery_discounts = dd;
+      }
       // Pinned add-ons + the manual ordering applied to the Optional grid.
       if (typeof window._getPinnedAddons === 'function') {
         const pa = window._getPinnedAddons();
@@ -5334,29 +5896,75 @@
         const origIds = new Set(orig.map(li => li.id));
         const curIds  = new Set(_pstate.lineItems.map(li => li.id));
         const li_state = {};
-        // Removed = in orig but not current
-        const removed = orig.filter(li => !curIds.has(li.id)).map(li => li.id);
+        // ⚠️  CRITICAL: orig = _originalPricing.lineItems is POST-editor-state
+        // — the regen already removed the operator's removed IDs and merged
+        // the operator's added items before snapshotting. Naively saying
+        // "removed = items in orig but not current" only captures THIS session's
+        // removals; it forgets the durable ones the operator did weeks ago.
+        // Same for added: an item the operator added in a prior session is
+        // already in orig, so the simple diff would emit `added: []` and the
+        // saved state would wipe their earlier work. This block carries the
+        // initial editor_state forward and merges in the session deltas.
+        const _initLi          = (window._editor_state_initial || {}).line_items || {};
+        const _initRemovedIds  = new Set(_initLi.removed_ids || []);
+        const _initAddedIds    = new Set((_initLi.added || []).map(a => a.id));
+
+        // Removed_ids = (durable initial removals minus anything the operator
+        //                re-added this session) ∪ (anything in orig but not
+        //                in current that wasn't already in the initial list).
+        const _sessionRemoved = orig
+          .filter(li => !curIds.has(li.id) && !_initRemovedIds.has(li.id))
+          .map(li => li.id);
+        const _carryRemoved = [..._initRemovedIds].filter(id => !curIds.has(id));
+        const removed = _carryRemoved.concat(_sessionRemoved);
         if (removed.length) li_state.removed_ids = removed;
-        // Edits = present in both, but name/rate/days changed
+
+        // Added = every line item the operator owns the full state of — i.e.,
+        // anything they explicitly added (either this session OR a previous one
+        // that's still in initial.added). Items from the rate-card auto-import
+        // are NOT in this set; their tweaks go in `edits` below.
+        const _isOperatorAdded = (id) => !origIds.has(id) || _initAddedIds.has(id);
+        const added = _pstate.lineItems
+          .filter(cur => _isOperatorAdded(cur.id))
+          .map(cur => ({
+            id:   cur.id,
+            role_id: cur.role_id || null,
+            name: cur.name,
+            rate: Number(cur.rate) || 0,
+            days: Number(cur.days) || 0,
+            ...(cur.assignee ? { assignee: cur.assignee } : {}),
+            ...(cur.category ? { category: cur.category } : {}),
+            ...(cur.discount && Number(cur.discount.value) > 0
+                ? { discount: { value: Number(cur.discount.value),
+                                   type:  cur.discount.type === 'fixed' ? 'fixed' : 'pct' } }
+                : {}),
+          }));
+        if (added.length) li_state.added = added;
+
+        // Edits = name/rate/days/assignee changes on rate-card items (not in
+        // initial.added — operator-added items carry their full state in
+        // `added` above so we don't double-store the diff).
         const edits = {};
         _pstate.lineItems.forEach(cur => {
+          if (_isOperatorAdded(cur.id)) return;
           const o = orig.find(li => li.id === cur.id);
-          if (!o) return;  // a custom add, handled below
+          if (!o) return;
           const diff = {};
-          ['name', 'rate', 'days'].forEach(k => {
-            if (cur[k] !== o[k]) diff[k] = cur[k];
+          ['name', 'rate', 'days', 'assignee'].forEach(k => {
+            if ((cur[k] || '') !== (o[k] || '')) diff[k] = cur[k] || '';
           });
+          // Discount is an object, not a primitive — diff by JSON shape.
+          if (JSON.stringify(cur.discount || null) !== JSON.stringify(o.discount || null)) {
+            if (cur.discount && Number(cur.discount.value) > 0) {
+              diff.discount = { value: Number(cur.discount.value),
+                                 type:  cur.discount.type === 'fixed' ? 'fixed' : 'pct' };
+            } else {
+              diff.discount = null;          // explicit clear
+            }
+          }
           if (Object.keys(diff).length) edits[cur.id] = diff;
         });
         if (Object.keys(edits).length) li_state.edits = edits;
-        // Added = in current but not orig
-        const added = _pstate.lineItems
-          .filter(cur => !origIds.has(cur.id))
-          .map(cur => ({
-            id: cur.id, role_id: cur.role_id || null,
-            name: cur.name, rate: Number(cur.rate) || 0, days: Number(cur.days) || 0,
-          }));
-        if (added.length) li_state.added = added;
         // Order: persist current row order so drag-to-reorder edits survive
         // regeneration. Only saved when it actually differs from the
         // server-seeded order, to keep editor state lean for unmodified quotes.
@@ -5394,7 +6002,7 @@
         'addon_edits',   'addon_qty',           'custom_addons',
         'addon_discounts', 'custom_discounts',
         'removed_addon_ids',
-        'travel_overrides', 'travel_discounts', 'travel_parking_label',
+        'travel_overrides', 'travel_discounts', 'travel_parking_label', 'delivery_discounts',
         'pinned_addons',   'addon_order',
       ];
       preserveKeys.forEach((k) => {
@@ -5786,7 +6394,28 @@
       el.textContent = newText;
       el.className   = newCls;
     }
+    // States where the quote is considered "locked" — autosave is a no-op,
+    // because mutating editor_state on a Signed/Invoiced/Paid quote can erase
+    // the figures the client actually signed for (and even just opening the
+    // editor would otherwise trigger a save with whatever transient diff the
+    // JS produces on init). The audit on VF-0204 was exactly this: my
+    // page-load autosave wiped a £24 addon discount Florence had signed
+    // against. Status check intentionally permissive on missing/unknown so
+    // legitimately-Draft / Generated quotes still save normally.
+    const _LOCKED_STATUSES = new Set([
+      'Signed', 'Invoiced', 'Paid', 'Archived',
+    ]);
+    function _isQuoteLocked() {
+      const s = (VF && VF.financialStatus) || '';
+      return _LOCKED_STATUSES.has(s);
+    }
     function _scheduleAutosave() {
+      if (_isQuoteLocked()) {
+        // Surface this once so the operator knows edits are inert; the
+        // banner gets a permanent locked indicator instead of a saving spinner.
+        _setAutosaveStatus('Locked — quote is ' + ((VF && VF.financialStatus) || 'finalised'), 'saved');
+        return;
+      }
       if (_autosaveTimer) clearTimeout(_autosaveTimer);
       _setAutosaveStatus('Edited — saving in 3s', '');
       _autosaveTimer = setTimeout(_doAutosave, 3000);
@@ -5842,6 +6471,28 @@
           throw new Error('HTTP ' + resp.status + bodyHint);
         }
         _autosaveFailCount = 0;
+
+        // VF-0204 fix: propagate the editor_state into the live KV HTML so
+        // the client view stays in sync with the operator's edits. The
+        // Notion write above is durable but invisible to the client — the
+        // served HTML keeps its baked-in _editor_state_initial from the
+        // last full regen until a /api/quotes/sync-state call refreshes
+        // it. Fire-and-forget here; a sync failure doesn't fail autosave
+        // (Notion is still the source of truth for the next regen), but
+        // a console warning surfaces silent divergence during dev.
+        try {
+          const _tok = ((VF.quoteUrl || '').match(/\/quotes\/([A-Za-z0-9]+)/) || [])[1] || '';
+          if (_tok) {
+            fetch('https://valley.film/api/quotes/sync-state?token=' + encodeURIComponent(_tok),
+                  {
+                    method:  'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body:    JSON.stringify({ editorState }),
+                  }).then(r => {
+                    if (!r.ok) console.warn('sync-state failed:', r.status);
+                  }).catch(e => console.warn('sync-state error:', e));
+          }
+        } catch (_) {}
 
         // Snapshot to our local history store — best-effort. The history
         // log is what powers the "Restore previous edits" button in the
@@ -6111,6 +6762,47 @@
     // for power users — see keyboard handler).
     new MutationObserver(_refreshStatusPillForView)
       .observe(document.body, {attributes: true, attributeFilter: ['class']});
+
+    // ── Refresh from Notion button ───────────────────────────────────────
+    // Re-pulls the latest Notion data (location, deliverables, brief,
+    // client info, etc.) and regenerates the quote HTML. Editor-state
+    // edits (line items, prices, package edits) are preserved — they're
+    // already in Notion's Editor State property, which the regen reads
+    // and re-applies on top of the fresh fields.
+    //
+    // Flow:
+    //   1. Force any pending autosave to flush so the operator's local
+    //      edits land in editor_state before the regen reads it.
+    //   2. POST /api/quotes/admin?action=trigger which flips Notion's
+    //      Financial Status to 'Requested'. The Mac monitor's LaunchAgent
+    //      picks that up within ~30s and runs the generator.
+    //   3. Show a "Refreshing from Notion… reloading in ~60s" status in
+    //      the autosave indicator + reload the page after that delay so
+    //      the operator sees the fresh HTML.
+    document.getElementById('draft-refresh-btn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('draft-refresh-btn');
+      if (btn?.dataset.busy === '1') return;     // already running
+      if (btn) btn.dataset.busy = '1';
+      try {
+        // 1. Flush any pending autosave (this commits in-progress edits).
+        try { if (typeof _doAutosave === 'function') await _doAutosave(); } catch (_) {}
+        _setAutosaveStatus('Refreshing from Notion…', 'saving');
+        // 2. Trigger Notion → Requested via the same-origin admin endpoint.
+        const r = await fetch('/api/quotes/admin', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ action: 'trigger', pageId: VF.pageId }),
+          credentials: 'same-origin',
+        });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        // 3. Tell the operator + reload after ~60s.
+        _setAutosaveStatus('Refreshing… page reloads in ~60s', 'saving');
+        setTimeout(() => { window.location.reload(); }, 60_000);
+      } catch (e) {
+        _setAutosaveStatus('Refresh failed — ' + (e?.message || 'unknown'), 'error');
+        if (btn) btn.dataset.busy = '';
+      }
+    });
 
     // ── Revert to Original button ────────────────────────────────────────
     document.getElementById('draft-revert-btn')?.addEventListener('click', async () => {
@@ -6479,6 +7171,34 @@
       }
     });
 
+    // ── Line item name sanitiser ──────────────────────────────────────
+    // Operator can ⌘B/⌘I inline; we want to preserve those tags through
+    // a save/regen cycle but nothing else (no fonts, colours, links, divs).
+    // Walks the DOM and unwraps anything that isn't b/strong/i/em.
+    function _sanitizeLiName(html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html || '';
+      const allow = new Set(['B', 'STRONG', 'I', 'EM']);
+      // Two passes so children get unwrapped before we re-check their parents.
+      const walk = (node) => {
+        Array.from(node.children).forEach(walk);
+        Array.from(node.children).forEach(el => {
+          if (!allow.has(el.tagName)) {
+            // Replace the element with its children (unwrap)
+            const parent = el.parentNode;
+            while (el.firstChild) parent.insertBefore(el.firstChild, el);
+            parent.removeChild(el);
+          } else {
+            // Strip all attributes
+            Array.from(el.attributes).forEach(a => el.removeAttribute(a.name));
+          }
+        });
+      };
+      walk(tmp);
+      return tmp.innerHTML;
+    }
+    window._sanitizeLiName = _sanitizeLiName;
+
     function _attachEditable(el) {
       el.addEventListener('click', function(e) {
         // Only stop propagation when NOT inside a toggle/pkg card — those need clicks to bubble
@@ -6519,6 +7239,34 @@
         if (this.dataset.singleLine && (e.key === 'Enter' || e.key === 'Tab')) {
           e.preventDefault();
           this.blur();
+        }
+      });
+      // ── Strip rich formatting on paste ──────────────────────────────
+      // contenteditable preserves bold / italic / fonts / colours when
+      // pasting from elsewhere. Force plain text so every line item /
+      // editable looks consistent regardless of where the operator
+      // copied from. We intercept the paste, drop into plain text,
+      // and use document.execCommand('insertText') so the browser's
+      // own undo stack picks it up correctly.
+      el.addEventListener('paste', function(e) {
+        if (this.contentEditable !== 'true') return;
+        e.preventDefault();
+        const cd = e.clipboardData || window.clipboardData;
+        if (!cd) return;
+        let text = cd.getData('text/plain') || '';
+        if (this.dataset.singleLine) {
+          text = text.replace(/[\r\n]+/g, ' ').trim();
+        }
+        if (!text) return;
+        try { document.execCommand('insertText', false, text); }
+        catch (_) {
+          // Fallback for browsers that have deprecated execCommand
+          const sel = window.getSelection();
+          if (!sel || !sel.rangeCount) return;
+          const range = sel.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(document.createTextNode(text));
+          range.collapse(false);
         }
       });
     }
@@ -7503,8 +8251,23 @@
     if (VF.quoteType === 'Itemized') {
       _pstate.lineItems = (PRICING.lineItems || []).map(li => ({ ...li }));
 
+      function _liGross(li) {
+        return Math.max(0, (parseFloat(li.rate) || 0) * (parseFloat(li.days) || 0));
+      }
+      function _liDiscountAmount(li) {
+        const d = li && li.discount;
+        if (!d || !Number(d.value)) return 0;
+        const gross = _liGross(li);
+        const amt = d.type === 'pct'
+          ? gross * (Number(d.value) / 100.0)
+          : Number(d.value);
+        return Math.max(0, Math.min(gross, amt));
+      }
+      // _liSubtotal returns the NET (rate*days − discount). Kept as the
+      // primary "what this line costs" helper so all callers (subtotal
+      // cell, footer, base-total) get the discount baked in automatically.
       function _liSubtotal(li) {
-        return Math.max(0, Math.round((parseFloat(li.rate) || 0) * (parseFloat(li.days) || 0)));
+        return Math.max(0, _liGross(li) - _liDiscountAmount(li));
       }
       function _liGrandSubtotal() {
         return _pstate.lineItems.reduce((acc, li) => acc + _liSubtotal(li), 0);
@@ -7513,7 +8276,15 @@
         const li = _pstate.lineItems.find(x => x.id === row.dataset.liId);
         if (!li) return;
         const cell = row.querySelector('.li-subtotal');
-        if (cell) cell.textContent = '£' + _liSubtotal(li).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (!cell) return;
+        const gross = _liGross(li);
+        const net   = _liSubtotal(li);
+        const fmt = (n) => '£' + Number(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (gross > net) {
+          cell.innerHTML = `<span class="li-subtotal-net">${fmt(net)}</span> <span class="li-subtotal-gross">${fmt(gross)}</span>`;
+        } else {
+          cell.textContent = fmt(net);
+        }
       }
       function _renderLiFooter() {
         const el = document.getElementById('line-items-subtotal');
@@ -7629,16 +8400,23 @@
         const id = row.dataset.liId;
         const li = _pstate.lineItems.find(x => x.id === id);
         if (!li) return;
-        const nameEl = row.querySelector('.li-name');
+        // Read the INNER name span, not the whole TD — the chip + drag handle
+        // also live inside .li-name. Using textContent on the TD would smuggle
+        // 'Max Paterson' / drag-icon text into the saved name on every blur.
+        const nameEl = row.querySelector('.li-name-text');
         const rateEl = row.querySelector('.li-rate');
-        // The Qty cell is now a wrapper around .li-qty-num (the editable
-        // number) + .li-qty-unit (the display unit suffix). We blur-sync
-        // off the number span and recompute the unit suffix's pluralisation.
         const qtyNumEl  = row.querySelector('.li-qty-num');
         const qtyUnitEl = row.querySelector('.li-qty-unit');
         if (nameEl) nameEl.addEventListener('blur', () => {
-          const t = (nameEl.textContent || '').trim();
-          if (t) li.name = t;
+          // innerHTML so deliberate ⌘B / ⌘I formatting survives. We strip
+          // anything that isn't b/strong/i/em via _sanitizeLiName before
+          // committing (paste-handler also strips formatting on input, so
+          // operators only get the bold/italic they explicitly added).
+          const html = _sanitizeLiName(nameEl.innerHTML || '');
+          if (html.trim()) {
+            li.name = html;
+            nameEl.innerHTML = html;     // normalise stray tags in place
+          }
         });
         if (rateEl) rateEl.addEventListener('blur', () => {
           const digits = (rateEl.textContent || '').replace(/[^0-9.]/g, '');
@@ -7962,6 +8740,15 @@
     // Webhook PATCHes it into the production page's Editor State rich_text;
     // the next regeneration applies these overrides on top of fresh data so
     // drafts survive writebacks, revisions, and rate-card changes.
+    //
+    // CRITICAL (VF-0204 lesson): the Notion write alone is NOT enough — the
+    // KV-served HTML embeds its own `_editor_state_initial` JSON, baked in at
+    // last regen. Without also patching that, the operator's edits never reach
+    // the client view. So after the Notion write succeeds, fire a parallel
+    // POST to /api/quotes/sync-state which substitutes the embedded JSON in
+    // KV in-place. Best-effort: a sync-state failure shouldn't fail Save
+    // Draft (Notion is still updated; next full regen will catch up), so it
+    // runs in parallel and we only surface the warning if it errors.
     document.getElementById('draft-save-btn')?.addEventListener('click', async () => {
       const btn = document.getElementById('draft-save-btn');
       btn.textContent = 'Saving…';
@@ -7974,6 +8761,25 @@
       });
 
       const editorState = _buildEditorState();
+      // Extract token from the public quote URL so we can target the right
+      // KV row. The Python regen embeds VF.quoteUrl, e.g.
+      //   https://valley.film/quotes/OodY9YX9
+      const _quoteToken = ((VF.quoteUrl || '').match(/\/quotes\/([A-Za-z0-9]+)/) || [])[1] || '';
+      // Parallel sync to KV. Detached so the operator doesn't wait on the
+      // network round-trip twice. We don't reject Save Draft on a sync
+      // failure — Notion is still the source of truth for the next regen.
+      let _syncPromise = Promise.resolve({ ok: true, skipped: !_quoteToken });
+      if (_quoteToken) {
+        _syncPromise = fetch(
+          'https://valley.film/api/quotes/sync-state?token=' + encodeURIComponent(_quoteToken),
+          {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ editorState }),
+          }
+        ).then(r => r.ok ? r.json() : { ok: false, status: r.status })
+         .catch(e => ({ ok: false, error: String(e && e.message || e) }));
+      }
       try {
         const resp = await fetch('https://vf-quotes.vercel.app/api/webhook', {
           method:  'POST',
@@ -7986,7 +8792,16 @@
           }),
         });
         if (!resp.ok) throw new Error('non-200');
-        btn.textContent = '✓ Saved';
+        // Wait for the KV sync too. If Notion saved but KV didn't, prefer to
+        // tell the operator clearly — that's the silent-divergence trap that
+        // bit VF-0204.
+        const syncRes = await _syncPromise;
+        if (syncRes && syncRes.ok === false) {
+          console.warn('Editor state synced to Notion but NOT to KV:', syncRes);
+          btn.textContent = '✓ Saved (KV sync warn)';
+        } else {
+          btn.textContent = '✓ Saved';
+        }
         btn.style.borderColor = 'var(--green)';
         btn.style.color = 'var(--green)';
         setTimeout(() => {
@@ -8419,7 +9234,7 @@
     lv('Project', VF.projectTitle);
     lv('Accepted by', signerName + (VF.clientCompany ? ', ' + VF.clientCompany : ''));
     lv('Production date', VF.productionDate);
-    lv('Location', 'London, England, United Kingdom');
+    lv('Location', 'Battersea Park Studios');
     lv('Deliverables', 'Highlight Video (60s), Social Cut (30s)');
     lv('Turnaround', '3 Working Days');
     y += 2; rule();
