@@ -146,6 +146,7 @@ def send_signed_email(payload, client_ip=""):
     # ── Header fields ─────────────────────────────────────────────
     quote_ref      = payload.get("quoteRef") or "—"
     signer_name    = payload.get("signerName") or "—"
+    signer_email   = (payload.get("signerEmail") or "").strip()
     project_title  = payload.get("projectTitle") or "TBC"
     client_company = payload.get("clientCompany") or ""
     timestamp      = payload.get("timestamp") or ""
@@ -269,6 +270,7 @@ def send_signed_email(payload, client_ip=""):
               <td style="padding:10px 0;color:#999;font-size:13px;width:140px;">Name on signature</td>
               <td style="padding:10px 0;font-size:13px;font-weight:600;">{client_line}</td>
             </tr>
+            {f'<tr style="border-bottom:1px solid #f0f0f0;"><td style="padding:10px 0;color:#999;font-size:13px;">Email</td><td style="padding:10px 0;font-size:13px;"><a href="mailto:{e(signer_email)}" style="color:#095EDF;text-decoration:none;">{e(signer_email)}</a></td></tr>' if signer_email else ''}
             <tr style="border-bottom:1px solid #f0f0f0;">
               <td style="padding:10px 0;color:#999;font-size:13px;">Signed at</td>
               <td style="padding:10px 0;font-size:13px;">{e(signed_date_full)}</td>
@@ -651,6 +653,29 @@ class handler(BaseHTTPRequestHandler):
             email_ok, email_err = send_signed_email(data, client_ip=client_ip)
             if not email_ok:
                 print(f"send_signed_email failed: {email_err}")
+
+            # Persist the full acceptance snapshot to KV via the website's
+            # /api/quotes/acceptance endpoint. This is what powers the
+            # operator's "View confirmation" link in the /quotes picker —
+            # serve.js reads it on the public client URL and renders a
+            # confirmation overlay instead of the live editor surface for
+            # signed quotes. Best-effort: a failure here doesn't block the
+            # sign (Notion is the canonical record), the operator just
+            # won't get the pretty confirmation view for this quote.
+            try:
+                quote_url = data.get("quoteUrl") or ""
+                token_match = re.search(r"/quotes/([A-Za-z0-9]+)", quote_url)
+                token = token_match.group(1) if token_match else ""
+                if token:
+                    snap = dict(data)
+                    snap["clientIp"] = client_ip
+                    requests.post(
+                        f"https://valley.film/api/quotes/acceptance?token={token}",
+                        json={"acceptance": snap},
+                        timeout=HTTP_TIMEOUT,
+                    )
+            except Exception as snap_e:
+                print(f"acceptance snapshot store failed (soft): {snap_e}")
 
             print(f"Signed: page={page_id} signer='{signer_name}' ip={client_ip} "
                   f"notion_ok={ok} email_ok={email_ok}")
