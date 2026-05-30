@@ -1,4 +1,3 @@
-import base64
 import hashlib
 import hmac
 import html
@@ -12,10 +11,13 @@ import datetime
 
 NOTION_API_KEY  = os.environ.get("NOTION_API_KEY")
 PROD_DB_ID      = os.environ.get("PROD_DB_ID")
-GITHUB_TOKEN    = os.environ.get("GITHUB_TOKEN")
 RESEND_API_KEY  = os.environ.get("RESEND_API_KEY")
-GITHUB_REPO    = "HenryMaxPaterson/vf-quotes"
-GITHUB_BRANCH  = "main"
+# NOTE: GITHUB_TOKEN / GITHUB_REPO / GITHUB_BRANCH used to live here for
+# the legacy github_write_file / github_flip_is_draft helpers. After the
+# Vercel KV migration the served HTML lives in KV (not the vf-quotes
+# repo), so both helpers were modifying a stale repo copy nobody served
+# from — pure dead code. Removed alongside the helpers themselves. The
+# vf-quotes-webhook fine-grained PAT can be retired in Vercel env vars.
 
 # ── Webhook auth (shared-secret HMAC per page) ────────────────────────────
 # Each generated quote embeds a token = hmac_sha256(VF_WEBHOOK_SECRET, page_id).
@@ -399,47 +401,16 @@ PROD_FIELD_MAP = {
 }
 
 
-# ── GitHub helpers ─────────────────────────────────────────────────────────────
-
-def _gh_headers():
-    return {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json",
-    }
-
-def github_write_file(filename, html_content):
-    """Create or update a file in the quotes repo."""
-    api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
-    # Get current SHA so GitHub accepts the update
-    get_resp = requests.get(api_url, headers=_gh_headers(), timeout=HTTP_TIMEOUT)
-    sha = get_resp.json().get("sha") if get_resp.status_code == 200 else None
-    payload = {
-        "message": f"Save: {filename}",
-        "content": base64.b64encode(html_content.encode("utf-8")).decode(),
-        "branch":  GITHUB_BRANCH,
-    }
-    if sha:
-        payload["sha"] = sha
-    put_resp = requests.put(api_url, headers=_gh_headers(), json=payload, timeout=HTTP_TIMEOUT)
-    put_resp.raise_for_status()
-
-def github_flip_is_draft(filename):
-    """Fetch the live HTML, set isDraft to false, write back."""
-    api_url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
-    get_resp = requests.get(api_url, headers=_gh_headers(), timeout=HTTP_TIMEOUT)
-    get_resp.raise_for_status()
-    file_data = get_resp.json()
-    html = base64.b64decode(file_data["content"]).decode("utf-8")
-    # Flip the flag in the VF data blob
-    html = re.sub(r'"isDraft"\s*:\s*true', '"isDraft": false', html)
-    payload = {
-        "message": f"Publish: {filename}",
-        "content": base64.b64encode(html.encode("utf-8")).decode(),
-        "branch":  GITHUB_BRANCH,
-        "sha":     file_data["sha"],
-    }
-    put_resp = requests.put(api_url, headers=_gh_headers(), json=payload, timeout=HTTP_TIMEOUT)
-    put_resp.raise_for_status()
+# ── GitHub helpers ────────────────────────────────────────────────────────────
+# Removed: _gh_headers, github_write_file, github_flip_is_draft.
+#
+# These powered the pre-KV publish path that wrote rendered HTML directly
+# into HenryMaxPaterson/vf-quotes via the GitHub API. After the Vercel KV
+# migration the served HTML lives in KV — every operation that *used* to
+# go through these helpers (save_draft, approved_for_sending → publish)
+# now goes through /api/quotes/upload, /api/quotes/sync-state, and
+# /api/quotes/publish on the valley-films Vercel project. The GitHub
+# writes were modifying a stale repo copy no one served from.
 
 
 class handler(BaseHTTPRequestHandler):
@@ -513,18 +484,17 @@ class handler(BaseHTTPRequestHandler):
         #                               localStorage, so the payload is safe
         #                               even if the Notion write rejects.
         if action == "save_draft":
-            filename     = data.get("filename", "")
-            html         = data.get("html", "")
+            # Post-KV-migration the only meaningful payload is editor_state.
+            # The legacy `html` branch (which posted whole rendered HTML to
+            # the vf-quotes GitHub repo) is gone — its served-from location
+            # was already replaced by Vercel KV, so the GitHub write was
+            # touching a stale repo copy no client ever read.
             editor_state = data.get("editor_state")
             ok = False
             warning   = None
             error_msg = None
             try:
-                if filename and html and GITHUB_TOKEN:
-                    github_write_file(filename, html)
-                    ok = True
-                    print(f"Draft saved to GitHub: {filename}")
-                elif editor_state is not None and page_id:
+                if editor_state is not None and page_id:
                     # Acknowledge receipt — localStorage is the canonical store
                     # for in-flight edits. Best-effort sync to Notion below;
                     # if it fails (e.g. property missing), we still return 200.
@@ -606,15 +576,15 @@ class handler(BaseHTTPRequestHandler):
             return
 
         # ── Approve: publish to client ─────────────────────────────────────────
+        # The flip-isDraft work now lives entirely on the website side: the
+        # editor JS calls /api/quotes/publish on valley.film before opening
+        # Gmail, which rewrites the KV-stored HTML in place. Previously
+        # we *also* flipped isDraft in the vf-quotes GitHub repo via
+        # github_flip_is_draft — kept around for a while after the KV
+        # migration as belt-and-braces, but the served HTML hasn't come
+        # from that repo for months, so the GitHub round-trip was pure
+        # tax. Webhook now only owns the Notion status transition.
         if action == "approved_for_sending" and page_id:
-            filename = data.get("filename", "")
-            # Flip isDraft in the live file so the client sees no draft UI
-            if filename and GITHUB_TOKEN:
-                try:
-                    github_flip_is_draft(filename)
-                    print(f"Published (isDraft→false): {filename}")
-                except Exception as e:
-                    print(f"GitHub publish failed (continuing): {e}")
             update_notion_status(page_id, "Quotation Sent")
             print(f"Set page {page_id} to Quotation Sent.")
             self.send_response(200)
