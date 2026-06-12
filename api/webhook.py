@@ -357,6 +357,11 @@ def update_notion_editor_state(page_id, state):
     response.raise_for_status()
 
 
+# Loose date check: just the YYYY-MM-DD prefix (Notion accepts ISO strings
+# with optional time suffixes, so prefix-matching is deliberately permissive).
+_DATE_PREFIX_RE = re.compile(r"^\d{4}-\d{2}-\d{2}")
+
+
 def update_notion_property(page_id, prop_name, prop_type, value):
     """PATCH a single Notion property on a Production page.
 
@@ -369,7 +374,28 @@ def update_notion_property(page_id, prop_name, prop_type, value):
         except Exception: return False, f"bad number '{value}'"
         prop = {"number": val}
     elif prop_type == "date":
-        prop = {"date": {"start": value}} if value else {"date": None}
+        # Accept either a plain string ("2026-06-11") or a {start, end} dict
+        # for date ranges. Empty / missing start clears the property.
+        if isinstance(value, dict):
+            start = value.get("start")
+            if not start:
+                prop = {"date": None}
+            else:
+                if not _DATE_PREFIX_RE.match(str(start).strip()):
+                    return False, f"bad date start '{start}' (want YYYY-MM-DD)"
+                date_obj = {"start": start}
+                end = value.get("end")
+                if end:
+                    if not _DATE_PREFIX_RE.match(str(end).strip()):
+                        return False, f"bad date end '{end}' (want YYYY-MM-DD)"
+                    date_obj["end"] = end
+                prop = {"date": date_obj}
+        elif value:
+            if not _DATE_PREFIX_RE.match(str(value).strip()):
+                return False, f"bad date '{value}' (want YYYY-MM-DD)"
+            prop = {"date": {"start": value}}
+        else:
+            prop = {"date": None}
     elif prop_type == "select":
         prop = {"select": {"name": value}} if value else {"select": None}
     elif prop_type in ("text", "rich_text"):
@@ -390,14 +416,22 @@ def update_notion_property(page_id, prop_name, prop_type, value):
 
 
 # Map our snake_case field names → (Notion property name, type)
+# Property names + types verified against the LIVE Productions DB schema.
+#   • 'Project' is the title (NOT 'Project Title').
+#   • Location is the 'Shoot Location' *place* property — the public Notion
+#     API CANNOT write place properties, so it's intentionally NOT here; the
+#     brief-grid Location row is display-only and edited in Notion directly.
+#   • 'Location' and 'Shoot Hours' do not exist in the schema, so neither the
+#     map nor the snake_case fallback should ever target them — fields not in
+#     this map are refused below rather than guessed at.
 PROD_FIELD_MAP = {
-    "project_title":     ("Project Title", "title"),
+    "project_title":     ("Project", "title"),
     "production_date":   ("Production Date", "date"),
     "shooting_days":     ("Shooting Days", "number"),
-    "location":          ("Location", "rich_text"),
     "job_type":          ("Job Type", "select"),
     "default_delivery":  ("Default Delivery", "select"),
     "quote_type":        ("Quote Type", "select"),
+    "draft_deadline":    ("1st Draft Deadline", "date"),
 }
 
 
@@ -411,6 +445,46 @@ PROD_FIELD_MAP = {
 # now goes through /api/quotes/upload, /api/quotes/sync-state, and
 # /api/quotes/publish on the valley-films Vercel project. The GitHub
 # writes were modifying a stale repo copy no one served from.
+
+
+# ── Actions dispatch (instant cloud generation) ──────────────────────────────
+# After set_trigger flips the Trigger select, fire a repository_dispatch so
+# GitHub Actions runs the generation sweep immediately instead of waiting for
+# the next poll. Strictly best-effort: the Mac monitor polls every ~30s
+# regardless, so a missing token or a failed dispatch just means "slower",
+# never "broken".
+GH_DISPATCH_TOKEN = os.environ.get("GH_DISPATCH_TOKEN", "")
+GH_DISPATCH_REPO  = "HenryMaxPaterson/vf-quote-generator"
+GH_DISPATCH_EVENT = "quote-generate"
+
+
+def dispatch_actions(page_id, reason="unspecified"):
+    """Fire a repository_dispatch event (soft-fail on every error path).
+    Silently no-ops when GH_DISPATCH_TOKEN isn't configured."""
+    if not GH_DISPATCH_TOKEN:
+        return
+    try:
+        r = requests.post(
+            f"https://api.github.com/repos/{GH_DISPATCH_REPO}/dispatches",
+            headers={
+                "Authorization": f"Bearer {GH_DISPATCH_TOKEN}",
+                "Accept":        "application/vnd.github+json",
+                "User-Agent":    "vf-quotes-webhook",
+            },
+            json={
+                "event_type": GH_DISPATCH_EVENT,
+                "client_payload": {"page_id": page_id or "", "reason": reason},
+            },
+            timeout=HTTP_TIMEOUT,
+        )
+        # GitHub returns 204 No Content on success.
+        if r.status_code == 204:
+            print(f"Actions dispatched for {(page_id or '?')[-8:]} (reason={reason})")
+        else:
+            print(f"Actions dispatch returned {r.status_code}: {(r.text or '')[:200]}")
+    except Exception as e:
+        # Never let a dispatch failure break the webhook handler.
+        print(f"Actions dispatch failed (non-fatal): {type(e).__name__}: {str(e)[:160]}")
 
 
 class handler(BaseHTTPRequestHandler):
@@ -542,6 +616,60 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"status": "ok" if ok else "error"}).encode())
             return
 
+        # ── Preflight: verify autosave will land ──────────────────────────────
+        # The editor calls this once on load so it can warn BEFORE the operator
+        # types, instead of letting every keystroke save fail silently.
+        # Always 200 (ok:true/false) — soft signal, not an HTTP error.
+        if action == "preflight" and page_id:
+            def _pf_reply(payload):
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(payload).encode())
+                return
+            try:
+                resp = requests.get(
+                    f"https://api.notion.com/v1/pages/{page_id}",
+                    headers=HEADERS, timeout=HTTP_TIMEOUT,
+                )
+                if resp.status_code == 404:
+                    return _pf_reply({
+                        "ok": False, "reason": "page_not_found",
+                        "hint": "This Production page no longer exists in Notion.",
+                    })
+                resp.raise_for_status()
+                props = resp.json().get("properties", {}) or {}
+                es = props.get("Editor State")
+                if es is None:
+                    return _pf_reply({
+                        "ok": False, "reason": "missing_property",
+                        "hint": "Add a 'Rich text' property called 'Editor State' "
+                                "to the Productions database, then refresh.",
+                    })
+                if "rich_text" not in es:
+                    return _pf_reply({
+                        "ok": False, "reason": "wrong_property_type",
+                        "hint": "The 'Editor State' property must be type 'Rich text'. "
+                                "Delete and recreate it as Rich text.",
+                    })
+                return _pf_reply({"ok": True})
+            except Exception as e:
+                return _pf_reply({
+                    "ok": False, "reason": "preflight_error",
+                    "hint": f"Could not verify save target: {type(e).__name__}",
+                })
+
+        # NOTE: 'revise' and 'set_trigger' deliberately do NOT live here.
+        # Both are state-mutating (revise un-sends a quote; set_trigger's
+        # "Reset & Regenerate" wipes the operator's Editor State), and this
+        # webhook is unauthenticated in its current posture (WEBHOOK_AUTH_MODE
+        # defaults to 'off' and no VF_WEBHOOK_SECRET is configured, so every
+        # quote ships with webhookToken=""). A client who reads VF.pageId out
+        # of their own served page could otherwise POST these and destroy the
+        # operator's work. They now run through valley.film/api/quotes/admin,
+        # which is gated on the operator's session cookie (a client has none).
+
         # ── Production field PATCH (editor changes a brief-grid field) ─────────
         # Editor sends { field, field_type, value }. We map the field to its
         # Notion property + type, then PATCH. Errors return 200 + ok:false so
@@ -552,13 +680,23 @@ class handler(BaseHTTPRequestHandler):
             field_type = data.get("field_type") or ""
             mapping = PROD_FIELD_MAP.get(field)
             if not mapping:
-                # Fallback: use snake_case → Title Case + the type hint sent
-                prop_name = " ".join(p.capitalize() for p in field.split("_"))
-                prop_type = field_type or "rich_text"
-            else:
-                prop_name, prop_type = mapping
-                if field_type:
-                    prop_type = field_type
+                # Unknown field → refuse. The old snake_case→Title-Case guess
+                # would PATCH a property that may not exist (e.g. 'location' →
+                # 'Location', which 404s) or, worse, an attacker-named one.
+                # Only the curated PROD_FIELD_MAP fields are writable.
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": False, "field": field,
+                    "error": f"field '{field}' is not editable from the quote "
+                             f"(edit it in Notion directly)",
+                }).encode())
+                return
+            prop_name, prop_type = mapping
+            if field_type:
+                prop_type = field_type
             ok, err = update_notion_property(page_id, prop_name, prop_type, value)
             print(f"update_production_field {field}={value!r} → {prop_name} ({prop_type}): "
                   + ("ok" if ok else f"failed: {err}"))
