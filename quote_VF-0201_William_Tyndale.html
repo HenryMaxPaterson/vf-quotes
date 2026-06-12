@@ -2280,12 +2280,15 @@
   .travel-group .travel-detail-row { padding-left: 48px; }
   /* Click-to-edit hint — only ever visible in draft mode (the row click
      handler is no-op outside it). */
-  body.draft-mode .travel-group .travel-editable { cursor: pointer; }
-  body.draft-mode .travel-group .travel-editable .travel-amt {
+  body.draft-mode .travel-group .travel-editable,
+  body.draft-mode .travel-group .travel-li-editable { cursor: pointer; }
+  body.draft-mode .travel-group .travel-editable .travel-amt,
+  body.draft-mode .travel-group .travel-li-editable .travel-amt {
     border-bottom: 1px dashed transparent;
     transition: border-color 120ms ease;
   }
-  body.draft-mode .travel-group .travel-editable:hover .travel-amt {
+  body.draft-mode .travel-group .travel-editable:hover .travel-amt,
+  body.draft-mode .travel-group .travel-li-editable:hover .travel-amt {
     border-bottom-color: rgba(26,86,255,0.35);
     color: var(--vf-blue, #1a56ff);
   }
@@ -3071,6 +3074,287 @@
   }
   .approve-modal-send:hover:not(:disabled) { background: #0750C2; transform: translateY(-1px); }
   .approve-modal-send:disabled { opacity: 0.55; cursor: not-allowed; }
+  /* Two-column layout: compose on the left, live client preview on the
+     right. The preview iframe renders the EXACT html the send endpoint
+     produces, so what the operator sees is what the client receives. */
+  .approve-modal-card-wide { max-width: 1060px; }
+  .approve-modal-split {
+    display: grid;
+    grid-template-columns: minmax(340px, 5fr) minmax(320px, 6fr);
+    gap: 0;
+    align-items: stretch;
+  }
+  .approve-modal-preview-col {
+    border-left: 1px solid var(--vf-line, #E6E8EE);
+    padding: 14px 24px 16px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--vf-paper, #FAFBFD);
+  }
+  .approve-modal-preview-label {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--vf-ink-3, #8892A6);
+    margin-bottom: 10px;
+  }
+  .approve-modal-preview {
+    flex: 1;
+    width: 100%;
+    min-height: 380px;
+    max-height: 56vh;
+    border: 1px solid var(--vf-line, #E6E8EE);
+    border-radius: 10px;
+    background: #fff;
+  }
+  .approve-modal-preview-hint {
+    font-size: 11px;
+    color: var(--vf-ink-3, #8892A6);
+    margin-top: 8px;
+    font-style: italic;
+    min-height: 14px;
+  }
+  .approve-modal-meta {
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--vf-ink-3, #8892A6);
+    padding: 10px 2px 4px;
+  }
+  .approve-modal-gmail {
+    margin-right: auto;
+    align-self: center;
+    font-size: 12px;
+    color: var(--vf-ink-3, #8892A6);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .approve-modal-gmail:hover { color: var(--vf-ink, #0A0F1A); }
+  /* ── Line-item search picker ─────────────────────────────────────────── */
+  #li-picker-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,15,26,0.45);
+    z-index: 9999;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 9vh 24px 24px;
+  }
+  .li-picker-card {
+    width: 100%;
+    max-width: 460px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.05);
+    border: 1px solid var(--vf-line, #E6E8EE);
+    overflow: hidden;
+    font-family: inherit;
+    color: var(--vf-ink, #0A0F1A);
+  }
+  .li-picker-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--vf-line, #E6E8EE);
+  }
+  .li-picker-search {
+    flex: 1;
+    font: inherit;
+    font-size: 15px;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--vf-ink, #0A0F1A);
+  }
+  .li-picker-close {
+    background: transparent;
+    border: none;
+    color: var(--vf-ink-3, #8892A6);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 8px;
+  }
+  .li-picker-close:hover { background: rgba(10,15,26,0.06); color: var(--vf-ink, #0A0F1A); }
+  .li-picker-list {
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 6px;
+  }
+  .li-picker-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 13.5px;
+    color: var(--vf-ink, #0A0F1A);
+    text-align: left;
+  }
+  .li-picker-item.active { background: rgba(9,94,223,0.08); }
+  .li-picker-item .li-picker-rate {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
+    font-size: 11px;
+    color: var(--vf-ink-3, #8892A6);
+    white-space: nowrap;
+  }
+  .li-picker-custom { border-top: 1px solid var(--vf-line, #E6E8EE); border-radius: 0 0 8px 8px; }
+  .li-picker-custom .li-picker-name { color: var(--vf-blue, #095EDF); font-weight: 600; }
+  .li-picker-empty {
+    padding: 12px;
+    font-size: 12.5px;
+    color: var(--vf-ink-3, #8892A6);
+    font-style: italic;
+  }
+  .li-picker-opts {
+    display: flex;
+    gap: 14px;
+    padding: 10px 14px 12px;
+    border-top: 1px solid var(--vf-line, #E6E8EE);
+    background: var(--vf-paper, #FAFBFD);
+  }
+  .li-picker-opts label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--vf-ink-3, #8892A6);
+  }
+  .li-picker-opts input {
+    font: inherit;
+    font-family: var(--font-body, inherit);
+    font-size: 13px;
+    color: var(--vf-ink, #0A0F1A);
+    background: #fff;
+    border: 1px solid var(--vf-line, #E6E8EE);
+    border-radius: 7px;
+    padding: 5px 9px;
+    outline: none;
+  }
+  .li-picker-opts label:first-child input { width: 64px; }
+  .li-picker-opts label:last-child { flex: 1; }
+  .li-picker-opts label:last-child input { flex: 1; min-width: 0; }
+  .li-picker-opts input:focus { border-color: var(--vf-blue, #095EDF); box-shadow: 0 0 0 3px rgba(9,94,223,0.12); }
+  body.client-preview #li-picker-overlay { display: none !important; }
+  /* ── Hero cover button (draft-only) + cover modal ─────────────────────── */
+  .hero-cover-btn {
+    display: none;
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    z-index: 6;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(10,15,26,0.55);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 999px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .hero-cover-btn:hover { background: rgba(10,15,26,0.75); border-color: rgba(255,255,255,0.6); }
+  body.draft-mode .hero-cover-btn { display: inline-flex; }
+  body.client-preview .hero-cover-btn { display: none !important; }
+  .hero { position: relative; }
+  #cover-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,15,26,0.45);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .cover-modal-card {
+    width: 100%;
+    max-width: 440px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.05);
+    border: 1px solid var(--vf-line, #E6E8EE);
+    padding: 22px 24px;
+    font-family: inherit;
+    color: var(--vf-ink, #0A0F1A);
+  }
+  .cover-modal-card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; }
+  .cover-modal-card .cover-modal-sub { margin: 0 0 16px; font-size: 12.5px; color: var(--vf-ink-3, #8892A6); line-height: 1.5; }
+  .cover-modal-row { margin-bottom: 14px; }
+  .cover-modal-row label {
+    display: block;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--vf-ink-3, #8892A6);
+    margin-bottom: 6px;
+  }
+  .cover-modal-row input[type="url"] {
+    width: 100%;
+    font: inherit;
+    font-size: 13.5px;
+    border: 1px solid var(--vf-line, #E6E8EE);
+    border-radius: 8px;
+    padding: 8px 12px;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .cover-modal-row input[type="url"]:focus { border-color: var(--vf-blue, #095EDF); box-shadow: 0 0 0 3px rgba(9,94,223,0.12); }
+  .cover-modal-or {
+    text-align: center;
+    font-size: 11px;
+    color: var(--vf-ink-3, #8892A6);
+    margin: 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .cover-modal-drop {
+    border: 1.5px dashed var(--vf-line, #C9CFDB);
+    border-radius: 10px;
+    padding: 22px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--vf-ink-3, #8892A6);
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .cover-modal-drop:hover, .cover-modal-drop.dragover {
+    border-color: var(--vf-blue, #095EDF);
+    background: rgba(9,94,223,0.04);
+    color: var(--vf-ink, #0A0F1A);
+  }
+  .cover-modal-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .cover-modal-hint { font-size: 11.5px; color: var(--vf-ink-3, #8892A6); margin-top: 10px; min-height: 14px; }
+  @media (max-width: 860px) {
+    .approve-modal-split { grid-template-columns: 1fr; }
+    .approve-modal-preview-col { border-left: none; border-top: 1px solid var(--vf-line, #E6E8EE); }
+  }
   /* In client preview / view-as-client, never show the approve modal. */
   body.client-preview .approve-modal-overlay { display: none !important; }
   @keyframes vf-fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -3665,6 +3949,24 @@
   }
 
   body.draft-mode [data-editable]:focus { outline: none; }
+
+  /* Floating inline-format toolbar for line-item names (draft only). Pops up
+     on a text selection inside a role name; Bold toggles the real font-weight
+     so the CSS-bold default can be lightened, which plain ⌘B can't do. */
+  #li-fmt-bar {
+    position: absolute; z-index: 95; display: none; gap: 2px;
+    padding: 4px; background: var(--vf-ink, #0A0F1A);
+    border-radius: 9px; box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+  }
+  #li-fmt-bar button {
+    min-width: 28px; height: 28px; padding: 0 8px; border: none;
+    background: transparent; color: #fff; border-radius: 6px;
+    font-size: 14px; line-height: 1; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  #li-fmt-bar button:hover { background: rgba(255,255,255,0.18); }
+  #li-fmt-bar .li-fmt-sep { width: 1px; background: rgba(255,255,255,0.18); margin: 3px 2px; }
+  body.client-preview #li-fmt-bar { display: none !important; }
 </style>
 </head>
 <body class="draft-mode hero-light">
@@ -3721,7 +4023,7 @@
      status update + Gmail compose tab). -->
 <!--VF_EDITOR_ONLY:START_APPROVE-->
 <div id="approve-modal" class="approve-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="approve-modal-title" hidden>
-  <div class="approve-modal-card">
+  <div class="approve-modal-card approve-modal-card-wide">
     <div class="approve-modal-header">
       <div>
         <div class="approve-modal-eyebrow">REVIEW BEFORE SENDING</div>
@@ -3729,28 +4031,40 @@
       </div>
       <button type="button" class="approve-modal-close" data-approve-close aria-label="Cancel">×</button>
     </div>
-    <div class="approve-modal-rows">
-      <div class="approve-modal-row">
-        <label for="approve-modal-to">To</label>
-        <div class="approve-modal-value">
-          <input type="email" id="approve-modal-to" class="approve-modal-input" placeholder="recipient@example.com" autocomplete="email">
+    <div class="approve-modal-split">
+      <div class="approve-modal-rows">
+        <div class="approve-modal-row">
+          <label for="approve-modal-to">To</label>
+          <div class="approve-modal-value">
+            <input type="email" id="approve-modal-to" class="approve-modal-input" placeholder="recipient@example.com" autocomplete="email">
+          </div>
+        </div>
+        <div class="approve-modal-row">
+          <label for="approve-modal-subject">Subject</label>
+          <div class="approve-modal-value">
+            <input type="text" id="approve-modal-subject" class="approve-modal-input">
+          </div>
+        </div>
+        <div class="approve-modal-body-row">
+          <label for="approve-modal-message">Message</label>
+          <div class="approve-modal-body-wrap">
+            <textarea id="approve-modal-message" class="approve-modal-textarea" rows="7" spellcheck="true" placeholder="Optional note above the quotation card. Leave as is for the standard wording."></textarea>
+            <div class="approve-modal-body-hint" id="approve-modal-body-hint" style="display:none;"></div>
+          </div>
+        </div>
+        <div class="approve-modal-meta">
+          The greeting, quotation summary card, view button and sign-off are
+          added automatically — the preview is exactly what the client receives.
         </div>
       </div>
-      <div class="approve-modal-row">
-        <label for="approve-modal-subject">Subject</label>
-        <div class="approve-modal-value">
-          <input type="text" id="approve-modal-subject" class="approve-modal-input">
-        </div>
-      </div>
-      <div class="approve-modal-body-row">
-        <label for="approve-modal-body">Body</label>
-        <div class="approve-modal-body-wrap">
-          <textarea id="approve-modal-body" class="approve-modal-textarea" rows="14" spellcheck="true">Loading…</textarea>
-          <div class="approve-modal-body-hint" id="approve-modal-body-hint">Drafting a personalised intro…</div>
-        </div>
+      <div class="approve-modal-preview-col">
+        <div class="approve-modal-preview-label">Client preview</div>
+        <iframe id="approve-modal-preview" class="approve-modal-preview" title="Email preview" sandbox=""></iframe>
+        <div class="approve-modal-preview-hint" id="approve-modal-preview-hint">Building preview…</div>
       </div>
     </div>
     <div class="approve-modal-footer">
+      <a href="#" id="approve-modal-gmail" class="approve-modal-gmail" target="_blank" rel="noopener" title="Fallback: open a plain-text draft in Gmail instead of sending the branded email">Open in Gmail instead</a>
       <button type="button" class="approve-modal-btn approve-modal-cancel" data-approve-close>Cancel</button>
       <button type="button" class="approve-modal-btn approve-modal-send" id="approve-modal-send" disabled>Send →</button>
     </div>
@@ -3780,6 +4094,18 @@
 
 <!-- ── HERO ───────────────────────────────────────── -->
 <div class="hero">
+  <!--VF_EDITOR_ONLY:START_COVER_BTN-->
+  <button type="button" id="hero-cover-btn" class="hero-cover-btn" data-no-edit
+          title="Set or replace the hero cover image (upload or paste a URL)">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5"/>
+      <path d="m21 15-5-5L5 21"/>
+    </svg>
+    <span>Add cover image</span>
+  </button>
+  <!--VF_EDITOR_ONLY:END_COVER_BTN-->
   <div class="hero-content">
     <div class="hero-eyebrow" data-editable data-single-line><span class="eyebrow-idx">VF-0201</span> · William Tyndale</div>
     <div class="hero-title"><em>Client</em> Quotation</div>
@@ -3794,7 +4120,7 @@
 <div class="light-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">01</span> · The Brief</div>
   <div class="section-heading">Project <em>Details</em></div>
-  <p style="font-size:14px;color:var(--grey-600);line-height:1.75;margin-bottom:28px;max-width:640px;" data-editable>We are excited to prepare this quotation for the 'William Tyndale' project, and look forward to the opportunity to bring this compelling story to life. Our team at Valley Films is ready to capture the essence of this historical figure with professional storytelling and high-quality production.</p>
+  <p style="font-size:14px;color:var(--grey-600);line-height:1.75;margin-bottom:28px;max-width:640px;" data-editable>We are thrilled to present our quotation for the ambitious 'William Tyndale' project, which we are eager to bring to life through our professional video production services. We are confident our expertise will capture this historical narrative compellingly, delivering powerful visual content for your audience.</p>
   <div class="brief-grid">
     
         <div class="brief-item">
@@ -3803,15 +4129,15 @@
         </div>
         <div class="brief-item">
           <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Location</div>
-          <div class="brief-item-value" data-editable data-single-line data-prod-field="location" data-prod-type="text" data-prod-value="London, England, United Kingdom"><a href="https://www.google.com/maps/search/London,+England,+United+Kingdom" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">London</a></div>
+          <div class="brief-item-value" data-editable data-single-line><a href="https://www.google.com/maps/search/London,+England,+United+Kingdom" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">London</a></div>
         </div>
         <div class="brief-item">
           <div class="brief-item-label"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Production Date</div>
-          <div class="brief-item-value" data-prod-field="production_date" data-prod-type="date" data-prod-value="2026-09-20">20th September</div>
+          <div class="brief-item-value" data-prod-field="production_date" data-prod-type="date" data-prod-value="2026-09-20|2026-09-27">20th – 27th September</div>
         </div>
         <div class="brief-item">
           <div class="brief-item-label">Shooting Days</div>
-          <div class="brief-item-value" data-prod-field="shooting_days" data-prod-type="number" data-prod-value="1">1 day</div>
+          <div class="brief-item-value" data-prod-field="shooting_days" data-prod-type="number" data-prod-value="8">8 days</div>
         </div>
         <div class="brief-item brief-item-internal">
           <div class="brief-item-label">Job Type</div>
@@ -3827,7 +4153,7 @@
         </div>
   </div>
   <div id="deliverables-section"><div class="sub-label deliverables-header">Deliverables<button type="button" id="deliv-section-remove" class="section-remove-btn" data-no-edit title="Remove the entire deliverables section from this quote" contenteditable="false">×</button></div>
-  <span id="deliv-list"><span class="tag" data-deliv-id="dl_4c7c78" style="vertical-align:top;"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_90ac2b" style="vertical-align:top;"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
+  <span id="deliv-list"><span class="tag" data-deliv-id="dl_da29eb" style="vertical-align:top;"><span data-deliv-title>Highlight Video (60s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">3840 × 2160</span></span><span class="tag" data-deliv-id="dl_4afb96" style="vertical-align:top;"><span data-deliv-title>Social Cut (30s)</span><span class="tag-spec" data-deliv-spec style="display:block;font-size:10px;color:rgba(26,86,255,0.75);margin-top:2px;font-weight:600;letter-spacing:0.3px;">1080 × 1920</span></span></span><button type="button" id="deliv-add-btn" class="draft-add-row-btn" style="margin-left:8px;vertical-align:middle;">+ Add deliverable</button>
   <div style="margin-top:8px;font-size:11px;color:var(--grey-500);">Footage-only handover — no first-draft delivery, revisions, or revision turnaround apply.</div></div><button type="button" id="deliv-section-restore" class="section-restore-btn" style="display:none;">+ Restore deliverables section</button>
 </div>
 
@@ -3842,7 +4168,7 @@
 <div class="white-section section-glow-top" id="pricing-section">
   <div class="section-eyebrow"><span class="eyebrow-idx">02</span> · Production Services</div>
   <div class="section-heading">The <em>Quotation</em></div>
-  <div class="pkg-grid" id="pkg-grid"><div class="pkg-card " data-pkg-id="34f47fd0-3620-8132-b8ac-cde2813c1a88" data-pkg-price="575"><div class="pkg-name" data-editable data-single-line>Core</div><div class="pkg-price" data-editable data-single-line data-field="price">£575.00</div><div class="pkg-desc" data-editable>Footage delivery (no edit)</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: Solo DP</li><li data-editable data-single-line>Footage delivery (no edit)</li></ul></div><div class="pkg-card selected" data-pkg-id="34f47fd0-3620-81e6-aeb3-faa26eb085f5" data-pkg-price="850"><div class="pkg-badge">Recommended</div><div class="pkg-name" data-editable data-single-line>Primary</div><div class="pkg-price" data-editable data-single-line data-field="price">£850.00</div><div class="pkg-desc" data-editable>Footage delivery (no edit)</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: DP + 1stAC</li><li data-editable data-single-line>Footage delivery (no edit)</li></ul></div><div class="pkg-card " data-pkg-id="34f47fd0-3620-81f7-a35e-f74fae800de6" data-pkg-price="1100"><div class="pkg-name" data-editable data-single-line>Premium</div><div class="pkg-price" data-editable data-single-line data-field="price">£1,100.00</div><div class="pkg-desc" data-editable>Footage delivery + basic selects edit</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: DP + 1stAC & Spark</li><li data-editable data-single-line>Footage delivery + basic selects edit</li></ul></div><div class="pkg-card pkg-add-card" id="pkg-add-card" style="display:none;align-items:center;justify-content:center;border:2px dashed var(--grey-200);background:transparent;cursor:pointer;min-height:240px;color:var(--grey-500);font-weight:600;"><div style="text-align:center;line-height:1.5;"><div style="font-size:32px;font-weight:300;color:var(--grey-400);">+</div><div style="font-size:13px;">Add Package</div></div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125.00</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350.00</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div>
+  <div class="pkg-grid" id="pkg-grid"><div class="pkg-card " data-pkg-id="34f47fd0-3620-8132-b8ac-cde2813c1a88" data-pkg-price="4600"><div class="pkg-name" data-editable data-single-line>Core</div><div class="pkg-price" data-editable data-single-line data-field="price">£4,600.00</div><div class="pkg-desc" data-editable>Footage delivery (no edit)</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: Solo DP</li><li data-editable data-single-line>Footage delivery (no edit)</li></ul><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-disc-kind="pkg" data-disc-id="34f47fd0-3620-8132-b8ac-cde2813c1a88" title="Apply inline discount">− Discount</button><span class="addon-discount-label"></span></div></div><div class="pkg-card selected" data-pkg-id="34f47fd0-3620-81e6-aeb3-faa26eb085f5" data-pkg-price="6800"><div class="pkg-badge">Recommended</div><div class="pkg-name" data-editable data-single-line>Primary</div><div class="pkg-price" data-editable data-single-line data-field="price">£6,800.00</div><div class="pkg-desc" data-editable>Footage delivery (no edit)</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: DP + 1stAC</li><li data-editable data-single-line>Footage delivery (no edit)</li></ul><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-disc-kind="pkg" data-disc-id="34f47fd0-3620-81e6-aeb3-faa26eb085f5" title="Apply inline discount">− Discount</button><span class="addon-discount-label"></span></div></div><div class="pkg-card " data-pkg-id="34f47fd0-3620-81f7-a35e-f74fae800de6" data-pkg-price="8800"><div class="pkg-name" data-editable data-single-line>Premium</div><div class="pkg-price" data-editable data-single-line data-field="price">£8,800.00</div><div class="pkg-desc" data-editable>Footage delivery + basic selects edit</div><ul class="pkg-includes"><li data-editable data-single-line>Crew: DP + 1stAC & Spark</li><li data-editable data-single-line>Footage delivery + basic selects edit</li></ul><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-disc-kind="pkg" data-disc-id="34f47fd0-3620-81f7-a35e-f74fae800de6" title="Apply inline discount">− Discount</button><span class="addon-discount-label"></span></div></div><div class="pkg-card pkg-add-card" id="pkg-add-card" style="display:none;align-items:center;justify-content:center;border:2px dashed var(--grey-200);background:transparent;cursor:pointer;min-height:240px;color:var(--grey-500);font-weight:600;"><div style="text-align:center;line-height:1.5;"><div style="font-size:32px;font-weight:300;color:var(--grey-400);">+</div><div style="font-size:13px;">Add Package</div></div></div></div><div class="price-section-label" style="margin-top:32px;margin-bottom:14px;">Optional Add-ons</div><div class="toggle-cards toggle-cards-grid"><div class="toggle-card" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-price="125" data-base-price="125"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Stills Package</div><div class="toggle-card-desc" data-editable>Cull and edit of photography from shoot day.</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-disc-kind="addon" data-disc-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-811e-9830-ee030ffaa6ca"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£125.00</div></div><div class="toggle-card" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-price="350" data-base-price="350"><button type="button" class="addon-drag-handle" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" draggable="true" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</button><button type="button" class="addon-pin-btn" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Lock in as a fixed extra under the packages" aria-label="Lock in as fixed extra"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg></button><div class="toggle-card-check"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3.5 3.5 5.5-5.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="toggle-card-body"><div class="toggle-card-name" data-editable data-single-line>Colour Grade / Transcode</div><div class="toggle-card-desc" data-editable>Simple transcoding of footage & colour grade to get this edit ready</div><div class="addon-qty-stepper" data-no-edit data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-qty-min="1" data-qty-max="10"><button type="button" class="addon-qty-btn addon-qty-minus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Decrease quantity">−</button><span class="addon-qty-value" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482">1</span><button type="button" class="addon-qty-btn addon-qty-plus" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" aria-label="Increase quantity">+</button><span class="addon-qty-label">qty</span></div><div class="toggle-card-discount-row" data-no-edit><button type="button" class="draft-addon-discount-btn" data-disc-kind="addon" data-disc-id="34f47fd0-3620-81e2-b77d-c78d07516482" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482" title="Apply inline discount">− Discount</button><span class="addon-discount-label" data-addon-id="34f47fd0-3620-81e2-b77d-c78d07516482"></span></div></div><div class="toggle-card-price" data-editable data-single-line>+£350.00</div></div><div class="toggle-card addon-add-card" id="addon-add-card" data-no-edit title="Add a one-off add-on for this quote"><div class="addon-add-plus">+</div><div class="addon-add-label">Add custom add-on</div></div></div>
 
   
 
@@ -3936,7 +4262,7 @@
     <h3>Let's get started</h3>
     <p style="font-size:15px;color:var(--grey-400);margin:0 0 32px;">Ready to confirm your booking? Click below to review and sign.</p>
     <button type="button" id="show-sig-btn" class="accept-btn">Accept Quote</button>
-    <p style="font-size:12px;color:var(--grey-400);margin-top:16px;">This quotation is valid until 18 June 2026</p>
+    <p style="font-size:12px;color:var(--grey-400);margin-top:16px;">This quotation is valid until 19 June 2026</p>
   </div>
   <div id="sign-form" class="sign-form-wrap" style="display:none;">
     <h3>Sign to Confirm</h3>
@@ -3945,6 +4271,8 @@
     <input type="text" id="signer-name" class="sign-name-input" value="TBD Client" autocomplete="name">
     <label class="sign-label" for="signer-email" style="margin-top:18px;">Email</label>
     <input type="email" id="signer-email" class="sign-name-input" value="" autocomplete="email" placeholder="you@example.com" inputmode="email">
+    <label class="sign-label" for="signer-po" style="margin-top:18px;">Purchase Order <span style="font-weight:400;color:var(--grey-500);">(optional)</span></label>
+    <input type="text" id="signer-po" class="sign-name-input" value="" autocomplete="off" placeholder="PO number, if you have one">
     <div class="sign-canvas-wrap">
       <canvas id="sig-canvas"></canvas>
       <div class="sig-baseline"></div>
@@ -4003,7 +4331,7 @@
     </div>
     <div class="footer-bottom">
       <span>&copy; 2026 Valley Films &middot; All rights reserved</span>
-      <span>Created @ 11 June 2026</span>
+      <span>Created @ 12 June 2026</span>
     </div>
   </div>
 </footer>
@@ -4012,8 +4340,8 @@
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script>
   // ── Quote data & pricing ─────────────────────────
-  const VF     = {"pageId": "1b3f86b9-f4db-4678-9985-742e906f9703", "quoteRef": "VF-0201", "webhookToken": "", "clientName": "TBD Client", "clientCompany": "", "clientEmail": "", "projectTitle": "William Tyndale", "productionDate": "20th September", "productionDateISO": "2026-09-20", "total": "TBC", "basePrice": 0, "validUntil": "18 June 2026", "generatedDate": "11 June 2026", "quoteType": "Package Based", "jobType": "", "defaultPkgId": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "isDraft": true, "financialStatus": "To Quote", "briefIssues": "", "briefQuestions": "", "qcNotes": "*   [Job type] is missing. The deliverables (Documentary Film, Promotional Highlight Reel) and project description strongly imply a job type requiring significant post-production, not \"Footage Delivery Only\".\n*   [Buyer type] is missing, which is needed to apply client-specific rules.\n*   [Default delivery] 'raw_onsite' is inconsistent with the listed deliverables, which are all edited, finished products requiring extensive post-production.", "warnings": ["No client linked \u2014 set the 'Client' relation on the Production page so pricing can use the buyer-type multiplier and the quote shows the right name. Currently rendering as 'TBD Client'.", "No Brief Paste, Deliverables, or Quote Notes are set \u2014 the LLM has nothing to work with. Paste the client's brief into 'Brief Paste' or add Deliverables, then re-trigger generation.", "Shooting Days isn't set on this production \u2014 defaulting to 1 day. Multi-day discount tiers and per-diem won't apply unless you set the actual number."], "quoteUrl": "https://quotes.valley.film/quote_VF-0201_William_Tyndale.html", "quoteFilename": "quote_VF-0201_William_Tyndale.html"};
-  const PRICING = {"basePrice": 0, "expenses": 0, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-81e2-b77d-c78d07516482", "name": "Colour Grade / Transcode", "price": 350, "price_core": 350, "price_primary": 350, "price_premium": 350, "desc": "Simple transcoding of footage & colour grade to get this edit ready", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "discounts": [{"id": "35847fd0-3620-81b7-a90d-c464b52709d6", "name": "Multi-day: 3\u20135 days", "type": "Percentage", "value": 10, "desc": "Standard multi-day discount for shoots of 3\u20135 days. Auto-suggested when shooting_days is in this range.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}, {"id": "35847fd0-3620-8129-8cd1-cf0165312c45", "name": "Multi-day: 6+ days", "type": "Percentage", "value": 20, "desc": "Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days \u2265 6.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}], "packages": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "raw_onsite", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "27th May", "travel": null, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null, "suggestedDiscounts": [], "lineItems": [], "lineItemsSource": "", "rateCard": [{"id": "35247fd0-3620-8161-88d3-d67b5f4825fb", "name": "2nd Assistant Camera", "my_rate": 375, "apa_ceiling": 400, "apa_bracket": "Crew", "ot_per_hr": 56.25, "ooh_uplift": 0, "half_day_rate": 225.0, "travel_day_rate": 187.5}, {"id": "34f47fd0-3620-81b5-ae9f-e9334018ee86", "name": "Assistant Camera", "my_rate": 275, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 41.25, "ooh_uplift": 0, "half_day_rate": 165.0, "travel_day_rate": 137.5}, {"id": "34f47fd0-3620-81f6-8508-c4f45a53cb1a", "name": "Camera Operator", "my_rate": 475, "apa_ceiling": 650, "apa_bracket": "Crew", "ot_per_hr": 71.25, "ooh_uplift": 0, "half_day_rate": 285.0, "travel_day_rate": 237.5}, {"id": "34f47fd0-3620-81bd-a585-c0e35c590c98", "name": "Colour Grade", "my_rate": 175, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 26.25, "ooh_uplift": 0, "half_day_rate": 105.0, "travel_day_rate": 87.5}, {"id": "35247fd0-3620-8092-9cb5-e6a135cb5215", "name": "Congestion Charge", "my_rate": 18, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 2.7, "ooh_uplift": 0, "half_day_rate": 10.8, "travel_day_rate": 9.0}, {"id": "35247fd0-3620-81f7-af92-e16d8a0cbc7e", "name": "Director", "my_rate": 700, "apa_ceiling": 1200, "apa_bracket": "HoD", "ot_per_hr": 105.0, "ooh_uplift": 0, "half_day_rate": 420.0, "travel_day_rate": 350.0}, {"id": "34f47fd0-3620-81be-8870-f75746f0696f", "name": "Director of Photography", "my_rate": 575, "apa_ceiling": 750, "apa_bracket": "HoD", "ot_per_hr": 86.25, "ooh_uplift": 0, "half_day_rate": 345.0, "travel_day_rate": 287.5}, {"id": "35247fd0-3620-815d-98a6-e42a8806565f", "name": "Gaffer", "my_rate": 450, "apa_ceiling": 650, "apa_bracket": "HoD", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-815a-8b70-fdd982d07f1e", "name": "Hero Edit (2\u20135 min)", "my_rate": 450, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-81f2-9370-c167bae0c7ca", "name": "Long-form Edit (10 min+)", "my_rate": 600, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 90.0, "ooh_uplift": 0, "half_day_rate": 360.0, "travel_day_rate": 300.0}, {"id": "34f47fd0-3620-8145-a058-e0ce634a7256", "name": "Mileage", "my_rate": 0.55, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.08, "ooh_uplift": 0, "half_day_rate": 0.33, "travel_day_rate": 0.28}, {"id": "35247fd0-3620-8178-ae82-f5277260296e", "name": "Producer", "my_rate": 550, "apa_ceiling": 1000, "apa_bracket": "HoD", "ot_per_hr": 82.5, "ooh_uplift": 0, "half_day_rate": 330.0, "travel_day_rate": 275.0}, {"id": "35247fd0-3620-8151-9809-e9ff5f46e40d", "name": "Production Assistant (PA)", "my_rate": 200, "apa_ceiling": 220, "apa_bracket": "Trainee", "ot_per_hr": 30.0, "ooh_uplift": 0, "half_day_rate": 120.0, "travel_day_rate": 100.0}, {"id": "34f47fd0-3620-815d-93d3-efcd057aa497", "name": "Social Cut (30\u201360s)", "my_rate": 300, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "35247fd0-3620-81bc-879f-ff9900b2f5ff", "name": "Sound Recordist", "my_rate": 400, "apa_ceiling": 600, "apa_bracket": "HoD", "ot_per_hr": 60.0, "ooh_uplift": 0, "half_day_rate": 240.0, "travel_day_rate": 200.0}, {"id": "35247fd0-3620-81e7-8028-fb60f7bceba6", "name": "Spark", "my_rate": 300, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "34f47fd0-3620-81a2-a7c4-fd40b3f1bae8", "name": "Stills Cull + Edit", "my_rate": 125, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 18.75, "ooh_uplift": 0, "half_day_rate": 75.0, "travel_day_rate": 62.5}, {"id": "34f47fd0-3620-81dd-911d-d1d92e5e3796", "name": "TfL Journey", "my_rate": 3.6, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.54, "ooh_uplift": 0, "half_day_rate": 2.16, "travel_day_rate": 1.8}, {"id": "34f47fd0-3620-81b6-b5c8-d8640c160aa2", "name": "Transcoding / Delivery", "my_rate": 65, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 9.75, "ooh_uplift": 0, "half_day_rate": 39.0, "travel_day_rate": 32.5}, {"id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0", "name": "Van Hire", "my_rate": 95, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 14.25, "ooh_uplift": 0, "half_day_rate": 57.0, "travel_day_rate": 47.5}], "defaultDays": 1};
+  const VF     = {"pageId": "1b3f86b9-f4db-4678-9985-742e906f9703", "quoteRef": "VF-0201", "webhookToken": "", "clientName": "TBD Client", "clientCompany": "", "clientEmail": "", "projectTitle": "William Tyndale", "productionDate": "20th \u2013 27th September", "productionDateISO": "2026-09-20", "total": "TBC", "basePrice": 0, "validUntil": "19 June 2026", "generatedDate": "12 June 2026", "quoteType": "Package Based", "jobType": "", "defaultPkgId": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "isDraft": true, "financialStatus": "To Quote", "briefIssues": "", "briefQuestions": "", "qcNotes": "*   [Job type] is empty, but deliverables and description clearly indicate 'Documentary'.\n*   [Buyer type] is empty.\n*   [Default delivery] is set to 'raw_onsite', which directly contradicts the post-production heavy deliverables.", "warnings": ["No client linked \u2014 set the 'Client' relation on the Production page so pricing can use the buyer-type multiplier and the quote shows the right name. Currently rendering as 'TBD Client'.", "No Brief Paste, Deliverables, or Quote Notes are set \u2014 the LLM has nothing to work with. Paste the client's brief into 'Brief Paste' or add Deliverables, then re-trigger generation.", "Shooting Days wasn't set \u2014 using the 8-day Production Date range (2026-09-20 \u2192 2026-09-27). Pricing is 8 \u00d7 day rate; set Shooting Days to override."], "quoteUrl": "https://valley.film/quotes/tvfLUtqd", "quoteFilename": "tvfLUtqd"};
+  const PRICING = {"basePrice": 0, "expenses": 0, "storage": 0, "delivery": [{"id": "raw_onsite", "name": "Raw Footage \u2014 On-Site", "price": 0, "desc": "Hard drive supplied by client. Files transferred on shoot day."}, {"id": "hdd_purchase", "name": "Hard Drive Purchase", "price": 45, "desc": "Valley Films provides a formatted drive. Yours to keep."}, {"id": "dropbox", "name": "Dropbox Delivery", "price": 25, "desc": "Files uploaded to a shared Dropbox folder within 48 hours of shoot."}], "postProduction": [{"id": "34f47fd0-3620-81d5-9e6c-f22f2b06fa2f", "name": "Additional Social Cut", "price": 200, "price_core": 200, "price_primary": 200, "price_premium": 200, "desc": "Extra cut beyond what is included in the package (up to 90s).", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-8134-9b43-de629d459f95", "name": "Subtitles / Captions", "price": 75, "price_core": 75, "price_primary": 75, "price_premium": 75, "desc": "Burnt-in or SRT subtitles per video.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "addons": [{"id": "34f47fd0-3620-811e-9830-ee030ffaa6ca", "name": "Stills Package", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Cull and edit of photography from shoot day.", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}, {"id": "34f47fd0-3620-81e2-b77d-c78d07516482", "name": "Colour Grade / Transcode", "price": 350, "price_core": 350, "price_primary": 350, "price_premium": 350, "desc": "Simple transcoding of footage & colour grade to get this edit ready", "exclude_job_types": [], "require_job_types": [], "group": "", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": null}], "discounts": [{"id": "35847fd0-3620-81b7-a90d-c464b52709d6", "name": "Multi-day: 3\u20135 days", "type": "Percentage", "value": 10, "desc": "Standard multi-day discount for shoots of 3\u20135 days. Auto-suggested when shooting_days is in this range.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}, {"id": "35847fd0-3620-8129-8cd1-cf0165312c45", "name": "Multi-day: 6+ days", "type": "Percentage", "value": 20, "desc": "Standard multi-day discount for shoots of 6+ days. Auto-suggested when shooting_days \u2265 6.", "stacking_priority": 50, "apply_to_job_types": [], "apply_to_buyer_types": [], "apply_to_client_ids": [], "exclude_job_types": [], "require_job_types": []}], "packages": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 4600, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 6800, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 8800, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}], "allTemplates": [{"id": "34f47fd0-3620-8132-b8ac-cde2813c1a88", "name": "Core", "price_per_day": 575, "price": 575, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-813b-ab04-cff5f8bd1655", "name": "Core", "price_per_day": 750, "price": 750, "desc": "1x social cut (up to 60s), colour grade", "job_type": "Production Services", "tier": "Core", "highlight": false, "includes": ["Crew: Solo DP", "1x social cut (up to 60s)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81e6-aeb3-faa26eb085f5", "name": "Primary", "price_per_day": 850, "price": 850, "desc": "Footage delivery (no edit)", "job_type": "Filming / Cinematography", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "Footage delivery (no edit)"], "standard_price": 0}, {"id": "34f47fd0-3620-81cf-ac50-edb008f094b6", "name": "Primary", "price_per_day": 1050, "price": 1050, "desc": "2x social cuts + 1x hero edit (2\u20135 min), colour grade", "job_type": "Production Services", "tier": "Primary", "highlight": true, "includes": ["Crew: DP + 1stAC", "2x social cuts + 1x hero edit (2\u20135 min)", "colour grade"], "standard_price": 0}, {"id": "34f47fd0-3620-81f7-a35e-f74fae800de6", "name": "Premium", "price_per_day": 1100, "price": 1100, "desc": "Footage delivery + basic selects edit", "job_type": "Filming / Cinematography", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Footage delivery + basic selects edit"], "standard_price": 0}, {"id": "34f47fd0-3620-81a6-9d86-eeba47824bd5", "name": "Premium", "price_per_day": 1400, "price": 1400, "desc": "Full delivery suite: social cuts + hero edit + long-form, grade, stills", "job_type": "Production Services", "tier": "Premium", "highlight": false, "includes": ["Crew: DP + 1stAC & Spark", "Full delivery suite: social cuts + hero edit + long-form", "grade", "stills"], "standard_price": 0}], "defaultDelivery": "raw_onsite", "revisionAddon": {"id": "34f47fd0-3620-81ef-9dfa-d8adadd8b8e2", "name": "Additional Revisions", "price": 0, "price_core": 0, "price_primary": 0, "price_premium": 0, "desc": "Charged hourly after included revision rounds are used.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Revision Tier", "auto_include_if": "", "qty_stepper": true, "min_qty": 1, "max_qty": 4, "default_qty": 1, "per_day": false, "days_out": null}, "rushAddons": [{"id": "34f47fd0-3620-819d-a712-e9fa795f5876", "name": "Rush Turnaround: 1 Week", "price": 45, "price_core": 45, "price_primary": 45, "price_premium": 45, "desc": "Delivery within 1 week of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 7, "daysOut": 7}, {"id": "35147fd0-3620-805c-a7d6-d1a2df734e63", "name": "Rush Turnaround: 3 Days", "price": 125, "price_core": 125, "price_primary": 125, "price_premium": 125, "desc": "Delivery within 3 days of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 3, "daysOut": 3}, {"id": "35147fd0-3620-8011-8c5f-c6d025e07e8e", "name": "Rush Turnaround: 24hours", "price": 250, "price_core": 250, "price_primary": 250, "price_premium": 250, "desc": "Delivery within 24 hours of shoot. Applied per project.", "exclude_job_types": ["Footage Delivery"], "require_job_types": [], "group": "Turnaround", "auto_include_if": "", "qty_stepper": false, "min_qty": 1, "max_qty": 10, "default_qty": 1, "per_day": false, "days_out": 1, "daysOut": 1}], "defaultRevisions": 2, "defaultDeadline": "27th May", "travel": null, "multiday": null, "buyerTypeMultiplier": null, "usageRights": null, "buyout": null, "suggestedDiscounts": [{"discount_id": "35847fd0-3620-8129-8cd1-cf0165312c45", "name": "Multi-day: 6+ days", "type": "Percentage", "value": 20, "reason": "8-day shoot \u2014 multi-day rate applies"}], "lineItems": [], "lineItemsSource": "", "rateCard": [{"id": "35247fd0-3620-8161-88d3-d67b5f4825fb", "name": "2nd Assistant Camera", "my_rate": 375, "apa_ceiling": 400, "apa_bracket": "Crew", "ot_per_hr": 56.25, "ooh_uplift": 0, "half_day_rate": 225.0, "travel_day_rate": 187.5}, {"id": "34f47fd0-3620-81b5-ae9f-e9334018ee86", "name": "Assistant Camera", "my_rate": 275, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 41.25, "ooh_uplift": 0, "half_day_rate": 165.0, "travel_day_rate": 137.5}, {"id": "34f47fd0-3620-81f6-8508-c4f45a53cb1a", "name": "Camera Operator", "my_rate": 475, "apa_ceiling": 650, "apa_bracket": "Crew", "ot_per_hr": 71.25, "ooh_uplift": 0, "half_day_rate": 285.0, "travel_day_rate": 237.5}, {"id": "34f47fd0-3620-81bd-a585-c0e35c590c98", "name": "Colour Grade", "my_rate": 175, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 26.25, "ooh_uplift": 0, "half_day_rate": 105.0, "travel_day_rate": 87.5}, {"id": "35247fd0-3620-8092-9cb5-e6a135cb5215", "name": "Congestion Charge", "my_rate": 18, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 2.7, "ooh_uplift": 0, "half_day_rate": 10.8, "travel_day_rate": 9.0}, {"id": "35247fd0-3620-81f7-af92-e16d8a0cbc7e", "name": "Director", "my_rate": 700, "apa_ceiling": 1200, "apa_bracket": "HoD", "ot_per_hr": 105.0, "ooh_uplift": 0, "half_day_rate": 420.0, "travel_day_rate": 350.0}, {"id": "34f47fd0-3620-81be-8870-f75746f0696f", "name": "Director of Photography", "my_rate": 575, "apa_ceiling": 750, "apa_bracket": "HoD", "ot_per_hr": 86.25, "ooh_uplift": 0, "half_day_rate": 345.0, "travel_day_rate": 287.5}, {"id": "35247fd0-3620-815d-98a6-e42a8806565f", "name": "Gaffer", "my_rate": 450, "apa_ceiling": 650, "apa_bracket": "HoD", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-815a-8b70-fdd982d07f1e", "name": "Hero Edit (2\u20135 min)", "my_rate": 450, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 67.5, "ooh_uplift": 0, "half_day_rate": 270.0, "travel_day_rate": 225.0}, {"id": "34f47fd0-3620-81f2-9370-c167bae0c7ca", "name": "Long-form Edit (10 min+)", "my_rate": 600, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 90.0, "ooh_uplift": 0, "half_day_rate": 360.0, "travel_day_rate": 300.0}, {"id": "34f47fd0-3620-8145-a058-e0ce634a7256", "name": "Mileage", "my_rate": 0.55, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.08, "ooh_uplift": 0, "half_day_rate": 0.33, "travel_day_rate": 0.28}, {"id": "35247fd0-3620-8178-ae82-f5277260296e", "name": "Producer", "my_rate": 550, "apa_ceiling": 1000, "apa_bracket": "HoD", "ot_per_hr": 82.5, "ooh_uplift": 0, "half_day_rate": 330.0, "travel_day_rate": 275.0}, {"id": "35247fd0-3620-8151-9809-e9ff5f46e40d", "name": "Production Assistant (PA)", "my_rate": 200, "apa_ceiling": 220, "apa_bracket": "Trainee", "ot_per_hr": 30.0, "ooh_uplift": 0, "half_day_rate": 120.0, "travel_day_rate": 100.0}, {"id": "34f47fd0-3620-815d-93d3-efcd057aa497", "name": "Social Cut (30\u201360s)", "my_rate": 300, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "35247fd0-3620-81bc-879f-ff9900b2f5ff", "name": "Sound Recordist", "my_rate": 400, "apa_ceiling": 600, "apa_bracket": "HoD", "ot_per_hr": 60.0, "ooh_uplift": 0, "half_day_rate": 240.0, "travel_day_rate": 200.0}, {"id": "35247fd0-3620-81e7-8028-fb60f7bceba6", "name": "Spark", "my_rate": 300, "apa_ceiling": 450, "apa_bracket": "Crew", "ot_per_hr": 45.0, "ooh_uplift": 0, "half_day_rate": 180.0, "travel_day_rate": 150.0}, {"id": "34f47fd0-3620-81a2-a7c4-fd40b3f1bae8", "name": "Stills Cull + Edit", "my_rate": 125, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 18.75, "ooh_uplift": 0, "half_day_rate": 75.0, "travel_day_rate": 62.5}, {"id": "34f47fd0-3620-81dd-911d-d1d92e5e3796", "name": "TfL Journey", "my_rate": 3.6, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 0.54, "ooh_uplift": 0, "half_day_rate": 2.16, "travel_day_rate": 1.8}, {"id": "34f47fd0-3620-81b6-b5c8-d8640c160aa2", "name": "Transcoding / Delivery", "my_rate": 65, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 9.75, "ooh_uplift": 0, "half_day_rate": 39.0, "travel_day_rate": 32.5}, {"id": "34f47fd0-3620-8192-b40b-fcafbfd39ac0", "name": "Van Hire", "my_rate": 95, "apa_ceiling": 0, "apa_bracket": "", "ot_per_hr": 14.25, "ooh_uplift": 0, "half_day_rate": 57.0, "travel_day_rate": 47.5}], "defaultDays": 8};
   // Initial Editor State as saved on the Notion Production page. Used by
   // draft-mode features that pre-fill from prior saves (e.g. brief Q&A inputs).
   window._editor_state_initial = {};
@@ -4073,6 +4401,34 @@
   // amount as text, etc. Empty = use the default 'Billed @ cost'.
   _pstate.travelParkingLabel =
     ((window._editor_state_initial || {}).travel_parking_label || '').toString();
+  // Travel rows the operator removed via the × button. For Package quotes
+  // these are PRICING.travel field names (van_cost / mile_cost / cc_cost /
+  // parking); Itemized quotes remove travel via line-item removal instead,
+  // so this set stays empty there. Round-trips through
+  // editor_state.travel_hidden so the removal survives regeneration.
+  _pstate.travelHidden = new Set(
+    ((window._editor_state_initial || {}).travel_hidden) || []
+  );
+  // Per-addon / per-package / per-post-prod operator discounts — keyed by
+  // item id, value {value, type:'pct'|'fixed'} (legacy plain number =
+  // £fixed). MUST be initialised here in the always-on layer, not just in
+  // draft mode: the client's total recompute reads these. Before this init
+  // existed, a client viewing a quote saw the discount CHIP (server-
+  // rendered) while the TOTAL silently ignored the discount — the VF-0204
+  // overcharge class of bug.
+  function _normaliseDiscountMap(saved) {
+    const out = {};
+    Object.entries(saved || {}).forEach(([k, v]) => {
+      if (typeof v === 'number' && v > 0) out[k] = { value: v, type: 'fixed' };
+      else if (v && typeof v === 'object' && Number(v.value) > 0) {
+        out[k] = { value: Number(v.value), type: v.type === 'pct' ? 'pct' : 'fixed' };
+      }
+    });
+    return out;
+  }
+  _pstate.addonDiscounts    = _normaliseDiscountMap((window._editor_state_initial || {}).addon_discounts);
+  _pstate.packageDiscounts  = _normaliseDiscountMap((window._editor_state_initial || {}).package_discounts);
+  _pstate.postprodDiscounts = _normaliseDiscountMap((window._editor_state_initial || {}).postprod_discounts);
 
   function _fmtGBP(n) {
     // Always 2 decimal places — matches the £0.00 convention used everywhere
@@ -4129,7 +4485,10 @@
   // tier price). Supports {value, type:'pct'|'fixed'}, plus a legacy plain
   // number that's treated as a fixed £ amount.
   function _addonDiscountAmount(addon) {
-    const disc = (_pstate.addonDiscounts || {})[addon.id];
+    // _pstate entry wins (live edits); fall back to the server-baked
+    // `discount` on the addon object itself so a fresh regen stays correct
+    // even if the embedded editor_state were ever missing/stale.
+    const disc = (_pstate.addonDiscounts || {})[addon.id] || addon.discount;
     if (!disc) return 0;
     if (typeof disc === 'number') return Math.max(0, Math.round(disc));
     const v = parseFloat(disc.value || 0);
@@ -4151,6 +4510,25 @@
     const qty = (_pstate.addonQty && _pstate.addonQty[addon.id]) || 1;
     return _addonNetPrice(addon) * qty;
   }
+  // Generic per-item discount amount for packages / post-prod cards. Same
+  // shape as addon discounts ({value, type} keyed by item id) but the base
+  // is the item's flat price (no tier variants, no qty).
+  function _itemDiscountAmount(map, id, base, fallbackDisc) {
+    const disc = (map || {})[id] || fallbackDisc;
+    if (!disc) return 0;
+    const v = parseFloat(typeof disc === 'number' ? disc : disc.value || 0);
+    if (!v || v <= 0) return 0;
+    const amt = (typeof disc === 'object' && disc.type === 'pct')
+      ? Math.round((Number(base) || 0) * v / 100)
+      : Math.round(v);
+    return Math.max(0, Math.min(Number(base) || 0, amt));
+  }
+  function _pkgDiscountAmount(pkg) {
+    return _itemDiscountAmount(_pstate.packageDiscounts, pkg.id, pkg.price, pkg.discount);
+  }
+  function _postprodDiscountAmount(p) {
+    return _itemDiscountAmount(_pstate.postprodDiscounts, p.id, p.price, p.discount);
+  }
 
   function _computeBaseTotal() {
     // Base from package or itemized (after addon-level discounts, before whole-quote discounts)
@@ -4158,7 +4536,7 @@
     if (VF.quoteType === 'Package Based') {
       const pkg = (PRICING.packages || []).find(x => x.id === _pstate.package);
       if (!pkg) return null;
-      t = pkg.price;
+      t = pkg.price - _pkgDiscountAmount(pkg);
       // Pinned add-ons are ALWAYS charged regardless of _pstate.addons —
       // they're treated like fixed line items below the package. The merge
       // into a Set prevents double-counting when the addon is also in the
@@ -4206,7 +4584,7 @@
       }
       if (_pstate.postProd) {
         const p = (PRICING.postProduction || []).find(x => x.id === _pstate.postProd);
-        if (p) t += p.price;
+        if (p) t += Math.max(0, p.price - _postprodDiscountAmount(p));
       }
       for (const id of _pstate.addons) {
         const a = (PRICING.addons || []).find(x => x.id === id);
@@ -4237,12 +4615,16 @@
     // so adding them again here would double-charge.
     if (PRICING.travel && VF.quoteType !== 'Itemized') {
       const tr = PRICING.travel;
-      t += (tr.van_cost || 0) + (tr.mile_cost || 0) + (tr.cc_cost || 0);
+      // Operator-removed rows (× button) live in _pstate.travelHidden and
+      // are excluded from both the row render and this total.
+      const _th = _pstate.travelHidden;
       // Subtract any per-row operator discounts (van hire, mileage, CC).
       // Stored under the field name; value is an object with `value` and
       // a `type` of 'pct' or 'fixed'.
       const td = _pstate.travelDiscounts || {};
       for (const f of ['van_cost', 'mile_cost', 'cc_cost']) {
+        if (_th && _th.has(f)) continue;          // operator removed this row
+        t += Number(tr[f]) || 0;
         const d = td[f];
         if (!d || !d.value) continue;
         const base = Number(tr[f]) || 0;
@@ -4316,7 +4698,17 @@
     };
     if (VF.quoteType === 'Package Based') {
       const pkg = (PRICING.packages || []).find(x => x.id === _pstate.package);
-      if (pkg) rows.push({label: pkg.name, amt: pkg.price, cls: 'base-row'});
+      if (pkg) {
+        rows.push({label: pkg.name, amt: pkg.price, cls: 'base-row'});
+        const _pkgDisc = _pkgDiscountAmount(pkg);
+        if (_pkgDisc > 0) {
+          const _pd = (_pstate.packageDiscounts || {})[pkg.id] || pkg.discount || {};
+          const _lbl = _pd.type === 'pct'
+            ? `  ↳ ${pkg.name} discount (${_pd.value}%)`
+            : `  ↳ ${pkg.name} discount`;
+          rows.push({label: _lbl, amt: _pkgDisc, cls: 'discount-row addon-discount-row'});
+        }
+      }
       // Pinned add-ons (operator locked them in) — render as fixed rows
       // immediately under the package row, with an × unpin button so the
       // operator can release them back to the optional grid. Skipping
@@ -4398,7 +4790,10 @@
         const total = travelLis.reduce((s, li) => s + _liNetForRow(li), 0);
         const detailsHtml = travelLis.map(li => {
           const sub = Math.max(0, (parseFloat(li.rate) || 0) * (parseFloat(li.days) || 0));
-          return `<div class="breakdown-row travel-detail-row fixed-row"><span>${li.name}</span><span class="travel-amt">+${_fmtGBP(sub)}</span></div>`;
+          // Draft-only × removes the underlying line item; the row is also
+          // click-to-edit (amount) via the .travel-li-editable handler.
+          const rmBtn = `<button type="button" class="breakdown-remove-btn" data-travel-remove-li="${li.id}" data-no-edit title="Remove from quote" aria-label="Remove">×</button>`;
+          return `<div class="breakdown-row travel-detail-row fixed-row travel-li-editable" data-travel-li="${li.id}"><span>${li.name}${rmBtn}</span><span class="travel-amt">+${_fmtGBP(sub)}</span></div>`;
         }).join('');
         const expanded = !!_pstate.travelExpanded;
         const groupHtml =
@@ -4435,7 +4830,17 @@
       }
       if (_pstate.postProd) {
         const p = (PRICING.postProduction || []).find(x => x.id === _pstate.postProd);
-        if (p) rows.push({label:p.name, amt:p.price, cls:''});
+        if (p) {
+          rows.push({label:p.name, amt:p.price, cls:''});
+          const _ppDisc = _postprodDiscountAmount(p);
+          if (_ppDisc > 0) {
+            const _ppd = (_pstate.postprodDiscounts || {})[p.id] || p.discount || {};
+            const _lbl = _ppd.type === 'pct'
+              ? `  ↳ ${p.name} discount (${_ppd.value}%)`
+              : `  ↳ ${p.name} discount`;
+            rows.push({label: _lbl, amt: _ppDisc, cls: 'discount-row addon-discount-row'});
+          }
+        }
       }
       for (const id of _pstate.addons) {
         const a = (PRICING.addons || []).find(x => x.id === id);
@@ -4505,8 +4910,12 @@
       // Detail row HTML — each editable row also carries a "− Discount"
       // trigger (visible only in draft mode, CSS-hidden otherwise); any
       // active discount renders as a sibling sub-row immediately below.
+      // Operator-removed rows (× button) are filtered out here and from the
+      // header total; they persist in editor_state.travel_hidden.
+      const _thP = _pstate.travelHidden;
+      const _visRows = detailRows.filter(d => !(_thP && _thP.has(d.field)));
       let runningDiscountTotal = 0;
-      const detailsHtml = detailRows.map(d => {
+      const detailsHtml = _visRows.map(d => {
         const amtStr = (typeof d.amt === 'string')
           ? d.amt
           : '+' + _fmtGBP(Number(d.amt) || 0);
@@ -4518,8 +4927,10 @@
         const discBtn = d.editable
           ? `<button type="button" class="travel-disc-btn" data-travel-disc="${d.field}" data-no-edit title="Apply a discount to this row">− Discount</button>`
           : '';
+        // × remove — hides this travel row (and its cost) from the quote.
+        const rmBtn = `<button type="button" class="breakdown-remove-btn" data-travel-remove-field="${d.field}" data-no-edit title="Remove from quote" aria-label="Remove">×</button>`;
         const mainRow = `<div class="${cls}"${dataAttr}>`
-                      +   `<span>${d.label}${discBtn}</span>`
+                      +   `<span>${d.label}${discBtn}${rmBtn}</span>`
                       +   `<span class="travel-amt">${amtStr}</span>`
                       + `</div>`;
         // Discount sub-row (only when set and > 0). Mirrors the per-addon
@@ -4540,9 +4951,8 @@
       }).join('');
       // Header total reflects post-discount value so the collapsed view
       // doesn't lie about what's being charged.
-      const grossTotal = (Number(tr.van_cost)  || 0)
-                       + (Number(tr.mile_cost) || 0)
-                       + (Number(tr.cc_cost)   || 0);
+      const grossTotal = ['van_cost', 'mile_cost', 'cc_cost'].reduce(
+        (s, f) => (_thP && _thP.has(f)) ? s : s + (Number(tr[f]) || 0), 0);
       const netTotal   = Math.max(0, grossTotal - runningDiscountTotal);
       const expanded = !!_pstate.travelExpanded;
       const groupHtml =
@@ -4553,7 +4963,8 @@
         + `</div>`
         + `<div class="travel-details">${detailsHtml}</div>`
         + `</div>`;
-      rows.push({ customHtml: groupHtml });
+      // Every travel row removed → suppress the empty Travel group entirely.
+      if (_visRows.length) rows.push({ customHtml: groupHtml });
     }
     // Multi-day discount line (automatic, not togglable)
     if (PRICING.multiday) {
@@ -4675,6 +5086,7 @@
   document.querySelectorAll('.pkg-card[data-pkg-id]').forEach(card => {
     card.addEventListener('click', (e) => {
       if (e.target.closest('[data-editable]')) return;
+      if (e.target.closest('[data-no-edit]')) return;
       if (e.target.closest('.pkg-camera-op')) return;
       if (e.target.closest('.pkg-camera-op-menu')) return;
       document.querySelectorAll('.pkg-card[data-pkg-id]').forEach(c => c.classList.remove('selected'));
@@ -5539,6 +5951,10 @@
     // so the accept flow stays compatible with both shapes.
     const _emailEl = document.getElementById('signer-email');
     const email = _emailEl ? _emailEl.value.trim() : '';
+    // Optional purchase-order field — same defensive read as email (old
+    // in-flight quotes won't have the input); carried in the acceptance payload.
+    const _poEl = document.getElementById('signer-po');
+    const po = _poEl ? _poEl.value.trim() : '';
     if (!name) { alert('Please enter your name.'); return; }
     // Email validation: only run when the field exists AND something was
     // entered, so old quotes (no field) and operators who skip it still
@@ -5612,6 +6028,7 @@
         quoteRef:         VF.quoteRef,
         signerName:       name,
         signerEmail:      email,
+        purchaseOrder:    po,
         signatureDataUrl: sigDataUrl,
         timestamp,
         projectTitle:    VF.projectTitle,
@@ -5787,6 +6204,10 @@
       // ── Discounts ───────────────────────────────────────────────────────
       const addonDiscounts = _pstate.addonDiscounts || {};
       if (Object.keys(addonDiscounts).length) state.addon_discounts = addonDiscounts;
+      const packageDiscounts = _pstate.packageDiscounts || {};
+      if (Object.keys(packageDiscounts).length) state.package_discounts = packageDiscounts;
+      const postprodDiscounts = _pstate.postprodDiscounts || {};
+      if (Object.keys(postprodDiscounts).length) state.postprod_discounts = postprodDiscounts;
       const customDiscounts = _pstate.customDiscounts || [];
       if (customDiscounts.length) state.custom_discounts = customDiscounts;
 
@@ -5851,6 +6272,14 @@
       if (typeof window._getTravelParkingLabel === 'function') {
         const pl = window._getTravelParkingLabel();
         if (pl) state.travel_parking_label = pl;
+      }
+      // Operator-removed travel rows (Package mode × on van/mileage/CC/
+      // parking). Itemized travel removal rides editor_state.line_items, not
+      // this key. Only written when non-empty, so an un-removed quote stays
+      // clean and the flag self-preserves across regens.
+      if (typeof window._getTravelHidden === 'function') {
+        const th = window._getTravelHidden();
+        if (th && th.length) state.travel_hidden = th;
       }
       if (typeof window._getDeliveryDiscounts === 'function') {
         const dd = window._getDeliveryDiscounts();
@@ -6011,6 +6440,7 @@
         'package_edits', 'removed_package_ids', 'custom_packages',
         'addon_edits',   'addon_qty',           'custom_addons',
         'addon_discounts', 'custom_discounts',
+        'package_discounts', 'postprod_discounts',
         'removed_addon_ids',
         'travel_overrides', 'travel_discounts', 'travel_parking_label', 'delivery_discounts',
         'pinned_addons',   'addon_order',
@@ -6835,14 +7265,18 @@
             editor_state: { version: 1, saved_at: new Date().toISOString() },  // empty
           }),
         });
-        // Trigger a Reset & Regenerate so the mac mini re-renders fresh HTML
-        await fetch('https://vf-quotes.vercel.app/api/webhook', {
-          method:  'POST',
-          headers: {'Content-Type': 'application/json', 'X-VF-Token': (VF && VF.webhookToken) || ''},
+        // Trigger a Reset & Regenerate so the mac mini re-renders fresh HTML.
+        // Routed through valley.film (session-gated) rather than the
+        // unauthenticated vf-quotes webhook — "Reset & Regenerate" wipes
+        // Editor State, so it must only be reachable by a signed-in operator.
+        await fetch('https://valley.film/api/quotes/admin', {
+          method:      'POST',
+          credentials: 'include',
+          headers:     { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            action:       'set_trigger',
-            page_id:      VF.pageId,
-            trigger:      'Reset & Regenerate',
+            action:  'set_trigger',
+            pageId:  VF.pageId,
+            trigger: 'Reset & Regenerate',
           }),
         });
         // Revert succeeded server-side → drop the local backup so the
@@ -7012,16 +7446,18 @@
         // 3-second autosave debounce flushes.
         await _doAutosave();
         if (status) status.textContent = 'Triggering re-extraction…';
-        const resp = await fetch('https://vf-quotes.vercel.app/api/webhook', {
-          method:  'POST',
-          headers: {'Content-Type': 'application/json', 'X-VF-Token': (VF && VF.webhookToken) || ''},
+        // Session-gated website endpoint (see the Revert flow above for why).
+        const resp = await fetch('https://valley.film/api/quotes/admin', {
+          method:      'POST',
+          credentials: 'include',
+          headers:     { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action:  'set_trigger',
-            page_id: VF.pageId,
+            pageId:  VF.pageId,
             trigger: 'Re-process Brief',
           }),
         });
-        if (!resp.ok) throw new Error('non-200 from webhook');
+        if (!resp.ok) throw new Error('non-200 from admin endpoint');
         if (status) status.textContent = '✓ Queued — refresh in ~30s to see updated quote.';
       } catch (e) {
         if (status) status.textContent = 'Failed: ' + e.message;
@@ -7188,7 +7624,27 @@
     function _sanitizeLiName(html) {
       const tmp = document.createElement('div');
       tmp.innerHTML = html || '';
-      const allow = new Set(['B', 'STRONG', 'I', 'EM']);
+      // Inline formatting the operator can apply via the B/I/S toolbar or
+      // ⌘B/⌘I. SPAN is allowed only to carry a whitelisted inline style —
+      // that's how the CSS-bold default gets lightened (font-weight:normal).
+      const allow = new Set(['B', 'STRONG', 'I', 'EM', 'S', 'STRIKE', 'DEL', 'U', 'SPAN']);
+      const styleOk = {
+        'font-weight':          (v) => /^(normal|bold|bolder|lighter|[1-9]00)$/.test(v),
+        'font-style':           (v) => /^(normal|italic|oblique)$/.test(v),
+        'text-decoration':      (v) => /^(none|underline|line-through)$/.test(v),
+        'text-decoration-line': (v) => /^(none|underline|line-through)$/.test(v),
+      };
+      const cleanStyle = (el) => {
+        const out = [];
+        (el.getAttribute('style') || '').split(';').forEach(decl => {
+          const idx = decl.indexOf(':');
+          if (idx < 0) return;
+          const prop = decl.slice(0, idx).trim().toLowerCase();
+          const val  = decl.slice(idx + 1).trim().toLowerCase();
+          if (styleOk[prop] && styleOk[prop](val)) out.push(prop + ': ' + val);
+        });
+        return out.join('; ');
+      };
       // Two passes so children get unwrapped before we re-check their parents.
       const walk = (node) => {
         Array.from(node.children).forEach(walk);
@@ -7198,9 +7654,18 @@
             const parent = el.parentNode;
             while (el.firstChild) parent.insertBefore(el.firstChild, el);
             parent.removeChild(el);
-          } else {
-            // Strip all attributes
-            Array.from(el.attributes).forEach(a => el.removeAttribute(a.name));
+            return;
+          }
+          // Keep only a whitelisted inline style; drop every other attribute.
+          const style = cleanStyle(el);
+          Array.from(el.attributes).forEach(a => el.removeAttribute(a.name));
+          if (style) {
+            el.setAttribute('style', style);
+          } else if (el.tagName === 'SPAN') {
+            // A SPAN with no surviving style adds nothing → unwrap it.
+            const parent = el.parentNode;
+            while (el.firstChild) parent.insertBefore(el.firstChild, el);
+            parent.removeChild(el);
           }
         });
       };
@@ -7211,6 +7676,11 @@
 
     function _attachEditable(el) {
       el.addEventListener('click', function(e) {
+        // "View as client" preview: the editor JS stays loaded (isDraft is
+        // still true) but text must behave exactly as it will for the real
+        // client — locked. Without this check the operator could "edit" in
+        // preview mode and believe clients could too.
+        if (document.body.classList.contains('client-preview')) return;
         // Only stop propagation when NOT inside a toggle/pkg card — those need clicks to bubble
         // so their own handlers (addon toggle, package select) still fire when clicking non-text areas
         if (!this.closest('.toggle-card, .pkg-card')) e.stopPropagation();
@@ -7318,6 +7788,31 @@
       el.appendChild(pill);
       setTimeout(() => { try { pill.remove(); } catch (_) {} }, ok ? 2500 : 8000);
     }
+    // Pricing-affecting fields need a full regen to take effect (day counts
+    // re-price every package and line item). Flush the editor state first so
+    // the regen doesn't resurrect a pre-edit snapshot, then flip Financial
+    // Status → Requested via the website admin API — the plain regen path,
+    // which PRESERVES Editor State (unlike the old Trigger: Reset &
+    // Regenerate route, which wiped the operator's edits).
+    const _REGEN_FIELDS = new Set(['production_date', 'shooting_days', 'job_type', 'default_delivery', 'quote_type']);
+    async function _queueRegen(field) {
+      try {
+        if (typeof _finalSaveBeforeSend === 'function') await _finalSaveBeforeSend();
+        const r = await fetch('https://valley.film/api/quotes/admin', {
+          method:      'POST',
+          credentials: 'include',
+          headers:     { 'Content-Type': 'application/json' },
+          body:        JSON.stringify({ action: 'trigger', pageId: VF.pageId }),
+        });
+        if (r.ok) {
+          _setAutosaveStatus('Saved — quote regenerating (~30–60s), refresh when done', 'saving');
+        } else {
+          _setAutosaveStatus('Saved to Notion — use Refresh from Notion in the portal to re-price', 'saving');
+        }
+      } catch (_) {
+        _setAutosaveStatus('Saved to Notion — use Refresh from Notion in the portal to re-price', 'saving');
+      }
+    }
     document.querySelectorAll('[data-prod-field]').forEach(el => {
       const field    = el.dataset.prodField;
       const editType = el.dataset.prodType || 'text';
@@ -7330,6 +7825,7 @@
         try { opts = JSON.parse(el.dataset.prodOptions || '[]'); } catch (_) {}
         el.style.cursor = 'pointer';
         el.addEventListener('click', function (e) {
+          if (document.body.classList.contains('client-preview')) return;
           if (this.querySelector('select')) return;
           if (e.target.closest('a, button')) return;
           e.stopPropagation();
@@ -7372,12 +7868,10 @@
             el.appendChild(document.createTextNode(newVal));
             if (sublabel) el.appendChild(sublabel);
             try {
-              const result = await _saveProdField(field, newVal);
+              await _saveProdField(field, newVal);
               el.dataset.prodValue = newVal;
               _flashProdFieldStatus(el, true);
-              if (result && result.regen_queued) {
-                _setAutosaveStatus('Field saved — regenerating quote in ~30s', 'saving');
-              }
+              if (_REGEN_FIELDS.has(field)) _queueRegen(field);
             } catch (err) {
               _flashProdFieldStatus(el, false, err.message);
             }
@@ -7391,12 +7885,97 @@
             if (ke.key === 'Escape') { done = true; finish(false); }
           });
         });
+      } else if (editType === 'date' && field === 'production_date') {
+        // Production Date supports a RANGE — start + optional end picker so
+        // multi-day shoots can be expressed right from the editor. The raw
+        // value arrives as "start" or "start|end"; saves go up as a
+        // {start, end} object (the webhook writes a Notion date range).
+        el.style.cursor = 'text';
+        el.addEventListener('click', function (e) {
+          if (document.body.classList.contains('client-preview')) return;
+          if (this.querySelector('input')) return;
+          if (e.target.closest('a, button')) return;
+          e.stopPropagation();
+          const current = (el.dataset.prodValue || initial || '').split('|');
+          const curStart = current[0] || '';
+          const curEnd   = (current[1] || '');
+          const displayText = this.firstChild ? this.firstChild.textContent : this.textContent;
+          this.dataset.prodDisplay = displayText;
+          const wrap = document.createElement('span');
+          wrap.style.cssText = 'display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;';
+          const mk = (val, ph) => {
+            const i = document.createElement('input');
+            i.type = 'date';
+            i.value = val || '';
+            if (ph) i.title = ph;
+            i.style.cssText = 'font:inherit;color:inherit;background:rgba(255,255,255,0.6);'
+                            + 'border:1px solid var(--blue);padding:1px 4px;border-radius:3px;';
+            return i;
+          };
+          const startIn = mk(curStart, 'First shoot day');
+          const endIn   = mk(curEnd, 'Last shoot day (leave empty for a single day)');
+          const dash = document.createElement('span');
+          dash.textContent = '–';
+          dash.style.opacity = '0.5';
+          const endHint = document.createElement('span');
+          endHint.textContent = 'end (optional)';
+          endHint.style.cssText = 'font-size:9px;color:var(--grey-400);';
+          wrap.appendChild(startIn); wrap.appendChild(dash); wrap.appendChild(endIn); wrap.appendChild(endHint);
+          const sublabel = this.querySelector('div');
+          this.innerHTML = '';
+          this.appendChild(wrap);
+          if (sublabel) this.appendChild(sublabel);
+          startIn.focus();
+
+          let aborted = false, done = false;
+          const restore = () => {
+            el.innerHTML = '';
+            el.appendChild(document.createTextNode(displayText));
+            if (sublabel) el.appendChild(sublabel);
+          };
+          const finish = async () => {
+            if (done) return;
+            done = true;
+            const ns = startIn.value;
+            let ne = endIn.value;
+            if (ne && ns && ne < ns) ne = '';            // backwards range → ignore end
+            if (ne && ns && ne === ns) ne = '';          // same-day "range" → single date
+            const joined = ns + (ne ? '|' + ne : '');
+            if (aborted || !ns || joined === (el.dataset.prodValue || initial || '')) { restore(); return; }
+            // Optimistic UI while we save
+            el.innerHTML = '';
+            el.appendChild(document.createTextNode(ne ? (ns + ' – ' + ne) : ns));
+            if (sublabel) el.appendChild(sublabel);
+            try {
+              await _saveProdField(field, ne ? { start: ns, end: ne } : ns);
+              el.dataset.prodValue = joined;
+              _flashProdFieldStatus(el, true);
+              _queueRegen(field);
+            } catch (err) {
+              _flashProdFieldStatus(el, false, err.message);
+            }
+          };
+          [startIn, endIn].forEach(i => {
+            i.addEventListener('keydown', (ke) => {
+              if (ke.key === 'Escape') { aborted = true; finish(); }
+              if (ke.key === 'Enter')  { finish(); }
+            });
+            i.addEventListener('blur', () => {
+              // Only finish when focus left BOTH inputs (tabbing between
+              // them shouldn't commit).
+              setTimeout(() => {
+                if (document.activeElement !== startIn && document.activeElement !== endIn) finish();
+              }, 120);
+            });
+          });
+        });
       } else if (editType === 'date' || editType === 'number') {
         // Swap in a real <input> on click so the operator gets the native
         // picker / numeric keyboard. Snapshot the display text so we can
         // restore it if they cancel (Esc) without saving.
         el.style.cursor = 'text';
         el.addEventListener('click', function (e) {
+          if (document.body.classList.contains('client-preview')) return;
           if (this.querySelector('input')) return;
           if (e.target.closest('a, button')) return;
           e.stopPropagation();
@@ -7439,14 +8018,12 @@
                 : newVal));
             if (sublabel) el.appendChild(sublabel);
             try {
-              const result = await _saveProdField(field, newVal);
+              await _saveProdField(field, newVal);
               el.dataset.prodValue = newVal;
               _flashProdFieldStatus(el, true);
-              // If the field affects pricing, the webhook auto-queued a
-              // regenerate. Tell the operator to wait for it to finish.
-              if (result && result.regen_queued) {
-                _setAutosaveStatus('Field saved — regenerating quote in ~30s', 'saving');
-              }
+              // Pricing-affecting fields (shooting_days) → queue the regen
+              // ourselves; the webhook's regen_queued flag is advisory only.
+              if (_REGEN_FIELDS.has(field)) _queueRegen(field);
             } catch (err) {
               _flashProdFieldStatus(el, false, err.message);
             }
@@ -7706,6 +8283,76 @@
         }
         return;
       }
+      // ── Itemized travel row × → remove the underlying line item ──────────
+      // Travel line items (Van Hire / Mileage / Congestion Charge) live in
+      // _pstate.lineItems but are filtered out of the editable rate-card
+      // table, so this × is their only remove affordance. Removal persists
+      // via editor_state.line_items (removed_ids), re-applied on regen.
+      const tRmLi = e.target.closest('[data-travel-remove-li]');
+      if (tRmLi) {
+        e.stopPropagation();
+        const id = tRmLi.getAttribute('data-travel-remove-li');
+        _pstate.lineItems = (_pstate.lineItems || []).filter(x => x.id !== id);
+        if (Array.isArray(PRICING.lineItems)) {
+          PRICING.lineItems = PRICING.lineItems.filter(x => x.id !== id);
+        }
+        _updateTotal();
+        if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
+        return;
+      }
+      // ── Package travel row × → hide that field (van/mileage/CC/parking) ──
+      // Persists via editor_state.travel_hidden; the row and its cost drop
+      // out of both the breakdown and the running total.
+      const tRmField = e.target.closest('[data-travel-remove-field]');
+      if (tRmField) {
+        e.stopPropagation();
+        const field = tRmField.getAttribute('data-travel-remove-field');
+        if (!_pstate.travelHidden) _pstate.travelHidden = new Set();
+        _pstate.travelHidden.add(field);
+        _updateTotal();
+        if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
+        return;
+      }
+      // ── Itemized travel row → inline-edit the £ amount (draft only) ──────
+      // Edits the line item's per-day rate so rate × days matches the entered
+      // amount, preserving the day count. Persists via editor_state.line_items.
+      const tLiRow = e.target.closest('.travel-li-editable[data-travel-li]');
+      if (tLiRow && document.body.classList.contains('draft-mode')) {
+        const id  = tLiRow.getAttribute('data-travel-li');
+        const sli = (_pstate.lineItems || []).find(x => x.id === id);
+        if (!sli) return;
+        const amtEl = tLiRow.querySelector('.travel-amt');
+        if (!amtEl || amtEl.querySelector('input')) return;   // already editing
+        const days   = (parseFloat(sli.days) || 0) || 1;
+        const curSub = Math.max(0, (parseFloat(sli.rate) || 0) * (parseFloat(sli.days) || 0));
+        const input  = document.createElement('input');
+        input.className = 'travel-edit-input';
+        input.type = 'number';
+        input.step = '0.01';
+        input.min  = '0';
+        input.value = curSub.toFixed(2);
+        input.setAttribute('aria-label', 'Edit travel amount');
+        amtEl.textContent = '';
+        amtEl.appendChild(input);
+        input.focus();
+        input.select();
+        const commit = () => {
+          const v = Math.max(0, Math.round(parseFloat(input.value || '0') * 100) / 100);
+          const newRate = Math.round((v / days) * 100) / 100;
+          sli.rate = newRate;
+          const pli = (PRICING.lineItems || []).find(x => x.id === id);
+          if (pli) pli.rate = newRate;
+          _updateTotal();
+          if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
+        };
+        const cancel = () => { _updateTotal(); };
+        input.addEventListener('blur', commit);
+        input.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter')  { ev.preventDefault(); input.blur(); }
+          if (ev.key === 'Escape') { ev.preventDefault(); input.removeEventListener('blur', commit); cancel(); }
+        });
+        return;
+      }
       // Pinned-addon × → un-pin (back to Optional grid).
       const unpinBtn = e.target.closest('.pinned-addon-unpin[data-unpin]');
       if (unpinBtn) {
@@ -7867,6 +8514,7 @@
     window._getTravelOverrides = () => Object.assign({}, _pstate.travelOverrides || {});
     window._getTravelDiscounts = () => Object.assign({}, _pstate.travelDiscounts || {});
     window._getTravelParkingLabel = () => (_pstate.travelParkingLabel || '').toString();
+    window._getTravelHidden       = () => Array.from(_pstate.travelHidden || []);
 
     // ── Deliverables editor: × per pill, "+ Add deliverable" button ──────────
     function _wireDelivPill(pill) {
@@ -8006,28 +8654,29 @@
       })).filter(d => d.title);
     }
 
-    // ── Add-on inline discount ────────────────────────────────────────────
-    // Storage: _pstate.addonDiscounts = { addon_id: { value, type } }
+    // ── Inline item discounts (add-ons, post-production, packages) ───────
+    // Storage (all initialised in the always-on layer from editor_state):
+    //   _pstate.addonDiscounts    = { addon_id: { value, type } }
+    //   _pstate.postprodDiscounts = { postprod_id: { value, type } }
+    //   _pstate.packageDiscounts  = { pkg_id: { value, type } }
     //   type: 'fixed' (£ amount)  |  'pct' (percentage of base price)
-    // The addon's price label is NOT modified — instead a small chip overlay
-    // shows the discount in the top-right of the card, and a separate negative
-    // line appears in the price breakdown below.
-    _pstate.addonDiscounts = {};
-    // Pre-populate from saved Editor State (operator's prior session) so chips
-    // appear on initial render. Migrate the legacy plain-number format.
-    {
-      const saved = (window._editor_state_initial && window._editor_state_initial.addon_discounts) || {};
-      Object.keys(saved).forEach(k => {
-        const v = saved[k];
-        _pstate.addonDiscounts[k] = (typeof v === 'number')
-          ? { value: v, type: 'fixed' }
-          : v;
-      });
+    // The item's price label is NOT modified — instead a small chip overlay
+    // shows the discount on the card, and a separate negative line appears
+    // in the price breakdown below.
+    function _discountStateFor(kind) {
+      if (kind === 'pkg')      return _pstate.packageDiscounts;
+      if (kind === 'postprod') return _pstate.postprodDiscounts;
+      return _pstate.addonDiscounts;
     }
-    function _renderDiscountChip(addonId) {
-      const card = document.querySelector('.toggle-card[data-addon-id="' + addonId + '"]');
+    function _discountCardFor(kind, id) {
+      if (kind === 'pkg')      return document.querySelector('.pkg-card[data-pkg-id="' + id + '"]');
+      if (kind === 'postprod') return document.querySelector('.toggle-card[data-postprod-id="' + id + '"]');
+      return document.querySelector('.toggle-card[data-addon-id="' + id + '"]');
+    }
+    function _renderItemDiscountChip(kind, id) {
+      const card = _discountCardFor(kind, id);
       if (!card) return;
-      const disc = _pstate.addonDiscounts[addonId];
+      const disc = _discountStateFor(kind)[id];
       let chip = card.querySelector('.addon-discount-chip');
       if (disc && parseFloat(disc.value || 0) > 0) {
         if (!chip) {
@@ -8042,44 +8691,63 @@
         chip.remove();
       }
       // Hide the legacy "− Discount applied" text label — chip replaces it.
-      const labelEl = card.querySelector('.addon-discount-label[data-addon-id="' + addonId + '"]');
+      const labelEl = card.querySelector('.addon-discount-label');
       if (labelEl) labelEl.textContent = '';
     }
-    function _applyAddonDiscount(addonId, spec) {
+    function _applyItemDiscount(kind, id, spec) {
       // spec: null/undefined to clear, or a value/type object
+      const map = _discountStateFor(kind);
       const v = spec ? parseFloat(spec.value || 0) : 0;
       if (spec && v > 0) {
-        _pstate.addonDiscounts[addonId] = { value: v, type: spec.type === 'pct' ? 'pct' : 'fixed' };
+        map[id] = { value: v, type: spec.type === 'pct' ? 'pct' : 'fixed' };
       } else {
-        delete _pstate.addonDiscounts[addonId];
+        delete map[id];
       }
-      _renderDiscountChip(addonId);
+      _renderItemDiscountChip(kind, id);
       _updateTotal();
+      _scheduleAutosave();
     }
+    // Back-compat wrappers — other call sites still use the addon names.
+    function _renderDiscountChip(addonId) { _renderItemDiscountChip('addon', addonId); }
+    function _applyAddonDiscount(addonId, spec) { _applyItemDiscount('addon', addonId, spec); }
     // Render any pre-populated chips on first paint
-    Object.keys(_pstate.addonDiscounts).forEach(_renderDiscountChip);
-    document.querySelectorAll('.draft-addon-discount-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        const addonId = btn.dataset.addonId;
-        const current = _pstate.addonDiscounts[addonId] || { value: 0, type: 'fixed' };
-        const r = await _openModal({
-          title: 'Discount on this add-on',
-          body: 'Apply a flat £ amount or a percentage of the base price. Set value to 0 to clear.',
-          fields: [
-            { id: 'kind',  label: 'Type',   type: 'radio',
-               options: [{value:'fixed', label:'£ amount'}, {value:'pct', label:'Percentage (%)'}],
-               value: current.type || 'fixed' },
-            { id: 'value', label: 'Amount', type: 'number', required: true, min: 0, value: current.value || 0 },
-          ],
-          submitLabel: 'Apply',
-        });
-        if (r === null) return;
-        const amt = parseFloat(r.value) || 0;
-        _applyAddonDiscount(addonId, amt > 0 ? { value: amt, type: r.kind } : null);
+    Object.keys(_pstate.addonDiscounts).forEach(id => _renderItemDiscountChip('addon', id));
+    Object.keys(_pstate.postprodDiscounts).forEach(id => _renderItemDiscountChip('postprod', id));
+    Object.keys(_pstate.packageDiscounts).forEach(id => _renderItemDiscountChip('pkg', id));
+    // ONE delegated handler covers every "− Discount" button: server-rendered
+    // add-on/post-prod/package cards AND custom add-on cards built later in
+    // this session (the old per-button binding missed those — the reported
+    // "can't discount a new optional add-on" bug).
+    const _DISCOUNT_KIND_LABEL = {
+      addon:    'Discount on this add-on',
+      postprod: 'Discount on this post-production option',
+      pkg:      'Discount on this package',
+    };
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.draft-addon-discount-btn');
+      if (!btn) return;
+      if (!document.body.classList.contains('draft-mode')) return;
+      e.stopPropagation();
+      e.preventDefault();
+      const kind = btn.dataset.discKind || 'addon';
+      const id   = btn.dataset.discId || btn.dataset.addonId;
+      if (!id) return;
+      const current = _discountStateFor(kind)[id] || { value: 0, type: 'fixed' };
+      const r = await _openModal({
+        title: _DISCOUNT_KIND_LABEL[kind] || _DISCOUNT_KIND_LABEL.addon,
+        body: 'Apply a flat £ amount or a percentage of the base price. Set value to 0 to clear.',
+        fields: [
+          { id: 'kind',  label: 'Type',   type: 'radio',
+             options: [{value:'fixed', label:'£ amount'}, {value:'pct', label:'Percentage (%)'}],
+             value: current.type || 'fixed' },
+          { id: 'value', label: 'Amount', type: 'number', required: true, min: 0, value: current.value || 0 },
+        ],
+        submitLabel: 'Apply',
       });
-    });
+      if (r === null) return;
+      const amt = parseFloat(r.value) || 0;
+      _applyItemDiscount(kind, id, amt > 0 ? { value: amt, type: r.kind } : null);
+    }, true);
 
     // ── Package add/remove + custom-with-Review writeback queue ──────────────
     _pstate.customPackages = [];   // queued for webhook on Approve
@@ -8480,56 +9148,142 @@
       }
       document.querySelectorAll('#line-items-body .li-row').forEach(_wireLiRow);
 
-      // "+ Add line item" — open a Rate Card picker
-      async function _openLineItemPicker() {
-        const used = new Set(_pstate.lineItems.map(li => li.role_id).filter(Boolean));
-        const choices = (PRICING.rateCard || [])
-          .filter(r => !used.has(r.id))
-          .map(r => ({ value: 'rate_' + r.id, label: r.name + ' (£' + Number(r.my_rate || 0).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}) + '/day)' }));
-        choices.push({ value: 'custom', label: 'Custom line item — type the role inline' });
-        const r = await _openModal({
-          title: 'Add line item',
-          fields: [
-            { id: 'choice', label: 'Pick a role from the Rate Card', type: 'radio', options: choices },
-            { id: 'days', label: 'Days', type: 'number', value: PRICING.defaultDays || 1, min: 0 },
-          ],
-          submitLabel: 'Add',
-        });
-        if (!r) return;
-        let newLi;
-        if (r.choice === 'custom') {
-          newLi = {
-            id:       'li_custom_' + Date.now(),
-            role_id:  null,
-            name:     'New role',
-            rate:     0,
-            days:     parseFloat(r.days) || 1,
-            subtotal: 0,
-            custom:   true,
-          };
-        } else {
-          const roleId = r.choice.replace(/^rate_/, '');
-          const role = (PRICING.rateCard || []).find(x => x.id === roleId);
-          if (!role) return;
-          // Match Python's _infer_role_unit: same heuristic, JS-flavoured
-          const inferUnit = (n) => {
-            const s = (n || '').toLowerCase();
-            if (s.includes('mileage') || s.includes('mile ')) return 'mile';
-            if (s.includes('journey'))    return 'journey';
-            if (s.includes('congestion')) return 'charge';
-            return 'day';
-          };
-          newLi = {
-            id:       'li_' + roleId.slice(-8),
-            role_id:  roleId,
-            name:     role.name,
-            rate:     parseFloat(role.my_rate) || 0,
-            days:     parseFloat(r.days) || 1,
-            unit:     inferUnit(role.name),
-            subtotal: (parseFloat(role.my_rate) || 0) * (parseFloat(r.days) || 1),
-          };
+      // ── Inline formatting toolbar for line-item names ────────────────────
+      // Floating B / I / S / clear bar that appears when the operator selects
+      // text inside a role name (draft only). Bold toggles the real
+      // font-weight (700⇄400) so the CSS-bold default can be lightened — plain
+      // ⌘B can't un-bold inherited weight. Edits live in the name's innerHTML
+      // and persist through the existing blur save + _sanitizeLiName.
+      (function _setupLiFmtBar() {
+        if (document.getElementById('li-fmt-bar')) return;
+        const bar = document.createElement('div');
+        bar.id = 'li-fmt-bar';
+        bar.setAttribute('role', 'toolbar');
+        bar.setAttribute('aria-label', 'Text formatting');
+        bar.innerHTML =
+            '<button type="button" data-fmt="bold" title="Bold (⌘B)" style="font-weight:800;">B</button>'
+          + '<button type="button" data-fmt="italic" title="Italic (⌘I)" style="font-style:italic;">I</button>'
+          + '<button type="button" data-fmt="strike" title="Strikethrough" style="text-decoration:line-through;">S</button>'
+          + '<span class="li-fmt-sep"></span>'
+          + '<button type="button" data-fmt="clear" title="Clear formatting">T×</button>';
+        document.body.appendChild(bar);
+
+        // Resolve the editing .li-name-text that holds the current selection.
+        function _fmtCtx() {
+          const sel = window.getSelection();
+          if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return null;
+          const range = sel.getRangeAt(0);
+          const node  = range.commonAncestorContainer;
+          const base  = (node.nodeType === 3 ? node.parentElement : node);
+          const host  = (base && base.closest) ? base.closest('.li-name-text') : null;
+          if (!host || host.contentEditable !== 'true') return null;
+          return { sel: sel, range: range, host: host };
         }
+
+        // Re-read the formatted name into _pstate + schedule a save. The blur
+        // handler does this too, but persisting here keeps it durable if the
+        // operator clicks straight to Send without blurring the field first.
+        function _fmtPersist(host) {
+          const row = host.closest('.li-row');
+          if (!row) return;
+          const li = _pstate.lineItems.find(x => x.id === row.dataset.liId);
+          if (!li) return;
+          li.name = window._sanitizeLiName(host.innerHTML || '');
+          if (typeof _scheduleAutosave === 'function') _scheduleAutosave();
+        }
+
+        function _fmtApply(kind) {
+          const ctx = _fmtCtx();
+          if (!ctx) return;
+          const sel = ctx.sel, range = ctx.range, host = ctx.host;
+          if (kind === 'clear') {
+            const text = range.toString();
+            range.deleteContents();
+            const tn = document.createTextNode(text);
+            range.insertNode(tn);
+            host.normalize();
+            const nr = document.createRange();
+            nr.selectNode(tn);
+            sel.removeAllRanges(); sel.addRange(nr);
+            _fmtPersist(host);
+            return;
+          }
+          const startEl = (range.startContainer.nodeType === 3)
+            ? range.startContainer.parentElement : range.startContainer;
+          const cs = startEl ? getComputedStyle(startEl) : null;
+          let prop, onVal, offVal, isOn;
+          if (kind === 'bold') {
+            const w = cs ? cs.fontWeight : '400';
+            isOn = (w === 'bold' || parseInt(w, 10) >= 600);
+            prop = 'fontWeight'; onVal = '700'; offVal = '400';
+          } else if (kind === 'italic') {
+            isOn = !!cs && cs.fontStyle.indexOf('italic') !== -1;
+            prop = 'fontStyle'; onVal = 'italic'; offVal = 'normal';
+          } else if (kind === 'strike') {
+            const td = cs ? (cs.textDecorationLine || cs.textDecoration || '') : '';
+            isOn = td.indexOf('line-through') !== -1;
+            prop = 'textDecorationLine'; onVal = 'line-through'; offVal = 'none';
+          } else { return; }
+          const span = document.createElement('span');
+          span.style[prop] = isOn ? offVal : onVal;
+          try {
+            span.appendChild(range.extractContents());
+            range.insertNode(span);
+            host.normalize();
+            const nr = document.createRange();
+            nr.selectNodeContents(span);
+            sel.removeAllRanges(); sel.addRange(nr);
+          } catch (e) { return; }
+          _fmtPersist(host);
+        }
+
+        bar.querySelectorAll('button[data-fmt]').forEach(btn => {
+          // Keep the field's selection alive when a button is pressed.
+          btn.addEventListener('mousedown', (e) => e.preventDefault());
+          btn.addEventListener('click', (e) => { e.preventDefault(); _fmtApply(btn.dataset.fmt); });
+        });
+
+        function _positionBar() {
+          if (!document.body.classList.contains('draft-mode')) { bar.style.display = 'none'; return; }
+          const ctx = _fmtCtx();
+          if (!ctx) { bar.style.display = 'none'; return; }
+          const rect = ctx.range.getBoundingClientRect();
+          if (!rect || (!rect.width && !rect.height)) { bar.style.display = 'none'; return; }
+          bar.style.display = 'flex';
+          const top  = window.scrollY + rect.top - bar.offsetHeight - 8;
+          const left = window.scrollX + rect.left + (rect.width / 2) - (bar.offsetWidth / 2);
+          bar.style.top  = Math.max(window.scrollY + 4, top) + 'px';
+          bar.style.left = Math.max(8, left) + 'px';
+        }
+        document.addEventListener('selectionchange', _positionBar);
+        window.addEventListener('scroll', () => { if (bar.style.display === 'flex') _positionBar(); }, true);
+
+        // ⌘B / ⌘I inside a role name → our weight-aware toggles (suppressing
+        // the browser's native bold, which can't lighten inherited weight).
+        const liBody = document.getElementById('line-items-body');
+        if (liBody) liBody.addEventListener('keydown', (e) => {
+          if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+          const t = e.target;
+          if (!t || !t.classList || !t.classList.contains('li-name-text') || t.contentEditable !== 'true') return;
+          const k = (e.key || '').toLowerCase();
+          if (k === 'b') { e.preventDefault(); _fmtApply('bold'); }
+          else if (k === 'i') { e.preventDefault(); _fmtApply('italic'); }
+        });
+      })();
+
+      // "+ Add line item" — open a Rate Card picker
+      // Insert a built line item into state + the table. Shared by both
+      // picker paths (rate-card role and custom).
+      function _addLineItemRow(newLi, opts) {
         if (!newLi.unit) newLi.unit = 'day';
+        // Section -> line item category (renders under that heading on the
+        // quote; persists via editor_state). Empty / "Crew & Production"
+        // keeps the default crew section.
+        const _secRaw = ((opts && opts.section) || '').trim();
+        const _secLc  = _secRaw.toLowerCase();
+        if (_secRaw && _secLc !== 'crew' && _secLc !== 'crew & production') {
+          newLi.category = (_secLc === 'equipment') ? 'equipment' : _secRaw;
+        }
         _pstate.lineItems.push(newLi);
         // Build a row matching the server-rendered shape
         const tbody = document.getElementById('line-items-body');
@@ -8558,10 +9312,160 @@
         _wireLiRow(row);
         _renderLiFooter();
         _updateTotal();
-        // If they picked Custom, immediately focus the name cell so they can type
+        _scheduleAutosave();
+        // Custom items start as a blank slate — focus the name cell to type
         if (newLi.custom) {
           setTimeout(() => row.querySelector('.li-name')?.click(), 30);
         }
+      }
+
+      // ── Add line item — search-first picker ──────────────────────────
+      // Type to filter the Rate Card roles; arrow keys + Enter to pick.
+      // No matches → a single "List custom line item" action that uses the
+      // typed text as the new row's name. Days + Section ride along as
+      // compact fields under the list.
+      const _esc_html = (s) => String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+      let _liPicker = null;
+      function _liInferUnit(n) {
+        // Match Python's _infer_role_unit: same heuristic, JS-flavoured
+        const s = (n || '').toLowerCase();
+        if (s.includes('mileage') || s.includes('mile ')) return 'mile';
+        if (s.includes('journey'))    return 'journey';
+        if (s.includes('congestion')) return 'charge';
+        return 'day';
+      }
+      function _buildLiPicker() {
+        const ov = document.createElement('div');
+        ov.id = 'li-picker-overlay';
+        ov.setAttribute('role', 'dialog');
+        ov.setAttribute('aria-modal', 'true');
+        ov.innerHTML =
+          '<div class="li-picker-card">' +
+            '<div class="li-picker-head">' +
+              '<input type="text" id="li-picker-search" class="li-picker-search" ' +
+                'placeholder="Search the rate card…" autocomplete="off" spellcheck="false">' +
+              '<button type="button" class="li-picker-close" aria-label="Cancel">×</button>' +
+            '</div>' +
+            '<div class="li-picker-list" id="li-picker-list"></div>' +
+            '<div class="li-picker-opts">' +
+              '<label>Days <input type="number" id="li-picker-days" min="0" step="0.5"></label>' +
+              '<label>Section <input type="text" id="li-picker-section" value="Crew &amp; Production" ' +
+                'title="Heading this line sits under. Keep Crew &amp; Production or Equipment, or type a new one (e.g. Catering)."></label>' +
+            '</div>' +
+          '</div>';
+        document.body.appendChild(ov);
+        const close = () => { ov.style.display = 'none'; document.body.style.overflow = ''; };
+        ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
+        ov.querySelector('.li-picker-close').addEventListener('click', close);
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && ov.style.display !== 'none') close();
+        });
+        const search = ov.querySelector('#li-picker-search');
+        const list   = ov.querySelector('#li-picker-list');
+        let active = 0;
+        const choices = () => {
+          const used = new Set(_pstate.lineItems.map(li => li.role_id).filter(Boolean));
+          const q = (search.value || '').trim().toLowerCase();
+          const roles = (PRICING.rateCard || [])
+            .filter(r => !used.has(r.id))
+            .filter(r => !q || (r.name || '').toLowerCase().includes(q));
+          return { q, roles };
+        };
+        const render = () => {
+          const { q, roles } = choices();
+          let html = roles.map((r, i) =>
+            '<button type="button" class="li-picker-item' + (i === active ? ' active' : '') + '" data-role-id="' + _esc_html(r.id) + '">' +
+              '<span class="li-picker-name">' + _esc_html(r.name) + '</span>' +
+              '<span class="li-picker-rate">£' + Number(r.my_rate || 0).toLocaleString('en-GB', {minimumFractionDigits:0, maximumFractionDigits:2}) + '/day</span>' +
+            '</button>').join('');
+          // Custom action: the only option when nothing matches; always
+          // available at the bottom otherwise.
+          const customLabel = q
+            ? 'List custom line item — &ldquo;' + _esc_html(q) + '&rdquo;'
+            : 'List custom line item';
+          html += '<button type="button" class="li-picker-item li-picker-custom' +
+                  (active >= roles.length ? ' active' : '') + '" data-custom="1">' +
+                  '<span class="li-picker-name">+ ' + customLabel + '</span>' +
+                  '<span class="li-picker-rate">set rate inline</span></button>';
+          if (!roles.length && q) {
+            html = '<div class="li-picker-empty">No rate-card match for &ldquo;' + _esc_html(q) + '&rdquo;</div>' + html;
+          }
+          list.innerHTML = html;
+          const count = roles.length + 1;
+          if (active >= count) active = count - 1;
+        };
+        const pick = (el) => {
+          const days = parseFloat(ov.querySelector('#li-picker-days').value);
+          const section = ov.querySelector('#li-picker-section').value || '';
+          const q = (search.value || '').trim();
+          let newLi;
+          if (el.dataset.custom) {
+            newLi = {
+              id:       'li_custom_' + Date.now(),
+              role_id:  null,
+              name:     q || 'New role',
+              rate:     0,
+              days:     isNaN(days) ? (PRICING.defaultDays || 1) : days,
+              subtotal: 0,
+              custom:   true,
+            };
+          } else {
+            const role = (PRICING.rateCard || []).find(x => x.id === el.dataset.roleId);
+            if (!role) return;
+            const d = isNaN(days) ? (PRICING.defaultDays || 1) : days;
+            newLi = {
+              id:       'li_' + role.id.slice(-8),
+              role_id:  role.id,
+              name:     role.name,
+              rate:     parseFloat(role.my_rate) || 0,
+              days:     d,
+              unit:     _liInferUnit(role.name),
+              subtotal: (parseFloat(role.my_rate) || 0) * d,
+            };
+          }
+          close();
+          _addLineItemRow(newLi, { section });
+        };
+        list.addEventListener('click', (e) => {
+          const el = e.target.closest('.li-picker-item');
+          if (el) pick(el);
+        });
+        list.addEventListener('mousemove', (e) => {
+          const el = e.target.closest('.li-picker-item');
+          if (!el) return;
+          const items = [...list.querySelectorAll('.li-picker-item')];
+          const idx = items.indexOf(el);
+          if (idx !== -1 && idx !== active) { active = idx; render(); }
+        });
+        search.addEventListener('input', () => { active = 0; render(); });
+        search.addEventListener('keydown', (e) => {
+          const items = list.querySelectorAll('.li-picker-item');
+          if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(active + 1, items.length - 1); render(); }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); active = Math.max(active - 1, 0); render(); }
+          else if (e.key === 'Enter') {
+            e.preventDefault();
+            const el = list.querySelectorAll('.li-picker-item')[active];
+            if (el) pick(el);
+          }
+        });
+        return {
+          open() {
+            ov.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            search.value = '';
+            ov.querySelector('#li-picker-days').value = PRICING.defaultDays || 1;
+            ov.querySelector('#li-picker-section').value = 'Crew & Production';
+            active = 0;
+            render();
+            setTimeout(() => search.focus(), 30);
+          },
+        };
+      }
+      function _openLineItemPicker() {
+        if (!_liPicker) _liPicker = _buildLiPicker();
+        _liPicker.open();
       }
       document.getElementById('line-items-add-btn')?.addEventListener('click', _openLineItemPicker);
     }
@@ -8596,6 +9500,12 @@
             '<button type="button" class="addon-qty-btn addon-qty-plus" ' +
               'data-addon-id="' + id + '" aria-label="Increase quantity">+</button>' +
             '<span class="addon-qty-label">qty</span>' +
+          '</div>' +
+          '<div class="toggle-card-discount-row" data-no-edit>' +
+            '<button type="button" class="draft-addon-discount-btn" ' +
+              'data-disc-kind="addon" data-disc-id="' + id + '" data-addon-id="' + id + '" ' +
+              'title="Apply inline discount">− Discount</button>' +
+            '<span class="addon-discount-label" data-addon-id="' + id + '"></span>' +
           '</div>' +
         '</div>' +
         '<div class="toggle-card-price" data-editable data-single-line>+£' +
@@ -8834,76 +9744,130 @@
     });
 
     // ── Approve & Send handler ──────────────────────────────────────────
-    // New flow (Phase 2): clicking the button opens a PREVIEW MODAL with
-    // the recipient, subject and (LLM-personalised) body. The real
-    // approve/send work — webhook to Vercel, Notion status flip, Gmail
-    // compose tab — only fires when the operator clicks "Send →" inside
-    // the modal. Cancel has no side effects.
-    function _buildEmailFooter(total) {
+    // Clicking the button opens a COMPOSE MODAL: To / Subject / optional
+    // personal message on the left, and a live iframe preview of the EXACT
+    // branded email on the right (rendered server-side by
+    // valley.film/api/quotes/admin action=email_preview — the same builder
+    // the send uses, so preview and send cannot differ). "Send →" delivers
+    // via Resend on the website (action=send_quote_email, which also flips
+    // Notion to Quotation Sent and strips the draft chrome from the live
+    // KV HTML), after a final editor-state save + KV sync so the published
+    // quote matches what the operator was looking at. The old Gmail compose
+    // tab survives only as the "Open in Gmail instead" fallback link.
+    const _VF_SITE = 'https://valley.film';
+    function _approveToken() {
+      return ((VF.quoteUrl || '').match(/\/quotes\/([A-Za-z0-9]+)/) || [])[1] || '';
+    }
+    function _emailFacts() {
+      const total = _computeTotal() !== null ? _fmtGBP(_computeTotal()) : VF.total;
+      return {
+        token:        _approveToken(),
+        pageId:       VF.pageId,
+        firstName:    (VF.clientName || '').split(' ')[0] || 'there',
+        projectTitle: VF.projectTitle || '',
+        quoteRef:     VF.quoteRef || '',
+        total:        total,
+        validUntil:   VF.validUntil || '',
+      };
+    }
+    function _approveFieldValues() {
+      return {
+        to:      (document.getElementById('approve-modal-to')?.value || '').trim(),
+        subject: (document.getElementById('approve-modal-subject')?.value || '').trim(),
+        message: (document.getElementById('approve-modal-message')?.value || '').trim(),
+      };
+    }
+    // Plain-text equivalent for the Gmail fallback link. Mirrors the branded
+    // email's content: greeting, message (or default), link, total, validity.
+    function _plainTextEmail(facts, message) {
+      const intro = message || (
+        `Please find your quotation for ${facts.projectTitle} below. You can review the full ` +
+        `breakdown, choose any optional extras, and sign off directly from the link.`
+      );
       return [
+        `Hi ${facts.firstName},`,
         ``,
-        VF.quoteUrl,
+        intro,
         ``,
-        `Total: ${total}`,
-        `Valid until: ${VF.validUntil}`,
+        facts.token ? `${_VF_SITE}/quotes/${facts.token}` : (VF.quoteUrl || ''),
         ``,
-        `If you have any questions before you’re ready to go ahead, feel free to reach out — happy to talk it through.`,
+        `Total: ${facts.total}`,
+        `Valid until: ${facts.validUntil}`,
         ``,
-        `Best,`,
-        `Max Paterson`,
-        `Director, Valley Films`,
-        `max@valley.film`,
-        `valley.film`,
+        `If you have any questions, just reply to this email.`,
+        ``,
+        `Thank you,`,
+        `Valley Films`,
       ].join('\n');
     }
-    function _buildEmailTemplate(firstName, total) {
-      return [
-        `Hi ${firstName},`,
-        ``,
-        `Thank you for getting in touch — it's great to have the chance to work with you on ${VF.projectTitle}.`,
-        ``,
-        `I've put a quotation together for you. You can view, choose your options, and sign off at the link below:`,
-        _buildEmailFooter(total),
-      ].join('\n');
+    function _updateGmailFallback() {
+      const a = document.getElementById('approve-modal-gmail');
+      if (!a) return;
+      const facts = _emailFacts();
+      const f = _approveFieldValues();
+      const su = f.subject || `Quotation | ${facts.projectTitle} - ${facts.quoteRef}`;
+      a.href = 'https://mail.google.com/mail/?view=cm&fs=1'
+        + '&to=' + encodeURIComponent(f.to)
+        + '&su=' + encodeURIComponent(su)
+        + '&body=' + encodeURIComponent(_plainTextEmail(facts, f.message));
     }
-    async function _fetchPersonalisedIntro(total) {
-      // Returns the LLM-generated body (without the footer) or null on failure.
-      // Resolves quickly with null so the modal never hangs on a flaky LLM.
+    let _previewSeq = 0;
+    async function _refreshEmailPreview() {
+      const frame = document.getElementById('approve-modal-preview');
+      const hint  = document.getElementById('approve-modal-preview-hint');
+      if (!frame) return;
+      const seq = ++_previewSeq;
+      if (hint) hint.textContent = 'Building preview…';
+      _updateGmailFallback();
       try {
-        const r = await fetch('https://vf-quotes.vercel.app/api/webhook', {
-          method:  'POST',
-          headers: {'Content-Type': 'application/json', 'X-VF-Token': (VF && VF.webhookToken) || ''},
-          body: JSON.stringify({
-            action:       'generate_email_body',
-            page_id:      VF.pageId,
-            projectTitle: VF.projectTitle,
-            clientName:   VF.clientName,
-            total,
-          }),
+        const facts = _emailFacts();
+        const f = _approveFieldValues();
+        const r = await fetch(_VF_SITE + '/api/quotes/admin', {
+          method:      'POST',
+          credentials: 'include',
+          headers:     { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.assign({ action: 'email_preview' }, facts, f)),
         });
-        if (!r.ok) return null;
+        if (!r.ok) throw new Error(r.status === 401
+          ? 'not signed in to the productions portal'
+          : 'HTTP ' + r.status);
         const d = await r.json();
-        return d && d.body ? d.body : null;
-      } catch (_) { return null; }
+        if (seq !== _previewSeq) return;   // a newer refresh superseded this one
+        frame.srcdoc = '<!doctype html><html><head><meta charset="utf-8">'
+          + '<base target="_blank"></head>'
+          + '<body style="margin:0;padding:18px;background:#f3f4f7;">'
+          + (d.html || '') + '</body></html>';
+        if (hint) hint.textContent = '';
+      } catch (e) {
+        if (seq !== _previewSeq) return;
+        if (hint) hint.textContent = 'Preview unavailable (' + (e && e.message || e) + ').';
+      }
     }
+    let _previewDebounce = null;
+    function _schedulePreviewRefresh() {
+      clearTimeout(_previewDebounce);
+      _previewDebounce = setTimeout(_refreshEmailPreview, 450);
+    }
+    ['approve-modal-to', 'approve-modal-subject', 'approve-modal-message'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', _schedulePreviewRefresh);
+    });
 
-    function _showApproveModal({to, subject, body, hint}) {
+    function _showApproveModal({to, subject}) {
       const modal = document.getElementById('approve-modal');
       // Inputs are editable — assign .value, not .textContent (which would
       // append visible text and leave the actual value empty).
       const toEl  = document.getElementById('approve-modal-to');
       const subEl = document.getElementById('approve-modal-subject');
-      const bdEl  = document.getElementById('approve-modal-body');
+      const msgEl = document.getElementById('approve-modal-message');
       if (toEl)  toEl.value  = to || '';
       if (subEl) subEl.value = subject || '';
-      if (bdEl)  bdEl.value  = body || '';
-      const hintEl = document.getElementById('approve-modal-body-hint');
-      if (hintEl) { hintEl.textContent = hint || ''; hintEl.style.display = hint ? 'block' : 'none'; }
+      if (msgEl) msgEl.value = '';
       modal.removeAttribute('hidden');
       // Block scroll on the page underneath
       document.body.style.overflow = 'hidden';
       // Focus the Send button so Enter sends, Esc cancels
       setTimeout(() => document.getElementById('approve-modal-send')?.focus(), 50);
+      _refreshEmailPreview();
     }
     function _hideApproveModal() {
       const modal = document.getElementById('approve-modal');
@@ -8926,7 +9890,215 @@
       }
     });
 
-    document.getElementById('draft-approve-btn')?.addEventListener('click', async () => {
+    // Final editor-state save + KV sync, awaited before sending so the
+    // published quote can't lag the operator's last edit (the VF-0204
+    // class of bug: discount applied seconds before Send never reached
+    // the client URL). Both legs best-effort but AWAITED.
+    async function _finalSaveBeforeSend() {
+      let savedNotion = false, savedKv = false;
+      try {
+        const editorState = _buildEditorState();
+        const token = _approveToken();
+        const kvLeg = token
+          ? fetch(_VF_SITE + '/api/quotes/sync-state?token=' + encodeURIComponent(token), {
+              method:  'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body:    JSON.stringify({ editorState }),
+            }).then(r => r.ok).catch(() => false)
+          : Promise.resolve(false);
+        const notionLeg = fetch('https://vf-quotes.vercel.app/api/webhook', {
+          method:  'POST',
+          headers: {'Content-Type': 'application/json', 'X-VF-Token': (VF && VF.webhookToken) || ''},
+          body: JSON.stringify({
+            action:       'save_draft',
+            page_id:      VF.pageId,
+            editor_state: editorState,
+          }),
+        }).then(r => r.ok).catch(() => false);
+        const both = await Promise.all([notionLeg, kvLeg]);
+        savedNotion = !!both[0];
+        savedKv     = !!both[1];
+      } catch (_) { /* fall through — send still proceeds */ }
+      return { savedNotion, savedKv };
+    }
+
+    // Fires the Notion-side approval work on the legacy webhook (status →
+    // Quotation Sent plus writebacks). Best-effort: the website send
+    // endpoint also flips the status itself, so this failing is not fatal.
+    function _fireApprovedWebhook(total) {
+      return fetch('https://vf-quotes.vercel.app/api/webhook', {
+        method:  'POST',
+        headers: {'Content-Type': 'application/json', 'X-VF-Token': (VF && VF.webhookToken) || ''},
+        body: JSON.stringify({
+          action:          'approved_for_sending',
+          page_id:         VF.pageId,
+          quoteRef:        VF.quoteRef,
+          projectTitle:    VF.projectTitle,
+          filename:        VF.quoteFilename,
+          total,
+          deliverables:    _collectDeliverables(),
+          customPackages:  _pstate.customPackages || [],
+          addonDiscounts:  _pstate.addonDiscounts || {},
+        }),
+      }).then(r => r.ok).catch(() => false);
+    }
+
+    // The Gmail fallback keeps the old semantics: clicking it counts as
+    // "I'm sending this myself" — flip the status + strip draft chrome so
+    // the link in that draft is client-safe by the time it's sent.
+    document.getElementById('approve-modal-gmail')?.addEventListener('click', () => {
+      const facts = _emailFacts();
+      _finalSaveBeforeSend();
+      _fireApprovedWebhook(facts.total);
+      const token = _approveToken();
+      if (token) {
+        fetch(_VF_SITE + '/api/quotes/publish?token=' + encodeURIComponent(token), { method: 'POST' })
+          .catch(() => {});
+      }
+    });
+
+    // ── Hero cover image — upload or link (Notion-style) ─────────────────
+    // The button on the hero opens a small modal: paste an image URL, or
+    // click/drop to upload. Either way the website admin API writes the
+    // Notion page cover (action=set_cover) and queues a regen; we also paint
+    // the hero immediately so the operator sees the change without waiting.
+    let _coverModal = null;
+    function _buildCoverModal() {
+      const ov = document.createElement('div');
+      ov.id = 'cover-modal-overlay';
+      ov.innerHTML =
+        '<div class="cover-modal-card">' +
+          '<h3>Cover image</h3>' +
+          '<p class="cover-modal-sub">Sets the Notion page cover and the quote hero. ' +
+            'The quote republishes itself in the background (~30–60s).</p>' +
+          '<div class="cover-modal-row">' +
+            '<label for="cover-modal-url">Link an image</label>' +
+            '<input type="url" id="cover-modal-url" placeholder="https://… (paste an image URL)">' +
+          '</div>' +
+          '<div class="cover-modal-or">or</div>' +
+          '<div class="cover-modal-drop" id="cover-modal-drop" tabindex="0">' +
+            'Click to upload — JPEG, PNG or WebP' +
+          '</div>' +
+          '<input type="file" id="cover-modal-file" accept="image/jpeg,image/png,image/webp" style="display:none;">' +
+          '<div class="cover-modal-hint" id="cover-modal-hint"></div>' +
+          '<div class="cover-modal-foot">' +
+            '<button type="button" class="approve-modal-btn approve-modal-cancel" id="cover-modal-cancel">Cancel</button>' +
+            '<button type="button" class="approve-modal-btn approve-modal-send" id="cover-modal-save">Save cover</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(ov);
+      const hint = ov.querySelector('#cover-modal-hint');
+      const urlIn = ov.querySelector('#cover-modal-url');
+      const fileIn = ov.querySelector('#cover-modal-file');
+      const drop = ov.querySelector('#cover-modal-drop');
+      const saveBtn = ov.querySelector('#cover-modal-save');
+      let pendingFile = null;   // { base64, name, type }
+      const close = () => { ov.style.display = 'none'; document.body.style.overflow = ''; };
+      ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
+      ov.querySelector('#cover-modal-cancel').addEventListener('click', close);
+
+      // Downscale client-side so uploads stay small (Notion cap + politeness):
+      // longest edge 2000px, JPEG 0.85. PNG/WebP re-encode to JPEG unless the
+      // image is small already.
+      function _prepareFile(file) {
+        hint.textContent = 'Reading image…';
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          const maxEdge = 2000;
+          const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+          const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          pendingFile = {
+            base64: dataUrl.split(',')[1] || '',
+            name:   (file.name || 'cover').replace(/\.[a-z0-9]+$/i, '') + '.jpg',
+            type:   'image/jpeg',
+          };
+          drop.textContent = '✓ ' + file.name + ' (' + w + '×' + h + ') — ready';
+          urlIn.value = '';
+          hint.textContent = '';
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(url);
+          pendingFile = null;
+          hint.textContent = 'Could not read that file as an image.';
+        };
+        img.src = url;
+      }
+      drop.addEventListener('click', () => fileIn.click());
+      drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') fileIn.click(); });
+      fileIn.addEventListener('change', () => { if (fileIn.files && fileIn.files[0]) _prepareFile(fileIn.files[0]); });
+      drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('dragover'); });
+      drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+      drop.addEventListener('drop', (e) => {
+        e.preventDefault();
+        drop.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) _prepareFile(e.dataTransfer.files[0]);
+      });
+
+      saveBtn.addEventListener('click', async () => {
+        const url = (urlIn.value || '').trim();
+        if (!url && !pendingFile) { hint.textContent = 'Paste an image URL or pick a file first.'; return; }
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving…';
+        hint.textContent = '';
+        const payload = url
+          ? { action: 'set_cover', pageId: VF.pageId, url }
+          : { action: 'set_cover', pageId: VF.pageId,
+               fileBase64: pendingFile.base64, fileName: pendingFile.name, contentType: pendingFile.type };
+        try {
+          const r = await fetch(_VF_SITE + '/api/quotes/admin', {
+            method:      'POST',
+            credentials: 'include',
+            headers:     { 'Content-Type': 'application/json' },
+            body:        JSON.stringify(payload),
+          });
+          const d = await r.json().catch(() => ({}));
+          if (!r.ok || !d.ok) throw new Error(d.error || ('HTTP ' + r.status));
+          // Paint the hero NOW so the operator sees it without the regen.
+          const hero = document.querySelector('.hero');
+          if (hero) {
+            const src = url || ('data:image/jpeg;base64,' + pendingFile.base64);
+            hero.style.backgroundImage = 'url("' + src.replace(/"/g, '%22') + '")';
+            hero.style.backgroundSize = 'cover';
+            hero.style.backgroundPosition = '50% 35%';
+            document.body.classList.add('hero-has-cover');
+          }
+          const btnLabel = document.querySelector('#hero-cover-btn span');
+          if (btnLabel) btnLabel.textContent = 'Replace cover';
+          _setAutosaveStatus(d.regenQueued
+            ? 'Cover saved — quote regenerating (~30–60s)'
+            : 'Cover saved to Notion', 'saving');
+          close();
+        } catch (e) {
+          hint.textContent = 'Save failed: ' + (e && e.message || e);
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save cover';
+        }
+      });
+      return {
+        open() {
+          ov.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+          pendingFile = null;
+          urlIn.value = '';
+          drop.textContent = 'Click to upload — JPEG, PNG or WebP';
+          hint.textContent = '';
+          setTimeout(() => urlIn.focus(), 30);
+        },
+      };
+    }
+    document.getElementById('hero-cover-btn')?.addEventListener('click', () => {
+      if (!_coverModal) _coverModal = _buildCoverModal();
+      _coverModal.open();
+    });
+
+    document.getElementById('draft-approve-btn')?.addEventListener('click', () => {
       const btn = document.getElementById('draft-approve-btn');
       const sendBtn = document.getElementById('approve-modal-send');
 
@@ -8936,130 +10108,88 @@
         el.classList.remove('editing');
       });
 
-      const total = _computeTotal() !== null ? _fmtGBP(_computeTotal()) : VF.total;
-      const firstName = (VF.clientName || '').split(' ')[0] || 'there';
-      const subject   = `Your Valley Films Quotation — ${VF.projectTitle} (${VF.quoteRef})`;
-      const footer    = _buildEmailFooter(total);
-
-      // 2. Show the modal IMMEDIATELY with the template body so the operator
-      // sees something straight away. Disable Send while the LLM body
-      // fetch is in flight; flip to enabled when ready (or it errors out).
+      // 2. Open the modal with the new house subject format. The live
+      // preview iframe builds itself from the server (same HTML the send
+      // will deliver).
       _showApproveModal({
         to:      VF.clientEmail || '',
-        subject,
-        body:    _buildEmailTemplate(firstName, total),
-        hint:    'Drafting a personalised intro…',
+        subject: `Quotation | ${VF.projectTitle} - ${VF.quoteRef}`,
       });
-      if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Loading…'; }
-
-      // 3. Kick off the LLM intro fetch. When it lands, swap the body in
-      // the textarea (UNLESS the operator's already typed in it — we
-      // shouldn't blow away their edits when the slower LLM response
-      // finally lands). Falls back silently to the template if the LLM
-      // call fails.
-      const bodyEl = document.getElementById('approve-modal-body');
-      const templateBody = _buildEmailTemplate(firstName, total);
-      let bodyToSend = templateBody;
-      try {
-        const intro = await _fetchPersonalisedIntro(total);
-        if (intro) bodyToSend = intro + '\n' + footer;
-      } catch (_) {}
-      // Only auto-fill the textarea if it STILL contains the original
-      // template the modal opened with — anything else means the operator
-      // started editing.
-      if (bodyEl && bodyEl.value === templateBody) {
-        bodyEl.value = bodyToSend;
-      }
-      const hintEl = document.getElementById('approve-modal-body-hint');
-      if (hintEl) { hintEl.style.display = 'none'; hintEl.textContent = ''; }
       if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send →'; }
 
-      // 4. Wire the Send button (rebind every open so closures stay fresh).
+      // 3. Wire the Send button (rebind every open so closures stay fresh).
       if (sendBtn) {
         const _onSend = async () => {
           sendBtn.removeEventListener('click', _onSend);
-          // Pull the LATEST values from the modal — the operator may have
-          // edited any of the three fields between opening the modal and
-          // clicking Send.
-          const finalTo      = (document.getElementById('approve-modal-to')?.value || '').trim();
-          const finalSubject = (document.getElementById('approve-modal-subject')?.value || subject).trim();
-          const finalBody    = (document.getElementById('approve-modal-body')?.value || bodyToSend);
+          const facts = _emailFacts();
+          const f = _approveFieldValues();
+          if (!f.to) {
+            sendBtn.addEventListener('click', _onSend);
+            const hint = document.getElementById('approve-modal-preview-hint');
+            if (hint) hint.textContent = 'Add a recipient address first.';
+            document.getElementById('approve-modal-to')?.focus();
+            return;
+          }
           sendBtn.disabled = true;
-          sendBtn.textContent = 'Sending…';
+          sendBtn.textContent = 'Saving…';
           btn.disabled = true;
           btn.textContent = 'Publishing…';
 
-          // The real approve-and-send work (webhook + Gmail compose).
-          let _approveStatusOk    = false;
-          let _approveStatusError = '';
-          try {
-            const resp = await fetch('https://vf-quotes.vercel.app/api/webhook', {
-              method:  'POST',
-              headers: {'Content-Type': 'application/json', 'X-VF-Token': (VF && VF.webhookToken) || ''},
-              body: JSON.stringify({
-                action:          'approved_for_sending',
-                page_id:         VF.pageId,
-                quoteRef:        VF.quoteRef,
-                projectTitle:    VF.projectTitle,
-                filename:        VF.quoteFilename,
-                total,
-                deliverables:    _collectDeliverables(),
-                customPackages:  _pstate.customPackages || [],
-                addonDiscounts:  _pstate.addonDiscounts || {},
-              }),
-            });
-            if (resp.ok) {
-              _approveStatusOk = true;
-              try { _clearLocalBackup(); } catch (_) {}
-            } else {
-              let txt = '';
-              try { txt = (await resp.text()).slice(0, 160); } catch (_) {}
-              _approveStatusError = 'HTTP ' + resp.status + (txt ? ' — ' + txt : '');
-            }
-          } catch (e) {
-            _approveStatusError = 'network: ' + (e && e.message ? e.message : String(e));
+          // 3a. Final save (Notion + KV) so what publishes = what's on screen.
+          const saved = await _finalSaveBeforeSend();
+          if (!saved.savedKv) {
+            try { console.warn('[approve-and-send] final KV sync failed — publish may lag the last edit'); } catch (_) {}
           }
 
-          // Belt-and-braces: BEFORE opening Gmail, force the live URL to
-          // serve the clean (no-draft-chrome) view. The monitor would
-          // republish within ~30s of the status flip above, but we don't
-          // want to gamble — if the client opens the link in 5s they
-          // shouldn't see the operator editor. /api/quotes/publish does
-          // an instant in-place flip of the draft markers in Vercel KV.
-          // Best-effort: a failure here doesn't block the email, the
-          // monitor will still pick up the status change shortly after.
-          try {
-            const token = (VF.quoteUrl || '').replace(/.*\/quotes\//, '');
-            if (token && token.length >= 6) {
-              await fetch(
-                'https://valley.film/api/quotes/publish?token=' + encodeURIComponent(token),
-                { method: 'POST' }
-              );
-            }
-          } catch (_) { /* monitor will catch up */ }
+          // 3b. Notion-side approval writebacks (best-effort, parallel with send).
+          const approvePromise = _fireApprovedWebhook(facts.total);
 
-          // Use the (possibly edited) modal values, not the originals.
-          const to = encodeURIComponent(finalTo);
-          const su = encodeURIComponent(finalSubject);
-          const bd = encodeURIComponent(finalBody);
-          window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${su}&body=${bd}`, '_blank');
+          // 3c. THE SEND — branded email via the website (Resend). This also
+          // flips Financial Status → Quotation Sent and strips the draft
+          // chrome from the live KV HTML server-side.
+          sendBtn.textContent = 'Sending…';
+          let sendOk = false, sendErr = '';
+          try {
+            const r = await fetch(_VF_SITE + '/api/quotes/admin', {
+              method:      'POST',
+              credentials: 'include',
+              headers:     { 'Content-Type': 'application/json' },
+              body: JSON.stringify(Object.assign({ action: 'send_quote_email' }, facts, f)),
+            });
+            const d = await r.json().catch(() => ({}));
+            if (r.ok && d && d.ok) {
+              sendOk = true;
+              try { _clearLocalBackup(); } catch (_) {}
+            } else {
+              sendErr = (d && (d.error || d.detail)) || ('HTTP ' + r.status);
+            }
+          } catch (e) {
+            sendErr = 'network: ' + (e && e.message ? e.message : String(e));
+          }
+
+          if (!sendOk) {
+            // Keep the modal open so nothing is lost — the operator can
+            // retry, fix the address, or fall back to the Gmail link.
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Retry send →';
+            sendBtn.addEventListener('click', _onSend);
+            btn.disabled = false;
+            btn.textContent = 'Approve & Send →';
+            const hint = document.getElementById('approve-modal-preview-hint');
+            if (hint) hint.textContent = 'Send failed: ' + sendErr + ' — retry, or use "Open in Gmail instead".';
+            return;
+          }
+
+          await approvePromise.catch(() => false);
 
           _hideApproveModal();
           btn.disabled = false;
           const dot   = document.querySelector('.draft-dot');
           const label = document.querySelector('.draft-label');
-          if (_approveStatusOk) {
-            btn.textContent = '✓ Email Drafted';
-            btn.style.background = 'var(--green)';
-            if (dot)   { dot.style.background = 'var(--green)'; dot.style.animation = 'none'; }
-            if (label) { label.textContent = 'Approved'; label.style.color = 'var(--green)'; }
-          } else {
-            btn.textContent = '⚠ Email opened — Notion not updated';
-            btn.style.background = '#f59e0b';
-            if (dot)   { dot.style.background = '#f59e0b'; dot.style.animation = 'none'; }
-            if (label) { label.textContent = 'Notion update failed'; label.style.color = '#f59e0b'; }
-            try { console.warn('[approve-and-send] webhook failed:', _approveStatusError); } catch (_) {}
-          }
+          btn.textContent = '✓ Sent to client';
+          btn.style.background = 'var(--green)';
+          if (dot)   { dot.style.background = 'var(--green)'; dot.style.animation = 'none'; }
+          if (label) { label.textContent = 'Sent'; label.style.color = 'var(--green)'; }
         };
         sendBtn.addEventListener('click', _onSend);
       }
@@ -9085,14 +10215,18 @@
       if (!confirm('Reopen this quote for editing? The monitor will regenerate it in draft mode within ~60 seconds.')) return;
       reviseBanner.textContent = 'Sending…';
       try {
-        await fetch('https://vf-quotes.vercel.app/api/webhook', {
-          method:  'POST',
-          headers: {'Content-Type': 'application/json', 'X-VF-Token': (VF && VF.webhookToken) || ''},
+        // Session-gated website endpoint, not the unauthenticated webhook —
+        // 'revise' un-sends a quote, so only a signed-in operator may fire it.
+        const _r = await fetch('https://valley.film/api/quotes/admin', {
+          method:      'POST',
+          credentials: 'include',
+          headers:     { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            action:  'revise',
-            page_id: VF.pageId,
+            action: 'revise',
+            pageId: VF.pageId,
           }),
         });
+        if (!_r.ok) throw new Error('non-200');
         reviseBanner.textContent = '✓ Revising — refresh in ~60s';
         reviseBanner.style.background = '#16a34a';
       } catch (_) {
