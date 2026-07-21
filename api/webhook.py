@@ -4,6 +4,7 @@ import html
 import json
 import os
 import re
+import time
 import urllib.parse
 from http.server import BaseHTTPRequestHandler
 import requests
@@ -102,13 +103,29 @@ def mark_quote_signed(page_id, signer_name, timestamp):
         "Signed At":        {"date": {"start": timestamp}} if timestamp else {"date": None},
         "Financial Status": {"status": {"name": "Signed"}},
     }}
-    try:
-        r = requests.patch(url, headers=HEADERS, json=payload, timeout=HTTP_TIMEOUT)
-        if r.status_code >= 400:
-            return False, f"Notion {r.status_code}: {r.text[:200]}"
-        return True, ""
-    except Exception as e:
-        return False, str(e)
+    # Retry transient failures. This is the canonical "the quote is signed" write,
+    # and a one-off Notion rate-limit (429) or timeout used to leave the quote
+    # looking unsigned in the Studio forever — the "signed docs don't always show
+    # as signed" symptom. Retry rate-limit / 5xx / network errors a few times with
+    # a short backoff; fail fast on a real 4xx (bad request) so we don't loop.
+    last_err = ""
+    for attempt in range(3):
+        try:
+            r = requests.patch(url, headers=HEADERS, json=payload, timeout=HTTP_TIMEOUT)
+            if r.status_code < 400:
+                return True, ""
+            last_err = f"Notion {r.status_code}: {r.text[:200]}"
+            if r.status_code in (429, 500, 502, 503, 504) and attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            return False, last_err
+        except Exception as e:
+            last_err = str(e)
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+                continue
+            return False, last_err
+    return False, last_err
 
 
 def _fmt_money_str(v):
@@ -167,7 +184,7 @@ def send_signed_email(payload, client_ip=""):
     if client_company:
         client_line += f", {e(client_company)}"
 
-    # ── What she signed for: itemise everything ──────────────────────
+    # ── What they signed for: itemise everything ─────────────────────
     rows = []
 
     # Package (Package Based mode only)
@@ -233,16 +250,40 @@ def send_signed_email(payload, client_ip=""):
         for label, value in rows
     )
 
-    # ── Signature block (inline data-URI image) ──────────────────────
-    sig_data_url = payload.get("signatureDataUrl") or ""
+    # ── Signature block ──────────────────────────────────────────────
+    # The signature must be a `cid:` attachment, NOT an inline data: URI.
+    # Gmail / Outlook / Apple Mail strip data: images from emails, which is why
+    # the signature previously showed as just the word "Signature" (the alt
+    # text). A cid-referenced attachment renders in every client. We attach the
+    # PNG below and reference it as cid:signature here.
+    sig_data_url  = payload.get("signatureDataUrl") or ""
+    sig_attachments = []
     if sig_data_url and sig_data_url.startswith("data:image/"):
-        sig_html = (
-            f'<div style="margin-top:8px;padding:12px;background:#fafafa;'
-            f'border:1px solid #eee;border-radius:6px;display:inline-block;">'
-            f'<img src="{sig_data_url}" alt="Signature" '
-            f'style="max-width:280px;height:auto;display:block;background:white;" />'
-            f'</div>'
-        )
+        m = re.match(r"data:(image/[A-Za-z0-9.+-]+);base64,(.+)$", sig_data_url, re.DOTALL)
+        if m:
+            mime, b64 = m.group(1), m.group(2).strip()
+            ext = "png" if "png" in mime else ("jpg" if ("jpeg" in mime or "jpg" in mime) else "img")
+            sig_attachments.append({
+                "filename":   f"signature.{ext}",
+                "content":    b64,           # base64, as Resend expects
+                "content_id": "signature",   # referenced as cid:signature below
+            })
+            sig_html = (
+                f'<div style="margin-top:8px;padding:12px;background:#fafafa;'
+                f'border:1px solid #eee;border-radius:6px;display:inline-block;">'
+                f'<img src="cid:signature" alt="Signature" '
+                f'style="max-width:280px;height:auto;display:block;background:white;" />'
+                f'</div>'
+            )
+        else:
+            # Malformed data URI — keep the raw inline as a last resort.
+            sig_html = (
+                f'<div style="margin-top:8px;padding:12px;background:#fafafa;'
+                f'border:1px solid #eee;border-radius:6px;display:inline-block;">'
+                f'<img src="{sig_data_url}" alt="Signature" '
+                f'style="max-width:280px;height:auto;display:block;background:white;" />'
+                f'</div>'
+            )
     else:
         sig_html = '<span style="color:#bbb;font-size:12px;">No signature image captured.</span>'
 
@@ -303,7 +344,7 @@ def send_signed_email(payload, client_ip=""):
             </tr>
           </table>
 
-          {f'<h2 style="font-size:13px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#999;margin:0 0 8px;border-top:1px solid #f0f0f0;padding-top:18px;">What she signed for</h2><table style="width:100%;border-collapse:collapse;margin-bottom:8px;">{selected_rows_html}</table>' if selected_rows_html else ''}
+          {f'<h2 style="font-size:13px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:#999;margin:0 0 8px;border-top:1px solid #f0f0f0;padding-top:18px;">What they signed for</h2><table style="width:100%;border-collapse:collapse;margin-bottom:8px;">{selected_rows_html}</table>' if selected_rows_html else ''}
 
           {quote_link_html}
 
@@ -326,6 +367,7 @@ def send_signed_email(payload, client_ip=""):
                 "to":      ["max@valley.film"],
                 "subject": subject,
                 "html":    body_html,
+                **({"attachments": sig_attachments} if sig_attachments else {}),
             },
             timeout=HTTP_TIMEOUT,
         )
